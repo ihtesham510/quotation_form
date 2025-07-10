@@ -8,7 +8,7 @@ export const Route = createFileRoute('/')({
 function App() {
   return (
     <div className="flex items-center justify-center h-screen w-full">
-      <div className="max-h-[75vh] min-h-[45vh] max-w-[60%] min-w-[50%]">
+      <div className="max-w-full max-h-full lg:max-w-[60%] lg:min-w-[50%]">
         <MultiStepForm />
       </div>
     </div>

@@ -33,3 +33,40 @@ export const roomTypes = [
   { key: 'guestRoom', label: 'Guest Room' },
   { key: 'bedRoom', label: 'Bedroom' },
 ]
+
+export enum SwaveCurtainSize {
+  Small = 'Small',
+  Medium = 'Medium',
+  Large = 'Large',
+  XL = 'XL',
+}
+
+export const SwaveCurtainPricing: Record<
+  SwaveCurtainSize,
+  {
+    price: number
+    widthRangeCm: [number, number]
+    dropRangeCm: [number, number]
+  }
+> = {
+  [SwaveCurtainSize.Small]: {
+    price: 200,
+    widthRangeCm: [120, 180],
+    dropRangeCm: [220, 250],
+  },
+  [SwaveCurtainSize.Medium]: {
+    price: 300,
+    widthRangeCm: [181, 240],
+    dropRangeCm: [220, 270],
+  },
+  [SwaveCurtainSize.Large]: {
+    price: 400,
+    widthRangeCm: [241, 300],
+    dropRangeCm: [240, 280],
+  },
+  [SwaveCurtainSize.XL]: {
+    price: 600,
+    widthRangeCm: [301, 500],
+    dropRangeCm: [250, 300],
+  },
+}

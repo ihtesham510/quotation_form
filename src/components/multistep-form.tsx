@@ -31,6 +31,8 @@ import {
   fabricOptions,
   roomTypes,
   shutterLocations,
+  SwaveCurtainPricing,
+  SwaveCurtainSize,
 } from '@/constants'
 
 interface RoomSelection {
@@ -44,6 +46,7 @@ interface RoomDetails {
   roomType: string
   roomIndex: number
   curtainType: 'SWAVE' | 'SWAVE BO' | ''
+  curtainsSize: SwaveCurtainSize
   motorized: boolean
   fabric: string
 }
@@ -139,6 +142,7 @@ export function MultiStepForm() {
           roomType: label,
           roomIndex: i + 1,
           curtainType: '',
+          curtainsSize: SwaveCurtainSize.Small,
           motorized: false,
           fabric: '',
         })
@@ -194,7 +198,9 @@ export function MultiStepForm() {
   }
 
   const canProceedFromStep2 = () => {
-    return roomDetails.every((room) => room.curtainType && room.fabric)
+    return roomDetails.every(
+      (room) => room.curtainType && room.fabric && room.curtainsSize,
+    )
   }
 
   const canProceedFromStep5 = () => {
@@ -364,6 +370,38 @@ export function MultiStepForm() {
                         {fabric}
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2 mt-2">
+                <Label>Size</Label>
+                <Select
+                  value={room.curtainsSize}
+                  onValueChange={(value) =>
+                    updateRoomDetail(index, 'curtainsSize', value)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select fabric type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.values(SwaveCurtainSize).map((size) => {
+                      const value =
+                        SwaveCurtainSize[size as keyof typeof SwaveCurtainSize]
+                      const dimensions_width =
+                        SwaveCurtainPricing[size as SwaveCurtainSize]
+                          .widthRangeCm
+                      const dimensions_drop =
+                        SwaveCurtainPricing[size as SwaveCurtainSize]
+                          .dropRangeCm
+                      return (
+                        <SelectItem key={size} value={value}>
+                          {size} ( {dimensions_width[0]} - {dimensions_width[1]}{' '}
+                          <p className="font-bold">x</p> {dimensions_drop[0]} -{' '}
+                          {dimensions_drop[1]} )
+                        </SelectItem>
+                      )
+                    })}
                   </SelectContent>
                 </Select>
               </div>
