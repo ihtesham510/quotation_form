@@ -34,6 +34,7 @@ import {
   SwaveCurtainPricing,
   SwaveCurtainSize,
 } from '@/constants'
+import { createPDFFromFormData, downloadPDF } from '@/lib/pdf'
 
 interface RoomSelection {
   livingRoom: number
@@ -250,6 +251,30 @@ export function MultiStepForm() {
       setDiscount({ percentage: 0 })
     }
     nextStep()
+  }
+  const handleDownloadPDF = async () => {
+    try {
+      const pdfBlob = await createPDFFromFormData(
+        roomDetails,
+        shutterDetails,
+        rollerBlindDetails,
+        addons,
+        discount,
+        wantsShutters,
+        wantsRollerBlinds,
+        wantsDiscount,
+        calculateTotalWithAddons,
+        calculateFinalTotal,
+      )
+
+      await downloadPDF(
+        pdfBlob,
+        `curtain-quote-${new Date().toISOString().split('T')[0]}.pdf`,
+      )
+    } catch (error) {
+      console.error('Error generating PDF:', error)
+      // Optionally show user-friendly error message
+    }
   }
 
   const renderStep1 = () => (
@@ -812,7 +837,7 @@ export function MultiStepForm() {
         </Card>
       </div>
 
-      <Button className="w-full" size="lg">
+      <Button className="w-full" size="lg" onClick={handleDownloadPDF}>
         <Download className="w-4 h-4 mr-2" />
         Download PDF Quote
       </Button>
