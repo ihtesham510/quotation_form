@@ -2,8 +2,8 @@ import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { ConvexProvider, ConvexReactClient } from 'convex/react'
+import { ConvexQueryCacheProvider } from 'convex-helpers/react/cache'
 
-// Import the generated route tree
 import { routeTree } from './routeTree.gen'
 
 document.documentElement.classList.add('dark')
@@ -11,18 +11,17 @@ document.documentElement.classList.add('dark')
 import './index.css'
 import reportWebVitals from './reportWebVitals.ts'
 import { Toaster } from './components/ui/sonner.tsx'
+import { AuthContextProvdider, useAuth } from './context/auth.tsx'
 
-// Create a new router instance
 const router = createRouter({
   routeTree,
-  context: {},
+  context: undefined!,
   defaultPreload: 'intent',
   scrollRestoration: true,
   defaultStructuralSharing: true,
   defaultPreloadStaleTime: 0,
 })
 
-// Register the router instance for type safety
 declare module '@tanstack/react-router' {
   interface Register {
     router: typeof router
@@ -31,7 +30,11 @@ declare module '@tanstack/react-router' {
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string)
 
-// Render the app
+function App() {
+  const auth = useAuth()
+  return <RouterProvider router={router} context={auth} />
+}
+
 const rootElement = document.getElementById('app')
 if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
@@ -39,13 +42,14 @@ if (rootElement && !rootElement.innerHTML) {
     <StrictMode>
       <Toaster />
       <ConvexProvider client={convex}>
-        <RouterProvider router={router} />
+        <ConvexQueryCacheProvider>
+          <AuthContextProvdider>
+            <App />
+          </AuthContextProvdider>
+        </ConvexQueryCacheProvider>
       </ConvexProvider>
     </StrictMode>,
   )
 }
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals()

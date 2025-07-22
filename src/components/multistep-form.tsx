@@ -278,52 +278,54 @@ export function MultiStepForm() {
   }
 
   const renderStep1 = () => (
-    <div className="space-y-6">
-      <div className="text-center space-y-2">
-        <Home className="w-12 h-12 mx-auto text-primary" />
-        <h2 className="text-2xl font-bold">
-          What kind of rooms do you want to furnish?
-        </h2>
-        <p className="text-muted-foreground">
-          Select the number of rooms for each type
-        </p>
-      </div>
-
-      <div className="grid gap-4">
-        {roomTypes.map(({ key, label }) => (
-          <div
-            key={key}
-            className="flex items-center justify-between p-4 border rounded-lg"
-          >
-            <Label htmlFor={key} className="text-base font-medium">
-              {label}
-            </Label>
-            <Input
-              id={key}
-              type="number"
-              min="0"
-              max="10"
-              value={roomSelection[key as keyof RoomSelection]}
-              onChange={(e) =>
-                setRoomSelection({
-                  ...roomSelection,
-                  [key]: Number.parseInt(e.target.value) || 0,
-                })
-              }
-              className="w-20"
-            />
-          </div>
-        ))}
-      </div>
-
-      {getTotalRooms() > 0 && (
-        <div className="text-center p-4 bg-muted rounded-lg">
-          <p className="text-sm text-muted-foreground">
-            Total rooms selected:{' '}
-            <Badge variant="secondary">{getTotalRooms()}</Badge>
+    <div className="max-w-full max-h-full lg:max-w-[59%] lg:min-w-[50%]">
+      <div className="space-y-6">
+        <div className="text-center space-y-2">
+          <Home className="w-12 h-12 mx-auto text-primary" />
+          <h2 className="text-2xl font-bold">
+            What kind of rooms do you want to furnish?
+          </h2>
+          <p className="text-muted-foreground">
+            Select the number of rooms for each type
           </p>
         </div>
-      )}
+
+        <div className="grid gap-4">
+          {roomTypes.map(({ key, label }) => (
+            <div
+              key={key}
+              className="flex items-center justify-between p-4 border rounded-lg"
+            >
+              <Label htmlFor={key} className="text-base font-medium">
+                {label}
+              </Label>
+              <Input
+                id={key}
+                type="number"
+                min="0"
+                max="10"
+                value={roomSelection[key as keyof RoomSelection]}
+                onChange={(e) =>
+                  setRoomSelection({
+                    ...roomSelection,
+                    [key]: Number.parseInt(e.target.value) || 0,
+                  })
+                }
+                className="w-20"
+              />
+            </div>
+          ))}
+        </div>
+
+        {getTotalRooms() > 0 && (
+          <div className="text-center p-4 bg-muted rounded-lg">
+            <p className="text-sm text-muted-foreground">
+              Total rooms selected:{' '}
+              <Badge variant="secondary">{getTotalRooms()}</Badge>
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   )
 

@@ -95,6 +95,7 @@ const agent = new Agent(components.agent, {
         'provide details for the order and generate pdf, this will give a link where people can visit and download the pdf. if no url is returned then say that something went wrong.',
       args: QuoteDataSchema,
       handler: async (ctx, args): Promise<string | null> => {
+        console.log(args)
         const url = await ctx.runAction(internal.pdf.generatePDF, args as any)
         return url
       },
