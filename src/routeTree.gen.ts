@@ -17,6 +17,8 @@ import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as DashboardInventoryRouteImport } from './routes/dashboard/inventory'
 import { Route as DashboardFormsRouteImport } from './routes/dashboard/forms'
 import { Route as DashboardForm_idRouteImport } from './routes/dashboard/$form_id'
+import { Route as DashboardHistoryIndexRouteImport } from './routes/dashboard/history/index'
+import { Route as DashboardHistoryQuotationIdRouteImport } from './routes/dashboard/history/$quotationId'
 
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
@@ -58,6 +60,17 @@ const DashboardForm_idRoute = DashboardForm_idRouteImport.update({
   path: '/$form_id',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardHistoryIndexRoute = DashboardHistoryIndexRouteImport.update({
+  id: '/history/',
+  path: '/history/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardHistoryQuotationIdRoute =
+  DashboardHistoryQuotationIdRouteImport.update({
+    id: '/history/$quotationId',
+    path: '/history/$quotationId',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -68,6 +81,8 @@ export interface FileRoutesByFullPath {
   '/dashboard/forms': typeof DashboardFormsRoute
   '/dashboard/inventory': typeof DashboardInventoryRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/history/$quotationId': typeof DashboardHistoryQuotationIdRoute
+  '/dashboard/history': typeof DashboardHistoryIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -77,6 +92,8 @@ export interface FileRoutesByTo {
   '/dashboard/forms': typeof DashboardFormsRoute
   '/dashboard/inventory': typeof DashboardInventoryRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/history/$quotationId': typeof DashboardHistoryQuotationIdRoute
+  '/dashboard/history': typeof DashboardHistoryIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -88,6 +105,8 @@ export interface FileRoutesById {
   '/dashboard/forms': typeof DashboardFormsRoute
   '/dashboard/inventory': typeof DashboardInventoryRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/history/$quotationId': typeof DashboardHistoryQuotationIdRoute
+  '/dashboard/history/': typeof DashboardHistoryIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -100,6 +119,8 @@ export interface FileRouteTypes {
     | '/dashboard/forms'
     | '/dashboard/inventory'
     | '/dashboard/'
+    | '/dashboard/history/$quotationId'
+    | '/dashboard/history'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -109,6 +130,8 @@ export interface FileRouteTypes {
     | '/dashboard/forms'
     | '/dashboard/inventory'
     | '/dashboard'
+    | '/dashboard/history/$quotationId'
+    | '/dashboard/history'
   id:
     | '__root__'
     | '/'
@@ -119,6 +142,8 @@ export interface FileRouteTypes {
     | '/dashboard/forms'
     | '/dashboard/inventory'
     | '/dashboard/'
+    | '/dashboard/history/$quotationId'
+    | '/dashboard/history/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -186,6 +211,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardForm_idRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/history/': {
+      id: '/dashboard/history/'
+      path: '/history'
+      fullPath: '/dashboard/history'
+      preLoaderRoute: typeof DashboardHistoryIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/history/$quotationId': {
+      id: '/dashboard/history/$quotationId'
+      path: '/history/$quotationId'
+      fullPath: '/dashboard/history/$quotationId'
+      preLoaderRoute: typeof DashboardHistoryQuotationIdRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
   }
 }
 
@@ -194,6 +233,8 @@ interface DashboardRouteRouteChildren {
   DashboardFormsRoute: typeof DashboardFormsRoute
   DashboardInventoryRoute: typeof DashboardInventoryRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardHistoryQuotationIdRoute: typeof DashboardHistoryQuotationIdRoute
+  DashboardHistoryIndexRoute: typeof DashboardHistoryIndexRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
@@ -201,6 +242,8 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardFormsRoute: DashboardFormsRoute,
   DashboardInventoryRoute: DashboardInventoryRoute,
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardHistoryQuotationIdRoute: DashboardHistoryQuotationIdRoute,
+  DashboardHistoryIndexRoute: DashboardHistoryIndexRoute,
 }
 
 const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(

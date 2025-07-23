@@ -1,7 +1,7 @@
 import { LoaderComponent } from '@/components/loader-component'
 import { InteractiveCard } from '@/components/ui/interactive-card'
 import { useAuth } from '@/context/auth'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
 import { api } from 'convex/_generated/api'
 import type { Id } from 'convex/_generated/dataModel'
 import { useQuery } from 'convex-helpers/react/cache'
@@ -25,24 +25,36 @@ function FormList({ userId }: { userId: Id<'user'> }) {
   const forms = useQuery(api.form.getForms, { userId })
   const navigate = useNavigate()
   if (!forms) return <LoaderComponent />
+  const isEmpty = forms && forms.length === 0
   return (
     <div className="grid grid-cols-3 gap-2">
-      {forms?.map((form) => (
-        <InteractiveCard
-          title={form.title}
-          description={form.description}
-          button={{
-            text: 'Check Out',
-            icon: ArrowRightIcon,
-            onClick: () =>
-              navigate({
-                to: '/dashboard/$form_id',
-                params: { form_id: form._id },
-              }),
-          }}
-          animationDuration="normal"
-        ></InteractiveCard>
-      ))}
+      {isEmpty && (
+        <div>
+          {' '}
+          You don't have any forms yet. <Link to="/dashboard/forms">
+            add
+          </Link>{' '}
+          forms to continue
+        </div>
+      )}
+      {!isEmpty &&
+        forms?.map((form) => (
+          <InteractiveCard
+            key={form._id}
+            title={form.title}
+            description={form.description}
+            button={{
+              text: 'Check Out',
+              icon: ArrowRightIcon,
+              onClick: () =>
+                navigate({
+                  to: '/dashboard/$form_id',
+                  params: { form_id: form._id },
+                }),
+            }}
+            animationDuration="normal"
+          ></InteractiveCard>
+        ))}
     </div>
   )
 }

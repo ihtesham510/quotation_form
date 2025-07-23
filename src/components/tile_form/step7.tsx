@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { FileText, Download, Mail } from 'lucide-react'
+import { FileText, Mail, SaveIcon } from 'lucide-react'
 import type {
   TileFormData as FormData,
   TilePricingBreakdown as PricingBreakdown,
@@ -10,6 +10,7 @@ import type {
 interface Step7Props {
   formData: FormData
   pricing: PricingBreakdown
+  onSave?: () => Promise<void> | void
 }
 
 const TILE_MATERIALS = {
@@ -50,18 +51,16 @@ const APPLICATION_AREAS = {
   outdoor: 'Outdoor/Patio',
 }
 
-export function Step7({ formData, pricing }: Step7Props) {
+export function Step7({ formData, pricing, onSave }: Step7Props) {
   const generateQuote = () => {
-    // This would typically generate a PDF or send the quote
     console.log('Generating quote...', { formData, pricing })
     alert(
       'Quote generated! In a real application, this would generate a PDF or send via email.',
     )
   }
-
-  const printQuote = () => {
-    window.print()
-  }
+  // const printQuote = () => {
+  //   window.print()
+  // }
 
   const emailQuote = () => {
     // This would typically open an email dialog or send the quote
@@ -312,11 +311,11 @@ export function Step7({ formData, pricing }: Step7Props) {
         </Button>
         <Button
           variant="outline"
-          onClick={printQuote}
+          onClick={onSave}
           className="flex-1 bg-transparent"
         >
-          <Download className="w-4 h-4 mr-2" />
-          Print Quote
+          <SaveIcon className="w-4 h-4 mr-2" />
+          Save Quote
         </Button>
         <Button
           variant="outline"

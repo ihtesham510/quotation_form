@@ -3,7 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
-import { ChevronLeft, ChevronRight, FileText } from 'lucide-react'
+import {
+  ChevronLeft,
+  ChevronRight,
+  FileText,
+  HistoryIcon,
+  SettingsIcon,
+} from 'lucide-react'
 import { Step1 } from '@/components/tile_form/step1'
 import { Step2 } from '@/components/tile_form/step2'
 import { Step3 } from '@/components/tile_form/step3'
@@ -92,9 +98,15 @@ const STEPS = [
 export function TileForm({
   title,
   description,
+  onSettingsClick,
+  onHistoryClick,
+  onSave,
 }: {
   title?: string
   description?: string
+  onSettingsClick?: () => void
+  onHistoryClick?: () => void
+  onSave: (data: FormData) => Promise<void> | void
 }) {
   const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState<FormData>({
@@ -357,7 +369,13 @@ export function TileForm({
           />
         )
       case 7:
-        return <Step7 formData={formData} pricing={pricing} />
+        return (
+          <Step7
+            formData={formData}
+            pricing={pricing}
+            onSave={async () => await onSave(formData)}
+          />
+        )
       default:
         return null
     }
@@ -366,10 +384,24 @@ export function TileForm({
   return (
     <div className="min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            {title ?? 'Tile Form'}
-          </h1>
+        <div className="text-start w-full mb-8">
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl w-full font-bold text-foreground mb-2">
+              {title ?? 'Tile Form'}
+            </h1>
+            <div className="flex items-center gap-4">
+              {onHistoryClick && (
+                <Button variant="ghost" onClick={onHistoryClick}>
+                  <HistoryIcon className="size-4" />
+                </Button>
+              )}
+              {onSettingsClick && (
+                <Button variant="ghost" onClick={onSettingsClick}>
+                  <SettingsIcon className="size-4" />
+                </Button>
+              )}
+            </div>
+          </div>
           <p className="text-muted-foreground">
             {description ?? 'Tile Description'}
           </p>
@@ -377,7 +409,7 @@ export function TileForm({
 
         {/* Progress Bar */}
         <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
+          <div className="hidden md:flex justify-between items-center mb-4">
             {STEPS.map((step) => (
               <div key={step.id} className="flex flex-col items-center">
                 <button

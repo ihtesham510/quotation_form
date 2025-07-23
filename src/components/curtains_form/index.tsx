@@ -31,9 +31,11 @@ import {
 export function CurtainsForm({
   title,
   description,
+  onSave,
 }: {
   title?: string
   description?: string
+  onSave?: (data: QuoteData) => void | Promise<void>
 }) {
   const [currentStep, setCurrentStep] = useState(1)
   const [quoteData, setQuoteData] = useState<QuoteData>({
@@ -59,7 +61,6 @@ export function CurtainsForm({
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [_, setSavedQuotes] = useState<QuoteData[]>([])
 
   const steps = [
     { number: 1, title: 'Customer Info', icon: Home },
@@ -127,15 +128,7 @@ export function CurtainsForm({
     }
   }
 
-  const saveQuote = () => {
-    const quoteWithId = {
-      ...quoteData,
-      id: Date.now().toString(),
-      savedAt: new Date().toISOString(),
-    }
-    setSavedQuotes((prev) => [...prev, quoteWithId])
-    alert('Quote saved successfully!')
-  }
+  const saveQuote = () => onSave?.(quoteData)
 
   const generatePDF = () => {
     const quoteContent = `
