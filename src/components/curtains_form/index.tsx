@@ -248,8 +248,8 @@ Payment Terms: ${quoteData.paymentTerms}
           </div>
 
           {/* Progress Indicator */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
+          <div className="mb-4 md:mb-8">
+            <div className="hidden md:flex items-center justify-between mb-4">
               {steps.map((step, index) => {
                 const Icon = step.icon
                 const isActive = currentStep === step.number

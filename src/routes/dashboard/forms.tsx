@@ -47,7 +47,7 @@ function RouteComponent() {
         type={form}
       />
       <h1 className="text-3xl font-bold my-4">Templates</h1>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 space-y-4 gap-2">
         <InteractiveCard
           title="Tile Form"
           description="Quickly generate your custom tile quotation with our easy-to-use form. Get an accurate estimate and instantly download your detailed quote as a PDF for your records."

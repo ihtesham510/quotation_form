@@ -80,8 +80,7 @@ export function InteractiveCard({
 
   return (
     <Card
-      className={`group relative overflow-hidden border transition-all ${durationClasses[animationDuration]} hover:${shadowClasses[hoverShadowIntensity]} ${shadowClasses[shadowIntensity]} w-full min-w-[280px] max-h-fit ${className}`}
-      style={{ isolation: 'isolate' }}
+      className={`group relative overflow-hidden border transition-all ${durationClasses[animationDuration]} hover:${shadowClasses[hoverShadowIntensity]} ${shadowClasses[shadowIntensity]} w-full min-w-[280px] ${className}`}
     >
       {/* Background overlay that appears on hover */}
       <div

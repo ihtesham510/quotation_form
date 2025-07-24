@@ -17,6 +17,7 @@ import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as DashboardInventoryRouteImport } from './routes/dashboard/inventory'
 import { Route as DashboardFormsRouteImport } from './routes/dashboard/forms'
 import { Route as DashboardForm_idRouteImport } from './routes/dashboard/$form_id'
+import { Route as DashboardHistoryRouteRouteImport } from './routes/dashboard/history/route'
 import { Route as DashboardHistoryIndexRouteImport } from './routes/dashboard/history/index'
 import { Route as DashboardHistoryQuotationIdRouteImport } from './routes/dashboard/history/$quotationId'
 
@@ -60,16 +61,21 @@ const DashboardForm_idRoute = DashboardForm_idRouteImport.update({
   path: '/$form_id',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
-const DashboardHistoryIndexRoute = DashboardHistoryIndexRouteImport.update({
-  id: '/history/',
-  path: '/history/',
+const DashboardHistoryRouteRoute = DashboardHistoryRouteRouteImport.update({
+  id: '/history',
+  path: '/history',
   getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardHistoryIndexRoute = DashboardHistoryIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardHistoryRouteRoute,
 } as any)
 const DashboardHistoryQuotationIdRoute =
   DashboardHistoryQuotationIdRouteImport.update({
-    id: '/history/$quotationId',
-    path: '/history/$quotationId',
-    getParentRoute: () => DashboardRouteRoute,
+    id: '/$quotationId',
+    path: '/$quotationId',
+    getParentRoute: () => DashboardHistoryRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -77,12 +83,13 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/dashboard/history': typeof DashboardHistoryRouteRouteWithChildren
   '/dashboard/$form_id': typeof DashboardForm_idRoute
   '/dashboard/forms': typeof DashboardFormsRoute
   '/dashboard/inventory': typeof DashboardInventoryRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/history/$quotationId': typeof DashboardHistoryQuotationIdRoute
-  '/dashboard/history': typeof DashboardHistoryIndexRoute
+  '/dashboard/history/': typeof DashboardHistoryIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -101,6 +108,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/dashboard/history': typeof DashboardHistoryRouteRouteWithChildren
   '/dashboard/$form_id': typeof DashboardForm_idRoute
   '/dashboard/forms': typeof DashboardFormsRoute
   '/dashboard/inventory': typeof DashboardInventoryRoute
@@ -115,12 +123,13 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/sign-in'
     | '/sign-up'
+    | '/dashboard/history'
     | '/dashboard/$form_id'
     | '/dashboard/forms'
     | '/dashboard/inventory'
     | '/dashboard/'
     | '/dashboard/history/$quotationId'
-    | '/dashboard/history'
+    | '/dashboard/history/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -138,6 +147,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/sign-in'
     | '/sign-up'
+    | '/dashboard/history'
     | '/dashboard/$form_id'
     | '/dashboard/forms'
     | '/dashboard/inventory'
@@ -211,39 +221,59 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardForm_idRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/dashboard/history/': {
-      id: '/dashboard/history/'
+    '/dashboard/history': {
+      id: '/dashboard/history'
       path: '/history'
       fullPath: '/dashboard/history'
-      preLoaderRoute: typeof DashboardHistoryIndexRouteImport
+      preLoaderRoute: typeof DashboardHistoryRouteRouteImport
       parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/history/': {
+      id: '/dashboard/history/'
+      path: '/'
+      fullPath: '/dashboard/history/'
+      preLoaderRoute: typeof DashboardHistoryIndexRouteImport
+      parentRoute: typeof DashboardHistoryRouteRoute
     }
     '/dashboard/history/$quotationId': {
       id: '/dashboard/history/$quotationId'
-      path: '/history/$quotationId'
+      path: '/$quotationId'
       fullPath: '/dashboard/history/$quotationId'
       preLoaderRoute: typeof DashboardHistoryQuotationIdRouteImport
-      parentRoute: typeof DashboardRouteRoute
+      parentRoute: typeof DashboardHistoryRouteRoute
     }
   }
 }
 
-interface DashboardRouteRouteChildren {
-  DashboardForm_idRoute: typeof DashboardForm_idRoute
-  DashboardFormsRoute: typeof DashboardFormsRoute
-  DashboardInventoryRoute: typeof DashboardInventoryRoute
-  DashboardIndexRoute: typeof DashboardIndexRoute
+interface DashboardHistoryRouteRouteChildren {
   DashboardHistoryQuotationIdRoute: typeof DashboardHistoryQuotationIdRoute
   DashboardHistoryIndexRoute: typeof DashboardHistoryIndexRoute
 }
 
+const DashboardHistoryRouteRouteChildren: DashboardHistoryRouteRouteChildren = {
+  DashboardHistoryQuotationIdRoute: DashboardHistoryQuotationIdRoute,
+  DashboardHistoryIndexRoute: DashboardHistoryIndexRoute,
+}
+
+const DashboardHistoryRouteRouteWithChildren =
+  DashboardHistoryRouteRoute._addFileChildren(
+    DashboardHistoryRouteRouteChildren,
+  )
+
+interface DashboardRouteRouteChildren {
+  DashboardHistoryRouteRoute: typeof DashboardHistoryRouteRouteWithChildren
+  DashboardForm_idRoute: typeof DashboardForm_idRoute
+  DashboardFormsRoute: typeof DashboardFormsRoute
+  DashboardInventoryRoute: typeof DashboardInventoryRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+}
+
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
+  DashboardHistoryRouteRoute: DashboardHistoryRouteRouteWithChildren,
   DashboardForm_idRoute: DashboardForm_idRoute,
   DashboardFormsRoute: DashboardFormsRoute,
   DashboardInventoryRoute: DashboardInventoryRoute,
   DashboardIndexRoute: DashboardIndexRoute,
-  DashboardHistoryQuotationIdRoute: DashboardHistoryQuotationIdRoute,
-  DashboardHistoryIndexRoute: DashboardHistoryIndexRoute,
 }
 
 const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(

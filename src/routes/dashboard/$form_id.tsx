@@ -6,6 +6,7 @@ import { api } from 'convex/_generated/api'
 import { useQuery } from 'convex-helpers/react/cache'
 import { useMutation } from 'convex/react'
 import type { Id } from 'convex/_generated/dataModel'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/dashboard/$form_id')({
   component: RouteComponent,
@@ -21,7 +22,7 @@ function RouteComponent() {
   const addTileQuotation = useMutation(api.quotation.addTileQuotation)
   const addCurtainQuotation = useMutation(api.quotation.addCurtainQuotation)
   return (
-    <div className="p-8">
+    <div>
       {form && form?.type === 'tile' && (
         <TileForm
           title={form.title}
@@ -43,6 +44,7 @@ function RouteComponent() {
               formId: form_id as Id<'forms'>,
               data: { ...data, type: 'curtains' },
             })
+            toast.success('Quote Saved Successfully')
           }}
         />
       )}

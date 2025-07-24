@@ -174,7 +174,7 @@ export function Step5({ formData, updateFormData }: Step5Props) {
           {INSTALLATION_COMPLEXITY.map((complexity) => (
             <div
               key={complexity.id}
-              className="flex items-center justify-between p-3 border rounded-lg"
+              className="grid space-y-2 md:flex md:items-center md:justify-between p-3 border rounded-lg"
             >
               <div className="flex items-center gap-2">
                 <Checkbox
@@ -189,12 +189,24 @@ export function Step5({ formData, updateFormData }: Step5Props) {
                     )
                   }
                 />
-                <Label htmlFor={complexity.id} className="flex-1">
+                <Label
+                  htmlFor={complexity.id}
+                  className="font-medium md:hidden"
+                >
+                  {complexity.name}
+                </Label>
+                <Label
+                  htmlFor={complexity.id}
+                  className="hidden md:flex md:flex-1"
+                >
                   <div className="font-medium">{complexity.name}</div>
                   <div className="text-sm text-muted-foreground">
                     {complexity.description}
                   </div>
                 </Label>
+              </div>
+              <div className="text-sm md:hidden text-muted-foreground">
+                {complexity.description}
               </div>
               <Badge variant="outline">
                 +${complexity.price.toFixed(2)} per sq ft
@@ -210,7 +222,7 @@ export function Step5({ formData, updateFormData }: Step5Props) {
           <CardTitle>Permit Fees</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="max-w-md">
+          <div className="max-w-md space-y-2">
             <Label htmlFor="permitFees">Permit fees (if applicable)</Label>
             <Input
               id="permitFees"
@@ -238,7 +250,7 @@ export function Step5({ formData, updateFormData }: Step5Props) {
           <CardTitle>Special Services</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-3 border rounded-lg">
+          <div className="grid md:flex md:items-center md:justify-between p-3 space-y-2 border rounded-lg">
             <div className="flex items-center gap-2">
               <Checkbox
                 id="rushOrder"
@@ -247,17 +259,22 @@ export function Step5({ formData, updateFormData }: Step5Props) {
                   updateFormData({ rushOrder: checked as boolean })
                 }
               />
-              <Label htmlFor="rushOrder" className="flex-1">
+              <Label htmlFor="rushOrder" className="md:hidden">
+                Rush order
+              </Label>
+              <Label htmlFor="rushOrder" className="hidden md:flex md:flex-1">
                 <div className="font-medium">Rush order</div>
                 <div className="text-sm text-muted-foreground">
                   Expedited processing and delivery
                 </div>
               </Label>
             </div>
+            <div className="md:hidden text-sm text-muted-foreground">
+              Expedited processing and delivery
+            </div>
             <Badge variant="outline">+15% of material cost</Badge>
           </div>
-
-          <div className="flex items-center justify-between p-3 border rounded-lg">
+          <div className="grid md:flex md:items-center md:justify-between p-3 space-y-2 border rounded-lg">
             <div className="flex items-center gap-2">
               <Checkbox
                 id="weekendWork"
@@ -266,12 +283,18 @@ export function Step5({ formData, updateFormData }: Step5Props) {
                   updateFormData({ weekendWork: checked as boolean })
                 }
               />
-              <Label htmlFor="weekendWork" className="flex-1">
+              <Label htmlFor="rushOrder" className="md:hidden">
+                Weekend/after-hours work
+              </Label>
+              <Label htmlFor="rushOrder" className="hidden md:flex md:flex-1">
                 <div className="font-medium">Weekend/after-hours work</div>
                 <div className="text-sm text-muted-foreground">
                   Installation outside normal business hours
                 </div>
               </Label>
+            </div>
+            <div className="md:hidden text-sm text-muted-foreground">
+              Installation outside normal business hours
             </div>
             <Badge variant="outline">+25% of installation cost</Badge>
           </div>

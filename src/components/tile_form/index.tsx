@@ -18,60 +18,10 @@ import { Step5 } from '@/components/tile_form/step5'
 import { Step6 } from '@/components/tile_form/step6'
 import { Step7 } from '@/components/tile_form/step7'
 import PricingSidebar from '@/components/tile_form/pricing-sidebar'
-
-export interface FormData {
-  // Step 1
-  tileMaterial: string
-  tileStyle: string
-
-  // Step 2
-  tileSize: string
-  finishType: string
-  applicationArea: string
-  squareFootage: number
-
-  // Step 3
-  trimPieces: Array<{ type: string; quantity: number; price: number }>
-  transitionStrips: Array<{ type: string; quantity: number; price: number }>
-  underlayment: { type: string; price: number } | null
-  groutSealers: Array<{ type: string; price: number }>
-
-  // Step 4
-  otherItems: Array<{
-    id: string
-    name: string
-    quantity: number
-    unit: string
-    unitPrice: number
-    description: string
-  }>
-
-  // Step 5
-  deliveryOption: string
-  installationComplexity: string[]
-  permitFees: number
-  rushOrder: boolean
-  weekendWork: boolean
-
-  // Step 6
-  discountType: string
-  discountPercentage: number
-  discountAmount: number
-  discountReason: string
-}
-
-export interface PricingBreakdown {
-  materialCost: number
-  installationCost: number
-  addOnsSubtotal: number
-  otherItemsSubtotal: number
-  additionalChargesSubtotal: number
-  preDiscountSubtotal: number
-  discountAmount: number
-  afterDiscountSubtotal: number
-  tax: number
-  finalTotal: number
-}
+import type {
+  TilePricingBreakdown as PricingBreakdown,
+  TileFormData as FormData,
+} from '@/lib/types'
 
 const STEPS = [
   {
@@ -372,6 +322,8 @@ export function TileForm({
         return (
           <Step7
             formData={formData}
+            title={title}
+            description={description}
             pricing={pricing}
             onSave={async () => await onSave(formData)}
           />
@@ -441,9 +393,9 @@ export function TileForm({
           <Progress value={(currentStep / 7) * 100} className="h-2" />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
           {/* Main Form */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-7">
             <Card className="shadow-md border-border bg-card">
               <CardHeader className="border-b border-border">
                 <CardTitle className="flex items-center justify-between text-card-foreground">
@@ -494,7 +446,7 @@ export function TileForm({
           </div>
 
           {/* Pricing Sidebar */}
-          <div className="lg:col-span-1">
+          <div className="xl:col-span-3">
             <PricingSidebar pricing={pricing} formData={formData} />
           </div>
         </div>

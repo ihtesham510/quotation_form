@@ -27,7 +27,7 @@ export function AppSidebar() {
     },
   ]
   return (
-    <Sidebar collapsible="icon" variant="floating">
+    <Sidebar collapsible="icon" variant="sidebar">
       <SidebarContent>
         <NavMain items={items} />
       </SidebarContent>

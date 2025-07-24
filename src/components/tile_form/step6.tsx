@@ -1,5 +1,11 @@
 import type React from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
@@ -109,32 +115,42 @@ export function Step6({ formData, updateFormData, pricing }: Step6Props) {
                 description: 'Apply a fixed dollar discount',
                 badge: { text: '$ Amount', variant: 'outline' },
               },
-            ].map((option) => (
-              <div key={option.id}>
-                <RadioGroupItem
-                  value={option.value}
-                  id={option.id}
-                  className="peer sr-only"
-                />
-                <Label
-                  htmlFor={option.id}
-                  className={cn(
-                    'flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-colors',
-                    'hover:bg-accent peer-checked:border-primary peer-checked:bg-accent',
-                  )}
-                >
-                  <div>
-                    <div className="font-medium">{option.title}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {option.description}
+            ].map((option) => {
+              const isActive = option.value === formData.discountType
+              return (
+                <div key={option.id}>
+                  <RadioGroupItem
+                    value={option.value}
+                    id={option.id}
+                    className="peer sr-only"
+                  />
+                  <Label
+                    htmlFor={option.id}
+                    className={cn(
+                      'flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-colors',
+                      isActive && 'border-primary bg-accent',
+                    )}
+                  >
+                    <div>
+                      <div
+                        className={cn(
+                          'font-medium',
+                          isActive && 'text-primary',
+                        )}
+                      >
+                        {option.title}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {option.description}
+                      </div>
                     </div>
-                  </div>
-                  <Badge variant={option.badge.variant as any}>
-                    {option.badge.text}
-                  </Badge>
-                </Label>
-              </div>
-            ))}
+                    <Badge variant={option.badge.variant as any}>
+                      {option.badge.text}
+                    </Badge>
+                  </Label>
+                </div>
+              )
+            })}
           </RadioGroup>
         </CardContent>
       </Card>
@@ -196,10 +212,10 @@ export function Step6({ formData, updateFormData, pricing }: Step6Props) {
         <Card>
           <CardHeader>
             <CardTitle>Fixed Dollar Discount</CardTitle>
+            <CardDescription>Discount amount ($)</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="max-w-md">
-              <Label htmlFor="discountAmount">Discount amount ($)</Label>
+            <div className="max-w-md space-y-4">
               <Input
                 id="discountAmount"
                 type="number"
@@ -246,11 +262,9 @@ export function Step6({ formData, updateFormData, pricing }: Step6Props) {
         <Card>
           <CardHeader>
             <CardTitle>Discount Reason/Code</CardTitle>
+            <CardDescription>Reason for discount (optional)</CardDescription>
           </CardHeader>
           <CardContent>
-            <Label htmlFor="discountReason">
-              Reason for discount (optional)
-            </Label>
             <Textarea
               id="discountReason"
               value={formData.discountReason}

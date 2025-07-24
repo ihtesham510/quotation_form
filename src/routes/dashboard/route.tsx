@@ -21,7 +21,7 @@ function RouteComponent() {
     <SidebarProvider defaultOpen={false}>
       <AppSidebar />
       <div className="flex flex-col w-full">
-        <header className="px-8 flex justify-between items-center mt-2 py-2 w-full">
+        <header className="px-4 md:px-8 flex justify-between items-center mt-2 py-2 w-full">
           <SidebarTrigger />
           <Button variant="secondary" onClick={async () => await signOut()}>
             Log Out

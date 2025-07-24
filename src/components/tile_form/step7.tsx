@@ -6,9 +6,12 @@ import type {
   TileFormData as FormData,
   TilePricingBreakdown as PricingBreakdown,
 } from '@/lib/types'
+import { generateTilePdf, openPdf } from '@/lib/pdf'
 
 interface Step7Props {
   formData: FormData
+  title?: string
+  description?: string
   pricing: PricingBreakdown
   onSave?: () => Promise<void> | void
 }
@@ -51,19 +54,25 @@ const APPLICATION_AREAS = {
   outdoor: 'Outdoor/Patio',
 }
 
-export function Step7({ formData, pricing, onSave }: Step7Props) {
-  const generateQuote = () => {
-    console.log('Generating quote...', { formData, pricing })
-    alert(
-      'Quote generated! In a real application, this would generate a PDF or send via email.',
-    )
+export function Step7({
+  formData,
+  pricing,
+  onSave,
+  title,
+  description,
+}: Step7Props) {
+  const generateQuote = async () => {
+    if (title && description) {
+      const blob = await generateTilePdf({
+        title,
+        description,
+        formData,
+        pricingBreakdown: pricing,
+      })
+      openPdf(blob)
+    }
   }
-  // const printQuote = () => {
-  //   window.print()
-  // }
-
   const emailQuote = () => {
-    // This would typically open an email dialog or send the quote
     alert('Email functionality would be implemented here.')
   }
 
