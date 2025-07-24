@@ -38,7 +38,7 @@ export function AuthContextProvdider({ children }: PropsWithChildren) {
   const signInMutation = useMutation(api.user.signIn)
   const signUpMutation = useMutation(api.user.signUp)
 
-  const isLoading = typeof user === undefined
+  const isLoading = user === undefined
   const isAuthenticated = !!user
 
   const signIn = useCallback(
