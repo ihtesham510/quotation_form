@@ -18,7 +18,12 @@ import {
 import type { DataModel, Id } from 'convex/_generated/dataModel'
 import { useQuery } from 'convex/react'
 import { api } from 'convex/_generated/api'
-import { generateTilePdf, openPdf } from '@/lib/pdf'
+import {
+  generateTilePDFfromDB,
+  generateWindowQuotePdf,
+  openPdf,
+} from '@/lib/pdf'
+import { productDatabase } from '@/components/curtains_form/data'
 
 export const Route = createFileRoute('/dashboard/history/$quotationId')({
   component: RouteComponent,
@@ -551,13 +556,16 @@ function QuotationDetails({
           <Button
             onClick={async () => {
               const { quote, title, description } = quotation
-              if (quote.type === 'tile' && title && description) {
-                const blob = await generateTilePdf({
-                  title,
-                  description,
-                  formData: quote,
-                  pricingBreakdown,
-                })
+              if (title && description) {
+                const blob =
+                  quote.type === 'tile'
+                    ? await generateTilePDFfromDB(quote, title, description)
+                    : await generateWindowQuotePdf({
+                        title,
+                        description,
+                        quoteData: quote,
+                        productDatabase,
+                      })
                 openPdf(blob)
               }
             }}

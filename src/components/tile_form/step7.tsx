@@ -73,18 +73,6 @@ export function Step7({
     }
   }
 
-  const downloadQuote = async () => {
-    if (title && description) {
-      const blob = await generateTilePdf({
-        title,
-        description,
-        formData,
-        pricingBreakdown: pricing,
-      })
-      openPdf(blob)
-    }
-  }
-
   const emailQuote = () => {
     alert('Email functionality would be implemented here.')
   }
