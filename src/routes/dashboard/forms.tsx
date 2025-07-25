@@ -1,4 +1,3 @@
-import { InteractiveCard } from '@/components/ui/interactive-card'
 import { createFileRoute } from '@tanstack/react-router'
 import { LoaderCircle, PlusIcon } from 'lucide-react'
 import { useForm } from 'react-hook-form'
@@ -26,6 +25,14 @@ import { useState } from 'react'
 import { useMutation } from 'convex/react'
 import { api } from 'convex/_generated/api'
 import { useAuth } from '@/context/auth'
+import {
+  Card,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 export const Route = createFileRoute('/dashboard/forms')({
   component: RouteComponent,
@@ -36,8 +43,9 @@ type FormType = null | 'tile' | 'curtains'
 function RouteComponent() {
   const [open, setIsOpen] = useState(false)
   const [form, setForm] = useState<FormType>(null)
+  const isMobile = useIsMobile()
   return (
-    <div className="p-8">
+    <div className="p-8 mb-8">
       <AddFormDialog
         open={open}
         onOpenChange={(e) => {
@@ -47,33 +55,75 @@ function RouteComponent() {
         type={form}
       />
       <h1 className="text-3xl font-bold my-4">Templates</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 space-y-4 gap-2">
-        <InteractiveCard
-          title="Tile Form"
-          description="Quickly generate your custom tile quotation with our easy-to-use form. Get an accurate estimate and instantly download your detailed quote as a PDF for your records."
-          button={{
-            text: 'Add',
-            icon: PlusIcon,
-            onClick: () => {
-              setIsOpen(true)
-              setForm('tile')
-            },
+      <div className="space-y-4 gap-2">
+        <Card
+          onClick={() => {
+            setForm('tile')
+            setIsOpen(true)
           }}
-          animationDuration="normal"
-        ></InteractiveCard>
-        <InteractiveCard
-          title="Curtain Form"
-          description="Create your custom curtain quotation in just a few steps. Enter your details, calculate the cost, and download your personalized quote as a PDF instantly."
-          button={{
-            text: 'Add',
-            icon: PlusIcon,
-            onClick: () => {
-              setIsOpen(true)
-              setForm('curtains')
-            },
+        >
+          <CardHeader>
+            <CardTitle>Tile Form</CardTitle>
+            <CardDescription>
+              Quickly generate your custom tile quotation with our easy-to-use
+              form. Get an accurate estimate and instantly download your
+              detailed quote as a PDF for your records.
+            </CardDescription>
+            {!isMobile && (
+              <div
+                className={`absolute opacity-0 transition-all group-hover:opacity-100 group-hover:translate-y-0 translate-y-2 z-30`}
+              >
+                {/* Blur backdrop behind button */}
+                <div className="absolute inset-0 -m-2 rounded-lg backdrop-blur-sm bg-background/20 dark:bg-background/10 border border-border/20" />
+                <Button
+                  size="sm"
+                  className="relative z-10 shadow-lg hover:shadow-xl transition-shadow duration-100"
+                >
+                  <PlusIcon className="size-4" />
+                </Button>
+              </div>
+            )}
+          </CardHeader>
+          <CardFooter className="flex md:justify-end">
+            <Button>
+              <p>Add</p> <PlusIcon className="size-4" />
+            </Button>
+          </CardFooter>
+        </Card>
+        <Card
+          onClick={() => {
+            setForm('curtains')
+            setIsOpen(true)
           }}
-          animationDuration="normal"
-        ></InteractiveCard>
+        >
+          <CardHeader>
+            <CardTitle>Curtain Form</CardTitle>
+            <CardDescription>
+              Create your custom curtain quotation in just a few steps. Enter
+              your details, calculate the cost, and download your personalized
+              quote as a PDF instantly.
+            </CardDescription>
+            {!isMobile && (
+              <div
+                className={`absolute opacity-0 transition-all group-hover:opacity-100 group-hover:translate-y-0 translate-y-2 z-30`}
+              >
+                {/* Blur backdrop behind button */}
+                <div className="absolute inset-0 -m-2 rounded-lg backdrop-blur-sm bg-background/20 dark:bg-background/10 border border-border/20" />
+                <Button
+                  size="sm"
+                  className="relative z-10 shadow-lg hover:shadow-xl transition-shadow duration-100"
+                >
+                  <PlusIcon className="size-4" />
+                </Button>
+              </div>
+            )}
+          </CardHeader>
+          <CardFooter className="flex md:justify-end">
+            <Button>
+              <p>Add</p> <PlusIcon className="size-4" />
+            </Button>
+          </CardFooter>
+        </Card>
       </div>
     </div>
   )

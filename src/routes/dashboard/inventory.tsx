@@ -13,6 +13,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { useIsMobile } from '@/hooks/use-mobile'
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 
 export const Route = createFileRoute('/dashboard/inventory')({
   component: RouteComponent,
@@ -30,6 +37,7 @@ function RouteComponent() {
 
 function FormList({ userId }: { userId: Id<'user'> }) {
   const forms = useQuery(api.form.getForms, { userId })
+  const isMobile = useIsMobile()
   const navigate = useNavigate()
   if (!forms) return <LoaderComponent />
   const isEmpty = forms && forms.length === 0
@@ -44,7 +52,26 @@ function FormList({ userId }: { userId: Id<'user'> }) {
           forms to continue
         </div>
       )}
-      {!isEmpty && (
+      {!isEmpty && isMobile ? (
+        <div className="flex flex-col space-y-4">
+          {forms.map((form, index) => (
+            <Card
+              key={index}
+              onClick={() =>
+                navigate({
+                  to: '/dashboard/$form_id',
+                  params: { form_id: form._id },
+                })
+              }
+            >
+              <CardHeader>
+                <CardTitle>{form.title}</CardTitle>
+                <CardDescription>{form.description}</CardDescription>
+              </CardHeader>
+            </Card>
+          ))}
+        </div>
+      ) : (
         <Table>
           <TableCaption>A list of Your Forms.</TableCaption>
           <TableHeader>
