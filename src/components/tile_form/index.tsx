@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import {
   ChevronLeft,
   ChevronRight,
-  FileText,
+  DownloadIcon,
   HistoryIcon,
   SettingsIcon,
 } from 'lucide-react'
@@ -22,6 +22,7 @@ import type {
   TilePricingBreakdown as PricingBreakdown,
   TileFormData as FormData,
 } from '@/lib/types'
+import { generateTilePdf, openPdf } from '@/lib/pdf'
 
 const STEPS = [
   {
@@ -99,6 +100,18 @@ export function TileForm({
   useEffect(() => {
     calculatePricing()
   }, [formData])
+
+  const downloadQuote = async () => {
+    if (title && description) {
+      const blob = await generateTilePdf({
+        title,
+        description,
+        formData,
+        pricingBreakdown: pricing,
+      })
+      openPdf(blob)
+    }
+  }
 
   const calculatePricing = () => {
     // Material pricing
@@ -435,9 +448,12 @@ export function TileForm({
                       <ChevronRight className="w-4 h-4 ml-2" />
                     </Button>
                   ) : (
-                    <Button className="flex items-center bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
-                      <FileText className="w-4 h-4 mr-2" />
-                      Generate Quote
+                    <Button
+                      className="flex items-center bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                      onClick={downloadQuote}
+                    >
+                      <DownloadIcon className="w-4 h-4 mr-2" />
+                      Download Quote
                     </Button>
                   )}
                 </div>

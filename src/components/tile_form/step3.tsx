@@ -323,16 +323,19 @@ export function Step3({ formData, updateFormData }: Step3Props) {
             {UNDERLAYMENT_OPTIONS.map((option) => (
               <div
                 key={option.id}
-                className="flex items-center justify-between p-3 border rounded-lg"
+                className="grid space-y-2 md:flex items-center justify-between p-3 border rounded-lg"
               >
                 <div className="flex items-center gap-2">
                   <RadioGroupItem value={option.id} id={option.id} />
                   <Label htmlFor={option.id} className="flex-1">
                     <div className="font-medium">{option.name}</div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="hidden md:inline-flex text-sm text-muted-foreground">
                       {option.description}
                     </div>
                   </Label>
+                </div>
+                <div className="md:hidden text-sm text-muted-foreground">
+                  {option.description}
                 </div>
                 <Badge variant="outline">
                   ${option.price.toFixed(2)} per sq ft
@@ -352,7 +355,7 @@ export function Step3({ formData, updateFormData }: Step3Props) {
           {GROUT_SEALERS.map((grout) => (
             <div
               key={grout.id}
-              className="flex items-center justify-between p-3 border rounded-lg"
+              className="grid space-y-2 md:flex items-center justify-between p-3 border rounded-lg"
             >
               <div className="flex items-center gap-2">
                 <Checkbox
@@ -366,10 +369,13 @@ export function Step3({ formData, updateFormData }: Step3Props) {
                 />
                 <Label htmlFor={grout.id} className="flex-1">
                   <div className="font-medium">{grout.name}</div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="hidden md:inline-flex text-sm text-muted-foreground">
                     {grout.description}
                   </div>
                 </Label>
+              </div>
+              <div className="md:hidden text-sm text-muted-foreground">
+                {grout.description}
               </div>
               <Badge variant="outline">
                 ${grout.price.toFixed(2)} per sq ft
