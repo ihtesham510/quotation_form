@@ -120,7 +120,24 @@ export const curtainsSchema = v.object({
   validityPeriod: v.number(),
 })
 
+export const productSchema = {
+  categoryId: v.id('categories'),
+  name: v.string(),
+  priceType: v.union(v.literal('sqm'), v.literal('each')),
+  basePrice: v.number(),
+  minimumQty: v.number(),
+  leadTime: v.string(),
+  specialConditions: v.optional(v.string()),
+}
+
+export const categorySchema = {
+  title: v.string(),
+  description: v.string(),
+}
+
 export default defineSchema({
+  categories: defineTable(categorySchema),
+  products: defineTable(productSchema).index('by_category', ['categoryId']),
   files: defineTable({
     url: v.string(),
     storageId: v.id('_storage'),

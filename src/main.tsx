@@ -1,8 +1,9 @@
 import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
-import { ConvexProvider, ConvexReactClient } from 'convex/react'
+import { ConvexProvider, ConvexReactClient, useConvex } from 'convex/react'
 import { ConvexQueryCacheProvider } from 'convex-helpers/react/cache'
+import { api } from 'convex/_generated/api'
 
 import { routeTree } from './routeTree.gen'
 
@@ -32,7 +33,8 @@ const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string)
 
 function App() {
   const auth = useAuth()
-  return <RouterProvider router={router} context={auth} />
+  const convex = useConvex()
+  return <RouterProvider router={router} context={{ auth, convex, api }} />
 }
 
 const rootElement = document.getElementById('app')

@@ -13,6 +13,7 @@ import type * as form from "../form.js";
 import type * as internal_ from "../internal.js";
 import type * as pdf from "../pdf.js";
 import type * as pdf_generate_schema from "../pdf_generate_schema.js";
+import type * as product_categoreis from "../product_categoreis.js";
 import type * as quotation from "../quotation.js";
 import type * as user from "../user.js";
 
@@ -36,6 +37,7 @@ declare const fullApi: ApiFromModules<{
   internal: typeof internal_;
   pdf: typeof pdf;
   pdf_generate_schema: typeof pdf_generate_schema;
+  product_categoreis: typeof product_categoreis;
   quotation: typeof quotation;
   user: typeof user;
 }>;

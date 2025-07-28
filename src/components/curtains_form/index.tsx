@@ -29,12 +29,8 @@ import {
 } from './calculations'
 
 export function CurtainsForm({
-  title,
-  description,
   onSave,
 }: {
-  title?: string
-  description?: string
   onSave?: (data: QuoteData) => void | Promise<void>
 }) {
   const [currentStep, setCurrentStep] = useState(1)
@@ -236,17 +232,8 @@ Payment Terms: ${quoteData.paymentTerms}
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-8 px-4">
+      <div className="container mx-auto py-4 mb-24">
         <div className="max-w-6xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">
-              {title ?? 'Curtain form title'}
-            </h1>
-            <p className="text-muted-foreground">
-              {description ?? 'Curtain form description'}
-            </p>
-          </div>
-
           {/* Progress Indicator */}
           <div className="mb-4 md:mb-8">
             <div className="hidden md:flex items-center justify-between mb-4">

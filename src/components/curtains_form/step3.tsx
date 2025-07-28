@@ -16,10 +16,11 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Plus, Trash2, Calculator } from 'lucide-react'
+import { Plus, Trash2, Calculator, ChevronsUpDownIcon } from 'lucide-react'
 import type { QuoteData, RoomProduct } from './types'
 import { productDatabase, controlTypes } from './data'
 import { calculateProductTotal, calculateRoomTotal } from './calculations'
+import { CommandSelect } from '../CommandSelect'
 
 interface Step3Props {
   quoteData: QuoteData
@@ -143,6 +144,43 @@ export function Step3({ quoteData, setQuoteData, errors }: Step3Props) {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label>Category</Label>
+                      <CommandSelect
+                        list={productDatabase.categories.map((p) => ({
+                          value: p.id.toString(),
+                          label: p.name,
+                        }))}
+                        value={
+                          productDatabase.products
+                            .find((p) => p.id === product.productId)
+                            ?.categoryId.toString() || ''
+                        }
+                        onSelect={(categoryId) => {
+                          const firstProductInCategory =
+                            productDatabase.products.find(
+                              (p) =>
+                                p.categoryId === Number.parseInt(categoryId),
+                            )
+                          if (firstProductInCategory) {
+                            updateRoomProduct(room.id, product.id, {
+                              productId: firstProductInCategory.id,
+                            })
+                          }
+                        }}
+                      >
+                        <Button
+                          className="w-full md:max-w-[200px]"
+                          variant="secondary"
+                        >
+                          <p>
+                            {' '}
+                            {productDatabase.products.find(
+                              (p) => p.id === product.productId,
+                            )?.name ?? 'Select Value'}
+                          </p>
+
+                          <ChevronsUpDownIcon className="size-4" />
+                        </Button>
+                      </CommandSelect>
                       <Select
                         value={
                           productDatabase.products

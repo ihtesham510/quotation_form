@@ -16,10 +16,11 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as DashboardInventoryRouteImport } from './routes/dashboard/inventory'
 import { Route as DashboardFormsRouteImport } from './routes/dashboard/forms'
-import { Route as DashboardForm_idRouteImport } from './routes/dashboard/$form_id'
 import { Route as DashboardHistoryRouteRouteImport } from './routes/dashboard/history/route'
 import { Route as DashboardHistoryIndexRouteImport } from './routes/dashboard/history/index'
+import { Route as DashboardForm_idIndexRouteImport } from './routes/dashboard/$form_id/index'
 import { Route as DashboardHistoryQuotationIdRouteImport } from './routes/dashboard/history/$quotationId'
+import { Route as DashboardForm_idManage_productsRouteImport } from './routes/dashboard/$form_id/manage_products'
 
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
@@ -56,11 +57,6 @@ const DashboardFormsRoute = DashboardFormsRouteImport.update({
   path: '/forms',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
-const DashboardForm_idRoute = DashboardForm_idRouteImport.update({
-  id: '/$form_id',
-  path: '/$form_id',
-  getParentRoute: () => DashboardRouteRoute,
-} as any)
 const DashboardHistoryRouteRoute = DashboardHistoryRouteRouteImport.update({
   id: '/history',
   path: '/history',
@@ -71,11 +67,22 @@ const DashboardHistoryIndexRoute = DashboardHistoryIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardHistoryRouteRoute,
 } as any)
+const DashboardForm_idIndexRoute = DashboardForm_idIndexRouteImport.update({
+  id: '/$form_id/',
+  path: '/$form_id/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 const DashboardHistoryQuotationIdRoute =
   DashboardHistoryQuotationIdRouteImport.update({
     id: '/$quotationId',
     path: '/$quotationId',
     getParentRoute: () => DashboardHistoryRouteRoute,
+  } as any)
+const DashboardForm_idManage_productsRoute =
+  DashboardForm_idManage_productsRouteImport.update({
+    id: '/$form_id/manage_products',
+    path: '/$form_id/manage_products',
+    getParentRoute: () => DashboardRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -84,22 +91,24 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/dashboard/history': typeof DashboardHistoryRouteRouteWithChildren
-  '/dashboard/$form_id': typeof DashboardForm_idRoute
   '/dashboard/forms': typeof DashboardFormsRoute
   '/dashboard/inventory': typeof DashboardInventoryRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/$form_id/manage_products': typeof DashboardForm_idManage_productsRoute
   '/dashboard/history/$quotationId': typeof DashboardHistoryQuotationIdRoute
+  '/dashboard/$form_id': typeof DashboardForm_idIndexRoute
   '/dashboard/history/': typeof DashboardHistoryIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
-  '/dashboard/$form_id': typeof DashboardForm_idRoute
   '/dashboard/forms': typeof DashboardFormsRoute
   '/dashboard/inventory': typeof DashboardInventoryRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/$form_id/manage_products': typeof DashboardForm_idManage_productsRoute
   '/dashboard/history/$quotationId': typeof DashboardHistoryQuotationIdRoute
+  '/dashboard/$form_id': typeof DashboardForm_idIndexRoute
   '/dashboard/history': typeof DashboardHistoryIndexRoute
 }
 export interface FileRoutesById {
@@ -109,11 +118,12 @@ export interface FileRoutesById {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/dashboard/history': typeof DashboardHistoryRouteRouteWithChildren
-  '/dashboard/$form_id': typeof DashboardForm_idRoute
   '/dashboard/forms': typeof DashboardFormsRoute
   '/dashboard/inventory': typeof DashboardInventoryRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/$form_id/manage_products': typeof DashboardForm_idManage_productsRoute
   '/dashboard/history/$quotationId': typeof DashboardHistoryQuotationIdRoute
+  '/dashboard/$form_id/': typeof DashboardForm_idIndexRoute
   '/dashboard/history/': typeof DashboardHistoryIndexRoute
 }
 export interface FileRouteTypes {
@@ -124,22 +134,24 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/dashboard/history'
-    | '/dashboard/$form_id'
     | '/dashboard/forms'
     | '/dashboard/inventory'
     | '/dashboard/'
+    | '/dashboard/$form_id/manage_products'
     | '/dashboard/history/$quotationId'
+    | '/dashboard/$form_id'
     | '/dashboard/history/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/sign-in'
     | '/sign-up'
-    | '/dashboard/$form_id'
     | '/dashboard/forms'
     | '/dashboard/inventory'
     | '/dashboard'
+    | '/dashboard/$form_id/manage_products'
     | '/dashboard/history/$quotationId'
+    | '/dashboard/$form_id'
     | '/dashboard/history'
   id:
     | '__root__'
@@ -148,11 +160,12 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/dashboard/history'
-    | '/dashboard/$form_id'
     | '/dashboard/forms'
     | '/dashboard/inventory'
     | '/dashboard/'
+    | '/dashboard/$form_id/manage_products'
     | '/dashboard/history/$quotationId'
+    | '/dashboard/$form_id/'
     | '/dashboard/history/'
   fileRoutesById: FileRoutesById
 }
@@ -214,13 +227,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardFormsRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/dashboard/$form_id': {
-      id: '/dashboard/$form_id'
-      path: '/$form_id'
-      fullPath: '/dashboard/$form_id'
-      preLoaderRoute: typeof DashboardForm_idRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
     '/dashboard/history': {
       id: '/dashboard/history'
       path: '/history'
@@ -235,12 +241,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardHistoryIndexRouteImport
       parentRoute: typeof DashboardHistoryRouteRoute
     }
+    '/dashboard/$form_id/': {
+      id: '/dashboard/$form_id/'
+      path: '/$form_id'
+      fullPath: '/dashboard/$form_id'
+      preLoaderRoute: typeof DashboardForm_idIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/history/$quotationId': {
       id: '/dashboard/history/$quotationId'
       path: '/$quotationId'
       fullPath: '/dashboard/history/$quotationId'
       preLoaderRoute: typeof DashboardHistoryQuotationIdRouteImport
       parentRoute: typeof DashboardHistoryRouteRoute
+    }
+    '/dashboard/$form_id/manage_products': {
+      id: '/dashboard/$form_id/manage_products'
+      path: '/$form_id/manage_products'
+      fullPath: '/dashboard/$form_id/manage_products'
+      preLoaderRoute: typeof DashboardForm_idManage_productsRouteImport
+      parentRoute: typeof DashboardRouteRoute
     }
   }
 }
@@ -262,18 +282,20 @@ const DashboardHistoryRouteRouteWithChildren =
 
 interface DashboardRouteRouteChildren {
   DashboardHistoryRouteRoute: typeof DashboardHistoryRouteRouteWithChildren
-  DashboardForm_idRoute: typeof DashboardForm_idRoute
   DashboardFormsRoute: typeof DashboardFormsRoute
   DashboardInventoryRoute: typeof DashboardInventoryRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardForm_idManage_productsRoute: typeof DashboardForm_idManage_productsRoute
+  DashboardForm_idIndexRoute: typeof DashboardForm_idIndexRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardHistoryRouteRoute: DashboardHistoryRouteRouteWithChildren,
-  DashboardForm_idRoute: DashboardForm_idRoute,
   DashboardFormsRoute: DashboardFormsRoute,
   DashboardInventoryRoute: DashboardInventoryRoute,
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardForm_idManage_productsRoute: DashboardForm_idManage_productsRoute,
+  DashboardForm_idIndexRoute: DashboardForm_idIndexRoute,
 }
 
 const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
