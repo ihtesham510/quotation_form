@@ -181,39 +181,6 @@ export function Step3({ quoteData, setQuoteData, errors }: Step3Props) {
                           <ChevronsUpDownIcon className="size-4" />
                         </Button>
                       </CommandSelect>
-                      <Select
-                        value={
-                          productDatabase.products
-                            .find((p) => p.id === product.productId)
-                            ?.categoryId.toString() || ''
-                        }
-                        onValueChange={(categoryId) => {
-                          const firstProductInCategory =
-                            productDatabase.products.find(
-                              (p) =>
-                                p.categoryId === Number.parseInt(categoryId),
-                            )
-                          if (firstProductInCategory) {
-                            updateRoomProduct(room.id, product.id, {
-                              productId: firstProductInCategory.id,
-                            })
-                          }
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {productDatabase.categories.map((category) => (
-                            <SelectItem
-                              key={category.id}
-                              value={category.id.toString()}
-                            >
-                              {category.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
                     </div>
 
                     <div className="space-y-2">
