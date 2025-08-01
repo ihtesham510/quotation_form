@@ -2,41 +2,103 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Download, Mail, Printer, Save, FileText } from 'lucide-react'
-import type { QuoteData } from './types'
+import type { QuoteData, QuoteCalculatedData } from './types'
 import { productDatabase } from './data'
 import {
   calculateProductTotal,
+  calculateProductGST,
   calculateRoomTotal,
+  calculateRoomGST,
+  calculateAddOnTotal,
+  calculateAddOnGST,
+  calculateServiceTotal,
+  calculateServiceGST,
   calculateSubtotal,
   calculateDiscount,
-  calculateTax,
+  calculateTotalGST,
   calculateTotal,
 } from './calculations'
 
 interface Step6Props {
   quoteData: QuoteData
-  onSaveQuote: () => void
-  onGeneratePDF: () => void
+  onSaveQuote?: (data: QuoteCalculatedData) => void
+  onGeneratePDF?: (data: QuoteCalculatedData) => void
+  onPrint?: (data: QuoteCalculatedData) => void
+  onEmail?: (data: QuoteCalculatedData) => void
 }
 
-export function Step6({ quoteData, onSaveQuote, onGeneratePDF }: Step6Props) {
+export function Step6({
+  quoteData,
+  onSaveQuote,
+  onGeneratePDF,
+  onPrint,
+  onEmail,
+}: Step6Props) {
+  const prepareQuoteData = (): QuoteCalculatedData => {
+    const roomTotals = quoteData.rooms.map((room) => ({
+      roomId: room.id,
+      total: calculateRoomTotal(room, quoteData.gstEnabled, quoteData.gstRate),
+    }))
+
+    const productTotals = quoteData.rooms.flatMap((room) =>
+      room.products.map((product) => ({
+        roomId: room.id,
+        productId: product.id,
+        total: calculateProductTotal(
+          product,
+          quoteData.gstEnabled,
+          quoteData.gstRate,
+        ),
+      })),
+    )
+
+    return {
+      quoteData,
+      calculations: {
+        subtotal: calculateSubtotal(quoteData),
+        discount: calculateDiscount(quoteData),
+        tax: 0, // No longer using end-of-quote tax
+        gst: calculateTotalGST(quoteData),
+        total: calculateTotal(quoteData),
+        roomTotals,
+        productTotals,
+      },
+      metadata: {
+        generatedAt: new Date().toISOString(),
+        itemCount:
+          quoteData.rooms.reduce(
+            (count, room) => count + room.products.length,
+            0,
+          ) + quoteData.addOns.length,
+        roomCount: quoteData.rooms.length,
+      },
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Quote Preview</h3>
         <div className="flex gap-2">
-          <Button
-            onClick={onSaveQuote}
-            variant="outline"
-            className="flex items-center gap-2 bg-transparent"
-          >
-            <Save className="w-4 h-4" />
-            Save Quote
-          </Button>
-          <Button onClick={onGeneratePDF} className="flex items-center gap-2">
-            <Download className="w-4 h-4" />
-            Download PDF
-          </Button>
+          {onSaveQuote && (
+            <Button
+              onClick={() => onSaveQuote(prepareQuoteData())}
+              variant="outline"
+              className="flex items-center gap-2 bg-transparent"
+            >
+              <Save className="w-4 h-4" />
+              Save Quote
+            </Button>
+          )}
+          {onGeneratePDF && (
+            <Button
+              onClick={() => onGeneratePDF(prepareQuoteData())}
+              className="flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Download PDF
+            </Button>
+          )}
         </div>
       </div>
 
@@ -44,10 +106,7 @@ export function Step6({ quoteData, onSaveQuote, onGeneratePDF }: Step6Props) {
         <CardHeader>
           <CardTitle>Blinds Quotation</CardTitle>
           <div className="text-sm text-muted-foreground">
-            Quote Date: {quoteData.quoteDate} | Valid Until:{' '}
-            {new Date(
-              Date.now() + quoteData.validityPeriod * 24 * 60 * 60 * 1000,
-            ).toLocaleDateString()}
+            Quote Date: {quoteData.quoteDate}
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -95,7 +154,17 @@ export function Step6({ quoteData, onSaveQuote, onGeneratePDF }: Step6Props) {
                       (p) => p.id === product.productId,
                     )
                     const sqm = product.width * product.height
-                    const total = calculateProductTotal(product)
+                    const baseTotal = calculateProductTotal(product, false, 0)
+                    const gstAmount = calculateProductGST(
+                      product,
+                      quoteData.gstEnabled,
+                      quoteData.gstRate,
+                    )
+                    const totalWithGST = calculateProductTotal(
+                      product,
+                      quoteData.gstEnabled,
+                      quoteData.gstRate,
+                    )
 
                     return (
                       <div
@@ -117,14 +186,42 @@ export function Step6({ quoteData, onSaveQuote, onGeneratePDF }: Step6Props) {
                             </div>
                           )}
                         </div>
-                        <div className="font-medium">${total.toFixed(2)}</div>
+                        <div className="text-right">
+                          <div className="font-medium">
+                            ${totalWithGST.toFixed(2)}
+                          </div>
+                          {quoteData.gstEnabled && gstAmount > 0 && (
+                            <div className="text-xs text-muted-foreground">
+                              Base: ${baseTotal.toFixed(2)} + GST: $
+                              {gstAmount.toFixed(2)}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )
                   })}
                 </div>
                 <div className="flex justify-end mt-2 pt-2 border-t">
-                  <div className="font-semibold">
-                    Room Total: ${calculateRoomTotal(room).toFixed(2)}
+                  <div className="text-right">
+                    <div className="font-semibold">
+                      Room Total: $
+                      {calculateRoomTotal(
+                        room,
+                        quoteData.gstEnabled,
+                        quoteData.gstRate,
+                      ).toFixed(2)}
+                    </div>
+                    {quoteData.gstEnabled && (
+                      <div className="text-xs text-muted-foreground">
+                        (GST: $
+                        {calculateRoomGST(
+                          room,
+                          quoteData.gstEnabled,
+                          quoteData.gstRate,
+                        ).toFixed(2)}
+                        )
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -142,32 +239,109 @@ export function Step6({ quoteData, onSaveQuote, onGeneratePDF }: Step6Props) {
                   Additional Items & Services
                 </h4>
                 <div className="space-y-1 text-sm">
-                  {quoteData.addOns.map((addOn) => (
-                    <div key={addOn.id} className="flex justify-between">
-                      <span>
-                        {addOn.name} ({addOn.quantity} × ${addOn.unitPrice})
-                      </span>
-                      <span>
-                        ${(addOn.quantity * addOn.unitPrice).toFixed(2)}
-                      </span>
-                    </div>
-                  ))}
+                  {quoteData.addOns.map((addOn) => {
+                    const baseTotal = addOn.quantity * addOn.unitPrice
+                    const gstAmount = calculateAddOnGST(
+                      addOn,
+                      quoteData.gstEnabled,
+                      quoteData.gstRate,
+                    )
+                    const totalWithGST = calculateAddOnTotal(
+                      addOn,
+                      quoteData.gstEnabled,
+                      quoteData.gstRate,
+                    )
+
+                    return (
+                      <div key={addOn.id} className="flex justify-between">
+                        <span>
+                          {addOn.name} ({addOn.quantity} × ${addOn.unitPrice})
+                        </span>
+                        <div className="text-right">
+                          <div>${totalWithGST.toFixed(2)}</div>
+                          {quoteData.gstEnabled && gstAmount > 0 && (
+                            <div className="text-xs text-muted-foreground">
+                              Base: ${baseTotal.toFixed(2)} + GST: $
+                              {gstAmount.toFixed(2)}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
                   {quoteData.installationService && (
                     <div className="flex justify-between">
                       <span>Installation Service</span>
-                      <span>$150.00</span>
+                      <div className="text-right">
+                        <div>
+                          $
+                          {calculateServiceTotal(
+                            150,
+                            quoteData.gstEnabled,
+                            quoteData.gstRate,
+                          ).toFixed(2)}
+                        </div>
+                        {quoteData.gstEnabled && (
+                          <div className="text-xs text-muted-foreground">
+                            Base: $150.00 + GST: $
+                            {calculateServiceGST(
+                              150,
+                              quoteData.gstEnabled,
+                              quoteData.gstRate,
+                            ).toFixed(2)}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                   {quoteData.siteMeasurement && (
                     <div className="flex justify-between">
                       <span>Site Measurement</span>
-                      <span>$75.00</span>
+                      <div className="text-right">
+                        <div>
+                          $
+                          {calculateServiceTotal(
+                            75,
+                            quoteData.gstEnabled,
+                            quoteData.gstRate,
+                          ).toFixed(2)}
+                        </div>
+                        {quoteData.gstEnabled && (
+                          <div className="text-xs text-muted-foreground">
+                            Base: $75.00 + GST: $
+                            {calculateServiceGST(
+                              75,
+                              quoteData.gstEnabled,
+                              quoteData.gstRate,
+                            ).toFixed(2)}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                   {quoteData.deliveryOption === 'express' && (
                     <div className="flex justify-between">
                       <span>Express Delivery</span>
-                      <span>$50.00</span>
+                      <div className="text-right">
+                        <div>
+                          $
+                          {calculateServiceTotal(
+                            50,
+                            quoteData.gstEnabled,
+                            quoteData.gstRate,
+                          ).toFixed(2)}
+                        </div>
+                        {quoteData.gstEnabled && (
+                          <div className="text-xs text-muted-foreground">
+                            Base: $50.00 + GST: $
+                            {calculateServiceGST(
+                              50,
+                              quoteData.gstEnabled,
+                              quoteData.gstRate,
+                            ).toFixed(2)}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -181,9 +355,17 @@ export function Step6({ quoteData, onSaveQuote, onGeneratePDF }: Step6Props) {
             <h4 className="font-semibold mb-2">Pricing Summary</h4>
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span>Subtotal:</span>
+                <span>
+                  Subtotal {quoteData.gstEnabled ? `(incl. GST)` : ''}:
+                </span>
                 <span>${calculateSubtotal(quoteData).toFixed(2)}</span>
               </div>
+              {quoteData.gstEnabled && (
+                <div className="flex justify-between text-muted-foreground">
+                  <span>Total GST ({quoteData.gstRate}%):</span>
+                  <span>${calculateTotalGST(quoteData).toFixed(2)}</span>
+                </div>
+              )}
               {quoteData.discountValue > 0 && (
                 <div className="flex justify-between text-red-600">
                   <span>
@@ -199,10 +381,6 @@ export function Step6({ quoteData, onSaveQuote, onGeneratePDF }: Step6Props) {
                   <span>-${calculateDiscount(quoteData).toFixed(2)}</span>
                 </div>
               )}
-              <div className="flex justify-between">
-                <span>Tax ({quoteData.taxRate}%):</span>
-                <span>${calculateTax(quoteData).toFixed(2)}</span>
-              </div>
               <Separator />
               <div className="flex justify-between text-xl font-bold">
                 <span>Total:</span>
@@ -217,39 +395,46 @@ export function Step6({ quoteData, onSaveQuote, onGeneratePDF }: Step6Props) {
             <div>
               <strong>Payment Terms:</strong> {quoteData.paymentTerms}
             </div>
-            <div className="mt-2 text-muted-foreground">
-              This quote is valid for {quoteData.validityPeriod} days from the
-              quote date.
-            </div>
+            {quoteData.gstEnabled && (
+              <div className="mt-2 text-muted-foreground">
+                All prices include GST ({quoteData.gstRate}%) as requested.
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
 
-      <div className="flex justify-center gap-2">
-        <Button
-          onClick={() => alert('Quote emailed!')}
-          variant="outline"
-          className="flex items-center gap-2"
-        >
-          <Mail className="w-4 h-4" />
-          Email Quote
-        </Button>
-        <Button
-          onClick={() => window.print()}
-          variant="outline"
-          className="flex items-center gap-2"
-        >
-          <Printer className="w-4 h-4" />
-          Print
-        </Button>
-        <Button
-          onClick={() => alert('Converting to order...')}
-          className="flex items-center gap-2"
-        >
-          <FileText className="w-4 h-4" />
-          Convert to Order
-        </Button>
-      </div>
+      {(onEmail || onPrint) && (
+        <div className="flex justify-center gap-2">
+          {onEmail && (
+            <Button
+              onClick={() => onEmail(prepareQuoteData())}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Mail className="w-4 h-4" />
+              Email Quote
+            </Button>
+          )}
+          {onPrint && (
+            <Button
+              onClick={() => onPrint(prepareQuoteData())}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Printer className="w-4 h-4" />
+              Print
+            </Button>
+          )}
+          <Button
+            onClick={() => alert('Converting to order...')}
+            className="flex items-center gap-2"
+          >
+            <FileText className="w-4 h-4" />
+            Convert to Order
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

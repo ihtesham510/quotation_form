@@ -16,7 +16,7 @@ import { paymentTerms } from './data'
 import {
   calculateSubtotal,
   calculateDiscount,
-  calculateTax,
+  calculateTotalGST,
   calculateTotal,
 } from './calculations'
 
@@ -102,47 +102,28 @@ export function Step5({ quoteData, setQuoteData }: Step5Props) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Tax & Payment Terms</CardTitle>
+          <CardTitle className="text-base">Payment Terms</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Tax Rate (%)</Label>
-              <Input
-                type="number"
-                step="0.1"
-                min="0"
-                max="100"
-                value={quoteData.taxRate}
-                onChange={(e) =>
-                  setQuoteData((prev) => ({
-                    ...prev,
-                    taxRate: Number.parseFloat(e.target.value) || 0,
-                  }))
-                }
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Payment Terms</Label>
-              <Select
-                value={quoteData.paymentTerms}
-                onValueChange={(value) =>
-                  setQuoteData((prev) => ({ ...prev, paymentTerms: value }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {paymentTerms.map((term) => (
-                    <SelectItem key={term} value={term}>
-                      {term}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-2">
+            <Label>Payment Terms</Label>
+            <Select
+              value={quoteData.paymentTerms}
+              onValueChange={(value) =>
+                setQuoteData((prev) => ({ ...prev, paymentTerms: value }))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {paymentTerms.map((term) => (
+                  <SelectItem key={term} value={term}>
+                    {term}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -154,19 +135,21 @@ export function Step5({ quoteData, setQuoteData }: Step5Props) {
         <CardContent>
           <div className="space-y-2">
             <div className="flex justify-between">
-              <span>Subtotal:</span>
+              <span>Subtotal {quoteData.gstEnabled ? `(incl. GST)` : ''}:</span>
               <span>${calculateSubtotal(quoteData).toFixed(2)}</span>
             </div>
+            {quoteData.gstEnabled && (
+              <div className="flex justify-between text-muted-foreground">
+                <span>Total GST ({quoteData.gstRate}%):</span>
+                <span>${calculateTotalGST(quoteData).toFixed(2)}</span>
+              </div>
+            )}
             {quoteData.discountValue > 0 && (
               <div className="flex justify-between text-red-600">
                 <span>Discount:</span>
                 <span>-${calculateDiscount(quoteData).toFixed(2)}</span>
               </div>
             )}
-            <div className="flex justify-between">
-              <span>Tax ({quoteData.taxRate}%):</span>
-              <span>${calculateTax(quoteData).toFixed(2)}</span>
-            </div>
             <Separator />
             <div className="flex justify-between text-xl font-bold">
               <span>Total:</span>

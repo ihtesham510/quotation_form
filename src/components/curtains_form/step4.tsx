@@ -1,5 +1,4 @@
 import type React from 'react'
-
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -112,6 +111,52 @@ export function Step4({ quoteData, setQuoteData }: Step4Props) {
               Site Measurement Service (+$75)
             </Label>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">GST Configuration</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="gstEnabled"
+              checked={quoteData.gstEnabled}
+              onCheckedChange={(checked) =>
+                setQuoteData((prev) => ({
+                  ...prev,
+                  gstEnabled: checked as boolean,
+                }))
+              }
+            />
+            <Label htmlFor="gstEnabled">Apply GST to this quote</Label>
+          </div>
+
+          {quoteData.gstEnabled && (
+            <div className="space-y-2">
+              <Label htmlFor="gstRate">GST Rate (%)</Label>
+              <Input
+                id="gstRate"
+                type="number"
+                step="0.1"
+                min="0"
+                max="100"
+                value={quoteData.gstRate}
+                onChange={(e) =>
+                  setQuoteData((prev) => ({
+                    ...prev,
+                    gstRate: Number.parseFloat(e.target.value) || 0,
+                  }))
+                }
+                placeholder="Enter GST rate (e.g., 10)"
+              />
+              <p className="text-sm text-muted-foreground">
+                GST will be calculated on the total amount after tax and
+                discount
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 

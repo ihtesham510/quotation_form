@@ -1,10 +1,9 @@
 import { openai } from '@ai-sdk/openai'
-import { Agent, createTool } from '@convex-dev/agent'
-import { components, internal } from './_generated/api'
+import { Agent } from '@convex-dev/agent'
+import { components } from './_generated/api'
 import { action, query } from './_generated/server'
 import { paginationOptsValidator } from 'convex/server'
 import { v } from 'convex/values'
-import { QuoteDataSchema } from './pdf_generate_schema'
 
 const prompt = `You are a professional curtain, shutter, and roller blind quote specialist. Your job is to collect all necessary information from customers to generate a comprehensive PDF quote for their window treatment needs.
 
@@ -89,18 +88,7 @@ Remember: Always be on the track of getting user to ask about the quote and give
 const agent = new Agent(components.agent, {
   chat: openai.chat('gpt-4o-mini'),
   instructions: prompt,
-  tools: {
-    generate_pdf_quote: createTool({
-      description:
-        'provide details for the order and generate pdf, this will give a link where people can visit and download the pdf. if no url is returned then say that something went wrong.',
-      args: QuoteDataSchema,
-      handler: async (ctx, args): Promise<string | null> => {
-        console.log(args)
-        const url = await ctx.runAction(internal.pdf.generatePDF, args as any)
-        return url
-      },
-    }),
-  },
+  tools: {},
   textEmbedding: openai.embedding('text-embedding-3-small'),
   maxSteps: 1,
   maxRetries: 3,

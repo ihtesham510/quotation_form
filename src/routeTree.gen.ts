@@ -14,13 +14,13 @@ import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
-import { Route as DashboardInventoryRouteImport } from './routes/dashboard/inventory'
-import { Route as DashboardFormsRouteImport } from './routes/dashboard/forms'
-import { Route as DashboardHistoryRouteRouteImport } from './routes/dashboard/history/route'
+import { Route as DashboardFormRouteImport } from './routes/dashboard/form'
+import { Route as DashboardProductsIndexRouteImport } from './routes/dashboard/products/index'
 import { Route as DashboardHistoryIndexRouteImport } from './routes/dashboard/history/index'
-import { Route as DashboardForm_idIndexRouteImport } from './routes/dashboard/$form_id/index'
+import { Route as DashboardFormsIndexRouteImport } from './routes/dashboard/forms/index'
 import { Route as DashboardHistoryQuotationIdRouteImport } from './routes/dashboard/history/$quotationId'
-import { Route as DashboardForm_idManage_productsRouteImport } from './routes/dashboard/$form_id/manage_products'
+import { Route as DashboardFormsTile_formRouteImport } from './routes/dashboard/forms/tile_form'
+import { Route as DashboardFormsCurtains_formRouteImport } from './routes/dashboard/forms/curtains_form'
 
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
@@ -47,41 +47,41 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
-const DashboardInventoryRoute = DashboardInventoryRouteImport.update({
-  id: '/inventory',
-  path: '/inventory',
+const DashboardFormRoute = DashboardFormRouteImport.update({
+  id: '/form',
+  path: '/form',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
-const DashboardFormsRoute = DashboardFormsRouteImport.update({
-  id: '/forms',
-  path: '/forms',
-  getParentRoute: () => DashboardRouteRoute,
-} as any)
-const DashboardHistoryRouteRoute = DashboardHistoryRouteRouteImport.update({
-  id: '/history',
-  path: '/history',
+const DashboardProductsIndexRoute = DashboardProductsIndexRouteImport.update({
+  id: '/products/',
+  path: '/products/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
 const DashboardHistoryIndexRoute = DashboardHistoryIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => DashboardHistoryRouteRoute,
+  id: '/history/',
+  path: '/history/',
+  getParentRoute: () => DashboardRouteRoute,
 } as any)
-const DashboardForm_idIndexRoute = DashboardForm_idIndexRouteImport.update({
-  id: '/$form_id/',
-  path: '/$form_id/',
+const DashboardFormsIndexRoute = DashboardFormsIndexRouteImport.update({
+  id: '/forms/',
+  path: '/forms/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
 const DashboardHistoryQuotationIdRoute =
   DashboardHistoryQuotationIdRouteImport.update({
-    id: '/$quotationId',
-    path: '/$quotationId',
-    getParentRoute: () => DashboardHistoryRouteRoute,
+    id: '/history/$quotationId',
+    path: '/history/$quotationId',
+    getParentRoute: () => DashboardRouteRoute,
   } as any)
-const DashboardForm_idManage_productsRoute =
-  DashboardForm_idManage_productsRouteImport.update({
-    id: '/$form_id/manage_products',
-    path: '/$form_id/manage_products',
+const DashboardFormsTile_formRoute = DashboardFormsTile_formRouteImport.update({
+  id: '/forms/tile_form',
+  path: '/forms/tile_form',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardFormsCurtains_formRoute =
+  DashboardFormsCurtains_formRouteImport.update({
+    id: '/forms/curtains_form',
+    path: '/forms/curtains_form',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
 
@@ -90,26 +90,27 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
-  '/dashboard/history': typeof DashboardHistoryRouteRouteWithChildren
-  '/dashboard/forms': typeof DashboardFormsRoute
-  '/dashboard/inventory': typeof DashboardInventoryRoute
+  '/dashboard/form': typeof DashboardFormRoute
   '/dashboard/': typeof DashboardIndexRoute
-  '/dashboard/$form_id/manage_products': typeof DashboardForm_idManage_productsRoute
+  '/dashboard/forms/curtains_form': typeof DashboardFormsCurtains_formRoute
+  '/dashboard/forms/tile_form': typeof DashboardFormsTile_formRoute
   '/dashboard/history/$quotationId': typeof DashboardHistoryQuotationIdRoute
-  '/dashboard/$form_id': typeof DashboardForm_idIndexRoute
-  '/dashboard/history/': typeof DashboardHistoryIndexRoute
+  '/dashboard/forms': typeof DashboardFormsIndexRoute
+  '/dashboard/history': typeof DashboardHistoryIndexRoute
+  '/dashboard/products': typeof DashboardProductsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
-  '/dashboard/forms': typeof DashboardFormsRoute
-  '/dashboard/inventory': typeof DashboardInventoryRoute
+  '/dashboard/form': typeof DashboardFormRoute
   '/dashboard': typeof DashboardIndexRoute
-  '/dashboard/$form_id/manage_products': typeof DashboardForm_idManage_productsRoute
+  '/dashboard/forms/curtains_form': typeof DashboardFormsCurtains_formRoute
+  '/dashboard/forms/tile_form': typeof DashboardFormsTile_formRoute
   '/dashboard/history/$quotationId': typeof DashboardHistoryQuotationIdRoute
-  '/dashboard/$form_id': typeof DashboardForm_idIndexRoute
+  '/dashboard/forms': typeof DashboardFormsIndexRoute
   '/dashboard/history': typeof DashboardHistoryIndexRoute
+  '/dashboard/products': typeof DashboardProductsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -117,14 +118,14 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
-  '/dashboard/history': typeof DashboardHistoryRouteRouteWithChildren
-  '/dashboard/forms': typeof DashboardFormsRoute
-  '/dashboard/inventory': typeof DashboardInventoryRoute
+  '/dashboard/form': typeof DashboardFormRoute
   '/dashboard/': typeof DashboardIndexRoute
-  '/dashboard/$form_id/manage_products': typeof DashboardForm_idManage_productsRoute
+  '/dashboard/forms/curtains_form': typeof DashboardFormsCurtains_formRoute
+  '/dashboard/forms/tile_form': typeof DashboardFormsTile_formRoute
   '/dashboard/history/$quotationId': typeof DashboardHistoryQuotationIdRoute
-  '/dashboard/$form_id/': typeof DashboardForm_idIndexRoute
+  '/dashboard/forms/': typeof DashboardFormsIndexRoute
   '/dashboard/history/': typeof DashboardHistoryIndexRoute
+  '/dashboard/products/': typeof DashboardProductsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -133,40 +134,41 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/sign-in'
     | '/sign-up'
-    | '/dashboard/history'
-    | '/dashboard/forms'
-    | '/dashboard/inventory'
+    | '/dashboard/form'
     | '/dashboard/'
-    | '/dashboard/$form_id/manage_products'
+    | '/dashboard/forms/curtains_form'
+    | '/dashboard/forms/tile_form'
     | '/dashboard/history/$quotationId'
-    | '/dashboard/$form_id'
-    | '/dashboard/history/'
+    | '/dashboard/forms'
+    | '/dashboard/history'
+    | '/dashboard/products'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/sign-in'
     | '/sign-up'
-    | '/dashboard/forms'
-    | '/dashboard/inventory'
+    | '/dashboard/form'
     | '/dashboard'
-    | '/dashboard/$form_id/manage_products'
+    | '/dashboard/forms/curtains_form'
+    | '/dashboard/forms/tile_form'
     | '/dashboard/history/$quotationId'
-    | '/dashboard/$form_id'
+    | '/dashboard/forms'
     | '/dashboard/history'
+    | '/dashboard/products'
   id:
     | '__root__'
     | '/'
     | '/dashboard'
     | '/sign-in'
     | '/sign-up'
-    | '/dashboard/history'
-    | '/dashboard/forms'
-    | '/dashboard/inventory'
+    | '/dashboard/form'
     | '/dashboard/'
-    | '/dashboard/$form_id/manage_products'
+    | '/dashboard/forms/curtains_form'
+    | '/dashboard/forms/tile_form'
     | '/dashboard/history/$quotationId'
-    | '/dashboard/$form_id/'
+    | '/dashboard/forms/'
     | '/dashboard/history/'
+    | '/dashboard/products/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -213,89 +215,78 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/dashboard/inventory': {
-      id: '/dashboard/inventory'
-      path: '/inventory'
-      fullPath: '/dashboard/inventory'
-      preLoaderRoute: typeof DashboardInventoryRouteImport
+    '/dashboard/form': {
+      id: '/dashboard/form'
+      path: '/form'
+      fullPath: '/dashboard/form'
+      preLoaderRoute: typeof DashboardFormRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/dashboard/forms': {
-      id: '/dashboard/forms'
-      path: '/forms'
-      fullPath: '/dashboard/forms'
-      preLoaderRoute: typeof DashboardFormsRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
-    '/dashboard/history': {
-      id: '/dashboard/history'
-      path: '/history'
-      fullPath: '/dashboard/history'
-      preLoaderRoute: typeof DashboardHistoryRouteRouteImport
+    '/dashboard/products/': {
+      id: '/dashboard/products/'
+      path: '/products'
+      fullPath: '/dashboard/products'
+      preLoaderRoute: typeof DashboardProductsIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/history/': {
       id: '/dashboard/history/'
-      path: '/'
-      fullPath: '/dashboard/history/'
+      path: '/history'
+      fullPath: '/dashboard/history'
       preLoaderRoute: typeof DashboardHistoryIndexRouteImport
-      parentRoute: typeof DashboardHistoryRouteRoute
+      parentRoute: typeof DashboardRouteRoute
     }
-    '/dashboard/$form_id/': {
-      id: '/dashboard/$form_id/'
-      path: '/$form_id'
-      fullPath: '/dashboard/$form_id'
-      preLoaderRoute: typeof DashboardForm_idIndexRouteImport
+    '/dashboard/forms/': {
+      id: '/dashboard/forms/'
+      path: '/forms'
+      fullPath: '/dashboard/forms'
+      preLoaderRoute: typeof DashboardFormsIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/history/$quotationId': {
       id: '/dashboard/history/$quotationId'
-      path: '/$quotationId'
+      path: '/history/$quotationId'
       fullPath: '/dashboard/history/$quotationId'
       preLoaderRoute: typeof DashboardHistoryQuotationIdRouteImport
-      parentRoute: typeof DashboardHistoryRouteRoute
+      parentRoute: typeof DashboardRouteRoute
     }
-    '/dashboard/$form_id/manage_products': {
-      id: '/dashboard/$form_id/manage_products'
-      path: '/$form_id/manage_products'
-      fullPath: '/dashboard/$form_id/manage_products'
-      preLoaderRoute: typeof DashboardForm_idManage_productsRouteImport
+    '/dashboard/forms/tile_form': {
+      id: '/dashboard/forms/tile_form'
+      path: '/forms/tile_form'
+      fullPath: '/dashboard/forms/tile_form'
+      preLoaderRoute: typeof DashboardFormsTile_formRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/forms/curtains_form': {
+      id: '/dashboard/forms/curtains_form'
+      path: '/forms/curtains_form'
+      fullPath: '/dashboard/forms/curtains_form'
+      preLoaderRoute: typeof DashboardFormsCurtains_formRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
   }
 }
 
-interface DashboardHistoryRouteRouteChildren {
-  DashboardHistoryQuotationIdRoute: typeof DashboardHistoryQuotationIdRoute
-  DashboardHistoryIndexRoute: typeof DashboardHistoryIndexRoute
-}
-
-const DashboardHistoryRouteRouteChildren: DashboardHistoryRouteRouteChildren = {
-  DashboardHistoryQuotationIdRoute: DashboardHistoryQuotationIdRoute,
-  DashboardHistoryIndexRoute: DashboardHistoryIndexRoute,
-}
-
-const DashboardHistoryRouteRouteWithChildren =
-  DashboardHistoryRouteRoute._addFileChildren(
-    DashboardHistoryRouteRouteChildren,
-  )
-
 interface DashboardRouteRouteChildren {
-  DashboardHistoryRouteRoute: typeof DashboardHistoryRouteRouteWithChildren
-  DashboardFormsRoute: typeof DashboardFormsRoute
-  DashboardInventoryRoute: typeof DashboardInventoryRoute
+  DashboardFormRoute: typeof DashboardFormRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
-  DashboardForm_idManage_productsRoute: typeof DashboardForm_idManage_productsRoute
-  DashboardForm_idIndexRoute: typeof DashboardForm_idIndexRoute
+  DashboardFormsCurtains_formRoute: typeof DashboardFormsCurtains_formRoute
+  DashboardFormsTile_formRoute: typeof DashboardFormsTile_formRoute
+  DashboardHistoryQuotationIdRoute: typeof DashboardHistoryQuotationIdRoute
+  DashboardFormsIndexRoute: typeof DashboardFormsIndexRoute
+  DashboardHistoryIndexRoute: typeof DashboardHistoryIndexRoute
+  DashboardProductsIndexRoute: typeof DashboardProductsIndexRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
-  DashboardHistoryRouteRoute: DashboardHistoryRouteRouteWithChildren,
-  DashboardFormsRoute: DashboardFormsRoute,
-  DashboardInventoryRoute: DashboardInventoryRoute,
+  DashboardFormRoute: DashboardFormRoute,
   DashboardIndexRoute: DashboardIndexRoute,
-  DashboardForm_idManage_productsRoute: DashboardForm_idManage_productsRoute,
-  DashboardForm_idIndexRoute: DashboardForm_idIndexRoute,
+  DashboardFormsCurtains_formRoute: DashboardFormsCurtains_formRoute,
+  DashboardFormsTile_formRoute: DashboardFormsTile_formRoute,
+  DashboardHistoryQuotationIdRoute: DashboardHistoryQuotationIdRoute,
+  DashboardFormsIndexRoute: DashboardFormsIndexRoute,
+  DashboardHistoryIndexRoute: DashboardHistoryIndexRoute,
+  DashboardProductsIndexRoute: DashboardProductsIndexRoute,
 }
 
 const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(

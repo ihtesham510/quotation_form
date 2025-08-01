@@ -48,7 +48,8 @@ export interface QuoteData {
   taxRate: number
   paymentTerms: string
   quoteDate: string
-  validityPeriod: number
+  gstEnabled: boolean
+  gstRate: number
 }
 
 export interface Product {
@@ -71,4 +72,22 @@ export interface Category {
 export interface ProductDatabase {
   categories: Category[]
   products: Product[]
+}
+
+export interface QuoteCalculatedData {
+  quoteData: QuoteData
+  calculations: {
+    subtotal: number
+    discount: number
+    tax: number
+    gst: number
+    total: number
+    roomTotals: { roomId: string; total: number }[]
+    productTotals: { roomId: string; productId: string; total: number }[]
+  }
+  metadata: {
+    generatedAt: string
+    itemCount: number
+    roomCount: number
+  }
 }

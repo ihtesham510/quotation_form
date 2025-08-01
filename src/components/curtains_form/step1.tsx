@@ -113,23 +113,6 @@ export function Step1({ quoteData, setQuoteData, errors }: Step1Props) {
           }
         />
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="validityPeriod">Quote Valid For (days)</Label>
-          <Input
-            id="validityPeriod"
-            type="number"
-            value={quoteData.validityPeriod}
-            onChange={(e) =>
-              setQuoteData((prev) => ({
-                ...prev,
-                validityPeriod: Number.parseInt(e.target.value) || 30,
-              }))
-            }
-          />
-        </div>
-      </div>
     </div>
   )
 }

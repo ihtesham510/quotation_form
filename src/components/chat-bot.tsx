@@ -29,8 +29,8 @@ export function ChatBot() {
     const id = await sendMessage({ message, threadId })
     setLoading(false)
     setThread(id)
-    setMessage((_) => '')
-    setMessage((_) => undefined)
+    setMessage('')
+    setMessage(undefined)
   }
   return (
     <ExpandableChat size="lg">

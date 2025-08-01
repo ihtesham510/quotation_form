@@ -990,14 +990,6 @@ export async function generateWindowQuotePdf({
     color: colors.secondary,
   })
 
-  page.drawText(`Valid for: ${quoteData.validityPeriod} days`, {
-    x: width - margin - 150,
-    y: height - margin - 80,
-    size: 10,
-    font: regularFont,
-    color: colors.secondary,
-  })
-
   // Section helper function
   const drawSection = (
     title: string,
@@ -1411,18 +1403,6 @@ export async function generateWindowQuotePdf({
     height: 30,
     color: colors.muted,
   })
-
-  // Footer text - left aligned
-  page.drawText(
-    `This quotation is valid for ${quoteData.validityPeriod} days from the date issued.`,
-    {
-      x: margin + 15,
-      y: yPosition + 8,
-      size: 10,
-      font: regularFont,
-      color: colors.primary,
-    },
-  )
 
   // Footer text - right aligned
   const thankYouText = 'Thank you for choosing our window treatments!'

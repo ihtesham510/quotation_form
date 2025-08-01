@@ -1,7 +1,4 @@
-'use client'
-
 import type React from 'react'
-
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -16,11 +13,18 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Plus, Trash2, Calculator, ChevronsUpDownIcon } from 'lucide-react'
+import {
+  CommandSelect,
+  type CommandSelectOption,
+} from '@/components/ui/command-select'
+import { Plus, Trash2, Calculator } from 'lucide-react'
 import type { QuoteData, RoomProduct } from './types'
 import { productDatabase, controlTypes } from './data'
-import { calculateProductTotal, calculateRoomTotal } from './calculations'
-import { CommandSelect } from '../CommandSelect'
+import {
+  calculateProductTotal,
+  calculateProductGST,
+  calculateRoomTotal,
+} from './calculations'
 
 interface Step3Props {
   quoteData: QuoteData
@@ -88,6 +92,26 @@ export function Step3({ quoteData, setQuoteData, errors }: Step3Props) {
     }))
   }
 
+  // Prepare category options for CommandSelect
+  const categoryOptions: CommandSelectOption[] = productDatabase.categories.map(
+    (category) => ({
+      value: category.id.toString(),
+      label: category.name,
+      description: category.description,
+    }),
+  )
+
+  // Get product options for a specific category
+  const getProductOptions = (categoryId: number): CommandSelectOption[] => {
+    return productDatabase.products
+      .filter((product) => product.categoryId === categoryId)
+      .map((product) => ({
+        value: product.id.toString(),
+        label: product.name,
+        description: `$${product.basePrice}/${product.priceType}`,
+      }))
+  }
+
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-semibold">Product Selection</h3>
@@ -122,7 +146,17 @@ export function Step3({ quoteData, setQuoteData, errors }: Step3Props) {
                 (p) => p.id === product.productId,
               )
               const sqm = product.width * product.height
-              const total = calculateProductTotal(product)
+              const baseTotal = calculateProductTotal(product, false, 0) // Base total without GST
+              const gstAmount = calculateProductGST(
+                product,
+                quoteData.gstEnabled,
+                quoteData.gstRate,
+              )
+              const totalWithGST = calculateProductTotal(
+                product,
+                quoteData.gstEnabled,
+                quoteData.gstRate,
+              )
 
               return (
                 <div
@@ -145,16 +179,9 @@ export function Step3({ quoteData, setQuoteData, errors }: Step3Props) {
                     <div className="space-y-2">
                       <Label>Category</Label>
                       <CommandSelect
-                        list={productDatabase.categories.map((p) => ({
-                          value: p.id.toString(),
-                          label: p.name,
-                        }))}
-                        value={
-                          productDatabase.products
-                            .find((p) => p.id === product.productId)
-                            ?.categoryId.toString() || ''
-                        }
-                        onSelect={(categoryId) => {
+                        options={categoryOptions}
+                        value={productInfo?.categoryId.toString() || ''}
+                        onValueChange={(categoryId) => {
                           const firstProductInCategory =
                             productDatabase.products.find(
                               (p) =>
@@ -166,48 +193,28 @@ export function Step3({ quoteData, setQuoteData, errors }: Step3Props) {
                             })
                           }
                         }}
-                      >
-                        <Button
-                          className="w-full md:max-w-[200px]"
-                          variant="secondary"
-                        >
-                          <p>
-                            {' '}
-                            {productDatabase.products.find(
-                              (p) => p.id === product.productId,
-                            )?.name ?? 'Select Value'}
-                          </p>
-
-                          <ChevronsUpDownIcon className="size-4" />
-                        </Button>
-                      </CommandSelect>
+                        placeholder="Select category..."
+                        searchPlaceholder="Search categories..."
+                        emptyMessage="No category found."
+                      />
                     </div>
 
                     <div className="space-y-2">
                       <Label>Product</Label>
-                      <Select
+                      <CommandSelect
+                        options={getProductOptions(
+                          productInfo?.categoryId || 1,
+                        )}
                         value={product.productId.toString()}
                         onValueChange={(productId) =>
                           updateRoomProduct(room.id, product.id, {
                             productId: Number.parseInt(productId),
                           })
                         }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {productDatabase.products
-                            .filter(
-                              (p) => p.categoryId === productInfo?.categoryId,
-                            )
-                            .map((p) => (
-                              <SelectItem key={p.id} value={p.id.toString()}>
-                                {p.name} (${p.basePrice}/{p.priceType})
-                              </SelectItem>
-                            ))}
-                        </SelectContent>
-                      </Select>
+                        placeholder="Select product..."
+                        searchPlaceholder="Search products..."
+                        emptyMessage="No product found."
+                      />
                     </div>
 
                     <div className="space-y-2">
@@ -225,77 +232,92 @@ export function Step3({ quoteData, setQuoteData, errors }: Step3Props) {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label>Width (m) *</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        min="0.01"
-                        value={product.width}
-                        onChange={(e) =>
-                          updateRoomProduct(room.id, product.id, {
-                            width: Number.parseFloat(e.target.value) || 0,
-                          })
-                        }
-                        className={
-                          errors[`room${roomIndex}Product${productIndex}Width`]
-                            ? 'border-red-500'
-                            : ''
-                        }
-                      />
-                      {errors[
-                        `room${roomIndex}Product${productIndex}Width`
-                      ] && (
-                        <p className="text-red-500 text-sm">
-                          {
+                  {productInfo?.priceType === 'sqm' && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label>Width (m) *</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0.01"
+                          value={product.width}
+                          onChange={(e) =>
+                            updateRoomProduct(room.id, product.id, {
+                              width: Number.parseFloat(e.target.value) || 0,
+                            })
+                          }
+                          className={
                             errors[
                               `room${roomIndex}Product${productIndex}Width`
                             ]
+                              ? 'border-red-500'
+                              : ''
                           }
-                        </p>
-                      )}
-                    </div>
+                        />
+                        {errors[
+                          `room${roomIndex}Product${productIndex}Width`
+                        ] && (
+                          <p className="text-red-500 text-sm">
+                            {
+                              errors[
+                                `room${roomIndex}Product${productIndex}Width`
+                              ]
+                            }
+                          </p>
+                        )}
+                      </div>
 
-                    <div className="space-y-2">
-                      <Label>Height (m) *</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        min="0.01"
-                        value={product.height}
-                        onChange={(e) =>
-                          updateRoomProduct(room.id, product.id, {
-                            height: Number.parseFloat(e.target.value) || 0,
-                          })
-                        }
-                        className={
-                          errors[`room${roomIndex}Product${productIndex}Height`]
-                            ? 'border-red-500'
-                            : ''
-                        }
-                      />
-                      {errors[
-                        `room${roomIndex}Product${productIndex}Height`
-                      ] && (
-                        <p className="text-red-500 text-sm">
-                          {
+                      <div className="space-y-2">
+                        <Label>Height (m) *</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0.01"
+                          value={product.height}
+                          onChange={(e) =>
+                            updateRoomProduct(room.id, product.id, {
+                              height: Number.parseFloat(e.target.value) || 0,
+                            })
+                          }
+                          className={
                             errors[
                               `room${roomIndex}Product${productIndex}Height`
                             ]
+                              ? 'border-red-500'
+                              : ''
                           }
-                        </p>
-                      )}
-                    </div>
+                        />
+                        {errors[
+                          `room${roomIndex}Product${productIndex}Height`
+                        ] && (
+                          <p className="text-red-500 text-sm">
+                            {
+                              errors[
+                                `room${roomIndex}Product${productIndex}Height`
+                              ]
+                            }
+                          </p>
+                        )}
+                      </div>
 
-                    <div className="space-y-2">
-                      <Label>Area</Label>
-                      <div className="flex items-center h-10 px-3 border rounded-md bg-muted">
-                        <Calculator className="w-4 h-4 mr-2" />
-                        {sqm.toFixed(2)} sqm
+                      <div className="space-y-2">
+                        <Label>Area</Label>
+                        <div className="flex items-center h-10 px-3 border rounded-md bg-muted">
+                          <Calculator className="w-4 h-4 mr-2" />
+                          {sqm.toFixed(2)} sqm
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
+
+                  {productInfo?.priceType === 'each' && (
+                    <div className="bg-primary/10 rounded-lg p-3">
+                      <p className="text-sm">
+                        <strong>Per Unit Pricing:</strong> This product is
+                        priced per unit. Dimensions are not required.
+                      </p>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -378,9 +400,23 @@ export function Step3({ quoteData, setQuoteData, errors }: Step3Props) {
                             Minimum {productInfo.minimumQty} sqm applies
                           </span>
                         )}
+                      {productInfo?.priceType === 'each' &&
+                        productInfo.minimumQty > product.quantity && (
+                          <span>
+                            Minimum {productInfo.minimumQty} units required
+                          </span>
+                        )}
                     </div>
-                    <div className="text-lg font-semibold">
-                      ${total.toFixed(2)}
+                    <div className="text-right">
+                      <div className="text-lg font-semibold">
+                        ${totalWithGST.toFixed(2)}
+                      </div>
+                      {quoteData.gstEnabled && (
+                        <div className="text-sm text-muted-foreground">
+                          Base: ${baseTotal.toFixed(2)} + GST: $
+                          {gstAmount.toFixed(2)}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -395,8 +431,33 @@ export function Step3({ quoteData, setQuoteData, errors }: Step3Props) {
 
             {room.products.length > 0 && (
               <div className="flex justify-end pt-4 border-t">
-                <div className="text-xl font-bold">
-                  Room Total: ${calculateRoomTotal(room).toFixed(2)}
+                <div className="text-right">
+                  <div className="text-xl font-bold">
+                    Room Total: $
+                    {calculateRoomTotal(
+                      room,
+                      quoteData.gstEnabled,
+                      quoteData.gstRate,
+                    ).toFixed(2)}
+                  </div>
+                  {quoteData.gstEnabled && (
+                    <div className="text-sm text-muted-foreground">
+                      (Includes GST: $
+                      {room.products
+                        .reduce(
+                          (total, product) =>
+                            total +
+                            calculateProductGST(
+                              product,
+                              quoteData.gstEnabled,
+                              quoteData.gstRate,
+                            ),
+                          0,
+                        )
+                        .toFixed(2)}
+                      )
+                    </div>
+                  )}
                 </div>
               </div>
             )}

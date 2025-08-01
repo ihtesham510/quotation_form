@@ -11,27 +11,24 @@ import {
   DollarSign,
   Eye,
 } from 'lucide-react'
-import type { QuoteData } from './types'
+import type { QuoteData, QuoteCalculatedData } from './types'
 import { Step1 } from './step1'
 import { Step2 } from './step2'
 import { Step3 } from './step3'
 import { Step4 } from './step4'
 import { Step5 } from './step5'
 import { Step6 } from './step6'
-import { productDatabase } from './data'
-import {
-  calculateProductTotal,
-  calculateRoomTotal,
-  calculateSubtotal,
-  calculateDiscount,
-  calculateTax,
-  calculateTotal,
-} from './calculations'
 
 export function CurtainsForm({
-  onSave,
+  onSaveQuote,
+  onEmail,
+  onPrint,
+  onGeneratePDF,
 }: {
-  onSave?: (data: QuoteData) => void | Promise<void>
+  onSaveQuote?: (data: QuoteCalculatedData) => void
+  onGeneratePDF?: (data: QuoteCalculatedData) => void
+  onPrint?: (data: QuoteCalculatedData) => void
+  onEmail?: (data: QuoteCalculatedData) => void
 }) {
   const [currentStep, setCurrentStep] = useState(1)
   const [quoteData, setQuoteData] = useState<QuoteData>({
@@ -53,7 +50,8 @@ export function CurtainsForm({
     taxRate: 10,
     paymentTerms: 'Net 30 days',
     quoteDate: new Date().toISOString().split('T')[0],
-    validityPeriod: 30,
+    gstEnabled: false,
+    gstRate: 10,
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -124,69 +122,6 @@ export function CurtainsForm({
     }
   }
 
-  const saveQuote = () => onSave?.(quoteData)
-
-  const generatePDF = () => {
-    const quoteContent = `
-BLINDS QUOTATION
-================
-
-Customer: ${quoteData.customer.name}
-Email: ${quoteData.customer.email}
-Phone: ${quoteData.customer.phone}
-Project Address: ${quoteData.customer.projectAddress}
-
-Quote Date: ${quoteData.quoteDate}
-Valid Until: ${new Date(Date.now() + quoteData.validityPeriod * 24 * 60 * 60 * 1000).toLocaleDateString()}
-
-ROOM BREAKDOWN:
-${quoteData.rooms
-  .map(
-    (room) => `
-${room.name} (${room.type}):
-${room.products
-  .map((product) => {
-    const productInfo = productDatabase.products.find(
-      (p) => p.id === product.productId,
-    )
-    const sqm = product.width * product.height
-    const total = calculateProductTotal(product)
-    return `  - ${productInfo?.name}: ${product.width}m x ${product.height}m (${sqm.toFixed(2)} sqm) x ${product.quantity} = $${total.toFixed(2)}`
-  })
-  .join('\n')}
-Room Total: $${calculateRoomTotal(room).toFixed(2)}
-`,
-  )
-  .join('\n')}
-
-ADD-ONS:
-${quoteData.addOns.map((addOn) => `${addOn.name}: ${addOn.quantity} x $${addOn.unitPrice} = $${(addOn.quantity * addOn.unitPrice).toFixed(2)}`).join('\n')}
-
-SERVICES:
-${quoteData.installationService ? 'Installation Service: $150.00' : ''}
-${quoteData.siteMeasurement ? 'Site Measurement: $75.00' : ''}
-${quoteData.deliveryOption === 'express' ? 'Express Delivery: $50.00' : ''}
-
-PRICING SUMMARY:
-Subtotal: $${calculateSubtotal(quoteData).toFixed(2)}
-Discount: -$${calculateDiscount(quoteData).toFixed(2)}
-Tax (${quoteData.taxRate}%): $${calculateTax(quoteData).toFixed(2)}
-TOTAL: $${calculateTotal(quoteData).toFixed(2)}
-
-Payment Terms: ${quoteData.paymentTerms}
-    `
-
-    const blob = new Blob([quoteContent], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `Quote-${quoteData.customer.name.replace(/\s+/g, '-')}-${quoteData.quoteDate}.txt`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-  }
-
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
@@ -221,8 +156,10 @@ Payment Terms: ${quoteData.paymentTerms}
         return (
           <Step6
             quoteData={quoteData}
-            onSaveQuote={saveQuote}
-            onGeneratePDF={generatePDF}
+            onSaveQuote={onSaveQuote}
+            onGeneratePDF={onGeneratePDF}
+            onPrint={onPrint}
+            onEmail={onEmail}
           />
         )
       default:
@@ -232,11 +169,11 @@ Payment Terms: ${quoteData.paymentTerms}
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-4 mb-24">
-        <div className="max-w-6xl mx-auto">
+      <div className="container mx-auto py-8">
+        <div className="mx-auto">
           {/* Progress Indicator */}
-          <div className="mb-4 md:mb-8">
-            <div className="hidden md:flex items-center justify-between mb-4">
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
               {steps.map((step, index) => {
                 const Icon = step.icon
                 const isActive = currentStep === step.number
