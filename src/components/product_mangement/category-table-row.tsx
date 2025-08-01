@@ -42,7 +42,7 @@ export function CategoryTableRow({
         <Card>
           <CardContent className="p-4">
             <div className="flex justify-between items-start mb-2">
-              <h3 className="font-medium text-lg">{category.title}</h3>
+              <h3 className="font-medium text-lg">{category.name}</h3>
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
@@ -78,7 +78,7 @@ export function CategoryTableRow({
           open={showDeleteDialog}
           onOpenChange={setShowDeleteDialog}
           title="Delete Category"
-          description={`Are you sure you want to delete "${category.title}"? This will also delete all products in this category. This action cannot be undone.`}
+          description={`Are you sure you want to delete "${category.name}"? This will also delete all products in this category. This action cannot be undone.`}
           onConfirm={handleDelete}
         />
       </>
@@ -88,7 +88,7 @@ export function CategoryTableRow({
   return (
     <>
       <TableRow>
-        <TableCell className="font-medium">{category.title}</TableCell>
+        <TableCell className="font-medium">{category.name}</TableCell>
         <TableCell>{category.description}</TableCell>
         <TableCell>
           <Badge variant="secondary">{productCount} products</Badge>
@@ -124,7 +124,7 @@ export function CategoryTableRow({
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
         title="Delete Category"
-        description={`Are you sure you want to delete "${category.title}"? This will also delete all products in this category. This action cannot be undone.`}
+        description={`Are you sure you want to delete "${category.name}"? This will also delete all products in this category. This action cannot be undone.`}
         onConfirm={handleDelete}
       />
     </>

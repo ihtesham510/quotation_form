@@ -18,8 +18,8 @@ import {
   type CommandSelectOption,
 } from '@/components/ui/command-select'
 import { Plus, Trash2, Calculator } from 'lucide-react'
-import type { QuoteData, RoomProduct } from './types'
-import { productDatabase, controlTypes } from './data'
+import type { QuoteData, RoomProduct, ProductDatabase, Id } from './types' // Import Id and ProductDatabase
+import { controlTypes } from './data' // productDatabase will be passed as prop
 import {
   calculateProductTotal,
   calculateProductGST,
@@ -30,13 +30,19 @@ interface Step3Props {
   quoteData: QuoteData
   setQuoteData: React.Dispatch<React.SetStateAction<QuoteData>>
   errors: Record<string, string>
+  productDatabase: ProductDatabase // New prop
 }
 
-export function Step3({ quoteData, setQuoteData, errors }: Step3Props) {
+export function Step3({
+  quoteData,
+  setQuoteData,
+  errors,
+  productDatabase,
+}: Step3Props) {
   const addProductToRoom = (roomId: string) => {
     const newProduct: RoomProduct = {
       id: Date.now().toString(),
-      productId: 1,
+      productId: productDatabase.products[0]._id, // Changed .id to ._id
       width: 1,
       height: 1,
       quantity: 1,
@@ -95,18 +101,20 @@ export function Step3({ quoteData, setQuoteData, errors }: Step3Props) {
   // Prepare category options for CommandSelect
   const categoryOptions: CommandSelectOption[] = productDatabase.categories.map(
     (category) => ({
-      value: category.id.toString(),
+      value: category._id, // Changed .id to ._id
       label: category.name,
       description: category.description,
     }),
   )
 
   // Get product options for a specific category
-  const getProductOptions = (categoryId: number): CommandSelectOption[] => {
+  const getProductOptions = (
+    categoryId: Id<'categories'>,
+  ): CommandSelectOption[] => {
     return productDatabase.products
       .filter((product) => product.categoryId === categoryId)
       .map((product) => ({
-        value: product.id.toString(),
+        value: product._id, // Changed .id to ._id
         label: product.name,
         description: `$${product.basePrice}/${product.priceType}`,
       }))
@@ -143,20 +151,27 @@ export function Step3({ quoteData, setQuoteData, errors }: Step3Props) {
           <CardContent className="space-y-4">
             {room.products.map((product, productIndex) => {
               const productInfo = productDatabase.products.find(
-                (p) => p.id === product.productId,
-              )
+                (p) => p._id === product.productId,
+              ) // Changed p.id to p._id
               const sqm = product.width * product.height
-              const baseTotal = calculateProductTotal(product, false, 0) // Base total without GST
+              const baseTotal = calculateProductTotal(
+                product,
+                false,
+                0,
+                productDatabase,
+              ) // Pass productDatabase
               const gstAmount = calculateProductGST(
                 product,
                 quoteData.gstEnabled,
                 quoteData.gstRate,
-              )
+                productDatabase,
+              ) // Pass productDatabase
               const totalWithGST = calculateProductTotal(
                 product,
                 quoteData.gstEnabled,
                 quoteData.gstRate,
-              )
+                productDatabase,
+              ) // Pass productDatabase
 
               return (
                 <div
@@ -180,17 +195,16 @@ export function Step3({ quoteData, setQuoteData, errors }: Step3Props) {
                       <Label>Category</Label>
                       <CommandSelect
                         options={categoryOptions}
-                        value={productInfo?.categoryId.toString() || ''}
+                        value={productInfo?.categoryId || ''}
                         onValueChange={(categoryId) => {
                           const firstProductInCategory =
                             productDatabase.products.find(
-                              (p) =>
-                                p.categoryId === Number.parseInt(categoryId),
+                              (p) => p.categoryId === categoryId,
                             )
                           if (firstProductInCategory) {
                             updateRoomProduct(room.id, product.id, {
-                              productId: firstProductInCategory.id,
-                            })
+                              productId: firstProductInCategory._id,
+                            }) // Changed .id to ._id
                           }
                         }}
                         placeholder="Select category..."
@@ -203,12 +217,13 @@ export function Step3({ quoteData, setQuoteData, errors }: Step3Props) {
                       <Label>Product</Label>
                       <CommandSelect
                         options={getProductOptions(
-                          productInfo?.categoryId || 1,
-                        )}
-                        value={product.productId.toString()}
+                          productInfo?.categoryId ||
+                            productDatabase.categories[0]._id,
+                        )} // Changed .id to ._id
+                        value={product.productId}
                         onValueChange={(productId) =>
                           updateRoomProduct(room.id, product.id, {
-                            productId: Number.parseInt(productId),
+                            productId: productId as Id<'products'>,
                           })
                         }
                         placeholder="Select product..."
@@ -311,8 +326,8 @@ export function Step3({ quoteData, setQuoteData, errors }: Step3Props) {
                   )}
 
                   {productInfo?.priceType === 'each' && (
-                    <div className="bg-primary/10 rounded-lg p-3">
-                      <p className="text-sm">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <p className="text-sm text-blue-700">
                         <strong>Per Unit Pricing:</strong> This product is
                         priced per unit. Dimensions are not required.
                       </p>
@@ -438,6 +453,7 @@ export function Step3({ quoteData, setQuoteData, errors }: Step3Props) {
                       room,
                       quoteData.gstEnabled,
                       quoteData.gstRate,
+                      productDatabase,
                     ).toFixed(2)}
                   </div>
                   {quoteData.gstEnabled && (
@@ -451,6 +467,7 @@ export function Step3({ quoteData, setQuoteData, errors }: Step3Props) {
                               product,
                               quoteData.gstEnabled,
                               quoteData.gstRate,
+                              productDatabase,
                             ),
                           0,
                         )

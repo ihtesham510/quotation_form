@@ -2,8 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Download, Mail, Printer, Save, FileText } from 'lucide-react'
-import type { QuoteData, QuoteCalculatedData } from './types'
-import { productDatabase } from './data'
+import type { QuoteData, QuoteCalculatedData, ProductDatabase } from './types' // Import ProductDatabase
 import {
   calculateProductTotal,
   calculateProductGST,
@@ -25,6 +24,7 @@ interface Step6Props {
   onGeneratePDF?: (data: QuoteCalculatedData) => void
   onPrint?: (data: QuoteCalculatedData) => void
   onEmail?: (data: QuoteCalculatedData) => void
+  productDatabase: ProductDatabase
 }
 
 export function Step6({
@@ -33,21 +33,28 @@ export function Step6({
   onGeneratePDF,
   onPrint,
   onEmail,
+  productDatabase,
 }: Step6Props) {
   const prepareQuoteData = (): QuoteCalculatedData => {
     const roomTotals = quoteData.rooms.map((room) => ({
       roomId: room.id,
-      total: calculateRoomTotal(room, quoteData.gstEnabled, quoteData.gstRate),
+      total: calculateRoomTotal(
+        room,
+        quoteData.gstEnabled,
+        quoteData.gstRate,
+        productDatabase,
+      ),
     }))
 
     const productTotals = quoteData.rooms.flatMap((room) =>
       room.products.map((product) => ({
         roomId: room.id,
-        productId: product.id,
+        productId: product.productId,
         total: calculateProductTotal(
           product,
           quoteData.gstEnabled,
           quoteData.gstRate,
+          productDatabase,
         ),
       })),
     )
@@ -55,11 +62,11 @@ export function Step6({
     return {
       quoteData,
       calculations: {
-        subtotal: calculateSubtotal(quoteData),
-        discount: calculateDiscount(quoteData),
+        subtotal: calculateSubtotal(quoteData, productDatabase),
+        discount: calculateDiscount(quoteData, productDatabase),
         tax: 0, // No longer using end-of-quote tax
-        gst: calculateTotalGST(quoteData),
-        total: calculateTotal(quoteData),
+        gst: calculateTotalGST(quoteData, productDatabase),
+        total: calculateTotal(quoteData, productDatabase),
         roomTotals,
         productTotals,
       },
@@ -151,19 +158,26 @@ export function Step6({
                 <div className="space-y-2">
                   {room.products.map((product) => {
                     const productInfo = productDatabase.products.find(
-                      (p) => p.id === product.productId,
-                    )
+                      (p) => p._id === product.productId,
+                    ) // Changed p.id to p._id
                     const sqm = product.width * product.height
-                    const baseTotal = calculateProductTotal(product, false, 0)
+                    const baseTotal = calculateProductTotal(
+                      product,
+                      false,
+                      0,
+                      productDatabase,
+                    )
                     const gstAmount = calculateProductGST(
                       product,
                       quoteData.gstEnabled,
                       quoteData.gstRate,
+                      productDatabase,
                     )
                     const totalWithGST = calculateProductTotal(
                       product,
                       quoteData.gstEnabled,
                       quoteData.gstRate,
+                      productDatabase,
                     )
 
                     return (
@@ -174,8 +188,9 @@ export function Step6({
                         <div>
                           <div className="font-medium">{productInfo?.name}</div>
                           <div className="text-muted-foreground">
-                            {product.width}m × {product.height}m (
-                            {sqm.toFixed(2)} sqm) × {product.quantity}
+                            {productInfo?.priceType === 'sqm'
+                              ? `${product.width}m × ${product.height}m (${sqm.toFixed(2)} sqm) × ${product.quantity}`
+                              : `Quantity: ${product.quantity}`}
                             {product.color !== 'White' && ` • ${product.color}`}
                             {product.controlType !== 'Cord' &&
                               ` • ${product.controlType}`}
@@ -209,6 +224,7 @@ export function Step6({
                         room,
                         quoteData.gstEnabled,
                         quoteData.gstRate,
+                        productDatabase,
                       ).toFixed(2)}
                     </div>
                     {quoteData.gstEnabled && (
@@ -218,6 +234,7 @@ export function Step6({
                           room,
                           quoteData.gstEnabled,
                           quoteData.gstRate,
+                          productDatabase,
                         ).toFixed(2)}
                         )
                       </div>
@@ -358,12 +375,16 @@ export function Step6({
                 <span>
                   Subtotal {quoteData.gstEnabled ? `(incl. GST)` : ''}:
                 </span>
-                <span>${calculateSubtotal(quoteData).toFixed(2)}</span>
+                <span>
+                  ${calculateSubtotal(quoteData, productDatabase).toFixed(2)}
+                </span>
               </div>
               {quoteData.gstEnabled && (
                 <div className="flex justify-between text-muted-foreground">
                   <span>Total GST ({quoteData.gstRate}%):</span>
-                  <span>${calculateTotalGST(quoteData).toFixed(2)}</span>
+                  <span>
+                    ${calculateTotalGST(quoteData, productDatabase).toFixed(2)}
+                  </span>
                 </div>
               )}
               {quoteData.discountValue > 0 && (
@@ -378,13 +399,17 @@ export function Step6({
                       ` - ${quoteData.discountReason}`}
                     :
                   </span>
-                  <span>-${calculateDiscount(quoteData).toFixed(2)}</span>
+                  <span>
+                    -${calculateDiscount(quoteData, productDatabase).toFixed(2)}
+                  </span>
                 </div>
               )}
               <Separator />
               <div className="flex justify-between text-xl font-bold">
                 <span>Total:</span>
-                <span>${calculateTotal(quoteData).toFixed(2)}</span>
+                <span>
+                  ${calculateTotal(quoteData, productDatabase).toFixed(2)}
+                </span>
               </div>
             </div>
           </div>

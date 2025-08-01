@@ -72,7 +72,7 @@ export function ProductsTable({
   }
 
   const getCategoryName = (categoryId: Id<'categories'>) => {
-    return categories.find((cat) => cat._id === categoryId)?.title || 'Unknown'
+    return categories.find((cat) => cat._id === categoryId)?.name || 'Unknown'
   }
 
   return (

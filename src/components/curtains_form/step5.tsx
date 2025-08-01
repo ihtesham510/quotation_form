@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import type { QuoteData } from './types'
+import type { QuoteData, ProductDatabase } from './types' // Import ProductDatabase
 import { paymentTerms } from './data'
 import {
   calculateSubtotal,
@@ -23,9 +23,14 @@ import {
 interface Step5Props {
   quoteData: QuoteData
   setQuoteData: React.Dispatch<React.SetStateAction<QuoteData>>
+  productDatabase: ProductDatabase // New prop
 }
 
-export function Step5({ quoteData, setQuoteData }: Step5Props) {
+export function Step5({
+  quoteData,
+  setQuoteData,
+  productDatabase,
+}: Step5Props) {
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-semibold">Pricing & Discounts</h3>
@@ -79,7 +84,7 @@ export function Step5({ quoteData, setQuoteData }: Step5Props) {
             <div className="space-y-2">
               <Label>Discount Amount</Label>
               <div className="flex items-center h-10 px-3 border rounded-md bg-muted">
-                -${calculateDiscount(quoteData).toFixed(2)}
+                -${calculateDiscount(quoteData, productDatabase).toFixed(2)}
               </div>
             </div>
           </div>
@@ -136,24 +141,32 @@ export function Step5({ quoteData, setQuoteData }: Step5Props) {
           <div className="space-y-2">
             <div className="flex justify-between">
               <span>Subtotal {quoteData.gstEnabled ? `(incl. GST)` : ''}:</span>
-              <span>${calculateSubtotal(quoteData).toFixed(2)}</span>
+              <span>
+                ${calculateSubtotal(quoteData, productDatabase).toFixed(2)}
+              </span>
             </div>
             {quoteData.gstEnabled && (
               <div className="flex justify-between text-muted-foreground">
                 <span>Total GST ({quoteData.gstRate}%):</span>
-                <span>${calculateTotalGST(quoteData).toFixed(2)}</span>
+                <span>
+                  ${calculateTotalGST(quoteData, productDatabase).toFixed(2)}
+                </span>
               </div>
             )}
             {quoteData.discountValue > 0 && (
               <div className="flex justify-between text-red-600">
                 <span>Discount:</span>
-                <span>-${calculateDiscount(quoteData).toFixed(2)}</span>
+                <span>
+                  -${calculateDiscount(quoteData, productDatabase).toFixed(2)}
+                </span>
               </div>
             )}
             <Separator />
             <div className="flex justify-between text-xl font-bold">
               <span>Total:</span>
-              <span>${calculateTotal(quoteData).toFixed(2)}</span>
+              <span>
+                ${calculateTotal(quoteData, productDatabase).toFixed(2)}
+              </span>
             </div>
           </div>
         </CardContent>

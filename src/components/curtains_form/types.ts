@@ -1,3 +1,6 @@
+import type { DataModel, Id } from 'convex/_generated/dataModel'
+export type { Id }
+
 export interface Customer {
   name: string
   email: string
@@ -15,7 +18,7 @@ export interface Room {
 
 export interface RoomProduct {
   id: string
-  productId: number
+  productId: Id<'products'>
   width: number
   height: number
   quantity: number
@@ -52,22 +55,8 @@ export interface QuoteData {
   gstRate: number
 }
 
-export interface Product {
-  id: number
-  categoryId: number
-  name: string
-  priceType: 'sqm' | 'each'
-  basePrice: number
-  minimumQty: number
-  leadTime: string
-  specialConditions: string
-}
-
-export interface Category {
-  id: number
-  name: string
-  description: string
-}
+export type Category = DataModel['categories']['document']
+export type Product = DataModel['products']['document']
 
 export interface ProductDatabase {
   categories: Category[]
@@ -83,7 +72,11 @@ export interface QuoteCalculatedData {
     gst: number
     total: number
     roomTotals: { roomId: string; total: number }[]
-    productTotals: { roomId: string; productId: string; total: number }[]
+    productTotals: {
+      roomId: string
+      productId: Id<'products'>
+      total: number
+    }[]
   }
   metadata: {
     generatedAt: string

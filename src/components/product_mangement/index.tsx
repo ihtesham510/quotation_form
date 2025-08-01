@@ -20,7 +20,10 @@ export function ProductCategoryManager({
   const addCategoryMutation = useMutation(api.product_categoreis.addCategory)
   const handleAddCategory = async (data: CategoryFormValues) => {
     try {
-      await addCategoryMutation(data)
+      await addCategoryMutation({
+        name: data.title,
+        description: data.description,
+      })
       toast.success('Category added Successfully')
       console.log('Add category:', data)
     } catch (err) {

@@ -143,7 +143,7 @@ export function ProductFormSheet({
                                   ? categories.find(
                                       (category) =>
                                         category._id === field.value,
-                                    )?.title
+                                    )?.name
                                   : 'Select category'}
                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                               </Button>
@@ -160,7 +160,7 @@ export function ProductFormSheet({
                                 <CommandGroup>
                                   {categories.map((category) => (
                                     <CommandItem
-                                      value={category.title}
+                                      value={category.name}
                                       key={category._id}
                                       onSelect={() => {
                                         field.onChange(category._id)
@@ -176,7 +176,7 @@ export function ProductFormSheet({
                                       />
                                       <div className="flex flex-col">
                                         <span className="font-medium">
-                                          {category.title}
+                                          {category.name}
                                         </span>
                                         <span className="text-sm text-muted-foreground">
                                           {category.description}

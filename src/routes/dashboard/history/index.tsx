@@ -21,6 +21,9 @@ function RouteComponent() {
 
 function History({ userId }: { userId: Id<'user'> }) {
   const quotations = useQuery(api.quotation.getQuotations, { userId })
+  const productDatabase = useQuery(
+    api.product_categoreis.getProductAndCategories,
+  )
 
   const isEmpty = quotations && quotations.length === 0
   if (!quotations) return null
@@ -82,7 +85,12 @@ function History({ userId }: { userId: Id<'user'> }) {
                         </p>
                         <div className="pt-2 border-t mt-2">
                           <p className="text-lg font-bold text-right">
-                            Total: ${calculateTotal(quote.quoteData).toFixed(2)}
+                            Total: $
+                            {productDatabase &&
+                              calculateTotal(
+                                quote.quoteData,
+                                productDatabase,
+                              ).toFixed(2)}
                           </p>
                         </div>
                       </CardContent>

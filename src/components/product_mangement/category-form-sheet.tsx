@@ -40,7 +40,7 @@ export function CategoryFormSheet({
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
-      title: defaultValues?.title || '',
+      title: defaultValues?.name || '',
       description: defaultValues?.description || '',
     },
   })

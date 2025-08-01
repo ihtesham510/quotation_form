@@ -56,8 +56,10 @@ export function CategoriesTable({
     try {
       await updateCategoryMutation({
         categoryId: id,
-        ...data,
+        name: data.title,
+        description: data.description,
       })
+
       toast.success('Updated Successfully')
     } catch (err) {
       console.log(err)

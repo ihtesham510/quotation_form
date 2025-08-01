@@ -19,7 +19,7 @@ export const curtainsSchema = {
         products: v.array(
           v.object({
             id: v.string(),
-            productId: v.number(),
+            productId: v.id('products'),
             width: v.number(),
             height: v.number(),
             quantity: v.number(),
@@ -73,7 +73,7 @@ export const curtainsSchema = {
     productTotals: v.array(
       v.object({
         roomId: v.string(),
-        productId: v.string(),
+        productId: v.id('products'),
         total: v.number(),
       }),
     ),
@@ -98,7 +98,7 @@ export const productSchema = {
 }
 
 export const categorySchema = {
-  title: v.string(),
+  name: v.string(),
   description: v.string(),
 }
 

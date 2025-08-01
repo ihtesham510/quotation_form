@@ -1,14 +1,20 @@
-import type { QuoteData, RoomProduct, Room, AddOn } from './types'
-import { productDatabase } from './data'
+import type {
+  QuoteData,
+  RoomProduct,
+  Room,
+  AddOn,
+  ProductDatabase,
+} from './types'
 
 export const calculateProductTotal = (
   product: RoomProduct,
   gstEnabled = false,
   gstRate = 0,
+  productDatabase: ProductDatabase,
 ): number => {
   const productInfo = productDatabase.products.find(
-    (p) => p.id === product.productId,
-  )
+    (p) => p._id === product.productId,
+  ) // Changed p.id to p._id
   if (!productInfo) return 0
 
   const sqm = product.width * product.height
@@ -35,11 +41,12 @@ export const calculateProductGST = (
   product: RoomProduct,
   gstEnabled = false,
   gstRate = 0,
+  productDatabase: ProductDatabase,
 ): number => {
   if (!gstEnabled) return 0
 
   const productInfo = productDatabase.products.find(
-    (p) => p.id === product.productId,
+    (p) => p._id === product.productId,
   )
   if (!productInfo) return 0
 
@@ -110,10 +117,12 @@ export const calculateRoomTotal = (
   room: Room,
   gstEnabled = false,
   gstRate = 0,
+  productDatabase: ProductDatabase,
 ): number => {
   return room.products.reduce(
     (total, product) =>
-      total + calculateProductTotal(product, gstEnabled, gstRate),
+      total +
+      calculateProductTotal(product, gstEnabled, gstRate, productDatabase),
     0,
   )
 }
@@ -122,18 +131,29 @@ export const calculateRoomGST = (
   room: Room,
   gstEnabled = false,
   gstRate = 0,
+  productDatabase: ProductDatabase,
 ): number => {
   return room.products.reduce(
     (total, product) =>
-      total + calculateProductGST(product, gstEnabled, gstRate),
+      total +
+      calculateProductGST(product, gstEnabled, gstRate, productDatabase),
     0,
   )
 }
 
-export const calculateSubtotal = (quoteData: QuoteData): number => {
+export const calculateSubtotal = (
+  quoteData: QuoteData,
+  productDatabase: ProductDatabase,
+): number => {
   const roomsTotal = quoteData.rooms.reduce(
     (total, room) =>
-      total + calculateRoomTotal(room, quoteData.gstEnabled, quoteData.gstRate),
+      total +
+      calculateRoomTotal(
+        room,
+        quoteData.gstEnabled,
+        quoteData.gstRate,
+        productDatabase,
+      ),
     0,
   )
   const addOnsTotal = quoteData.addOns.reduce(
@@ -166,12 +186,21 @@ export const calculateSubtotal = (quoteData: QuoteData): number => {
   return roomsTotal + addOnsTotal + servicesTotal
 }
 
-export const calculateTotalGST = (quoteData: QuoteData): number => {
+export const calculateTotalGST = (
+  quoteData: QuoteData,
+  productDatabase: ProductDatabase,
+): number => {
   if (!quoteData.gstEnabled) return 0
 
   const roomsGST = quoteData.rooms.reduce(
     (total, room) =>
-      total + calculateRoomGST(room, quoteData.gstEnabled, quoteData.gstRate),
+      total +
+      calculateRoomGST(
+        room,
+        quoteData.gstEnabled,
+        quoteData.gstRate,
+        productDatabase,
+      ),
     0,
   )
   const addOnsGST = quoteData.addOns.reduce(
@@ -203,8 +232,11 @@ export const calculateTotalGST = (quoteData: QuoteData): number => {
   return roomsGST + addOnsGST + servicesGST
 }
 
-export const calculateDiscount = (quoteData: QuoteData): number => {
-  const subtotal = calculateSubtotal(quoteData)
+export const calculateDiscount = (
+  quoteData: QuoteData,
+  productDatabase: ProductDatabase,
+): number => {
+  const subtotal = calculateSubtotal(quoteData, productDatabase)
   if (quoteData.discountType === 'percentage') {
     return subtotal * (quoteData.discountValue / 100)
   } else {
@@ -212,8 +244,14 @@ export const calculateDiscount = (quoteData: QuoteData): number => {
   }
 }
 
-export const calculateTotal = (quoteData: QuoteData): number => {
-  return calculateSubtotal(quoteData) - calculateDiscount(quoteData)
+export const calculateTotal = (
+  quoteData: QuoteData,
+  productDatabase: ProductDatabase,
+): number => {
+  return (
+    calculateSubtotal(quoteData, productDatabase) -
+    calculateDiscount(quoteData, productDatabase)
+  )
 }
 
 export const calculateTax = (quoteData: QuoteData): number => {
@@ -221,6 +259,9 @@ export const calculateTax = (quoteData: QuoteData): number => {
   return 0
 }
 
-export const calculateGST = (quoteData: QuoteData): number => {
-  return calculateTotalGST(quoteData)
+export const calculateGST = (
+  quoteData: QuoteData,
+  productDatabase: ProductDatabase,
+): number => {
+  return calculateTotalGST(quoteData, productDatabase)
 }

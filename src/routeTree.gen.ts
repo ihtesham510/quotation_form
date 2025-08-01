@@ -17,10 +17,7 @@ import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as DashboardFormRouteImport } from './routes/dashboard/form'
 import { Route as DashboardProductsIndexRouteImport } from './routes/dashboard/products/index'
 import { Route as DashboardHistoryIndexRouteImport } from './routes/dashboard/history/index'
-import { Route as DashboardFormsIndexRouteImport } from './routes/dashboard/forms/index'
 import { Route as DashboardHistoryQuotationIdRouteImport } from './routes/dashboard/history/$quotationId'
-import { Route as DashboardFormsTile_formRouteImport } from './routes/dashboard/forms/tile_form'
-import { Route as DashboardFormsCurtains_formRouteImport } from './routes/dashboard/forms/curtains_form'
 
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
@@ -62,26 +59,10 @@ const DashboardHistoryIndexRoute = DashboardHistoryIndexRouteImport.update({
   path: '/history/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
-const DashboardFormsIndexRoute = DashboardFormsIndexRouteImport.update({
-  id: '/forms/',
-  path: '/forms/',
-  getParentRoute: () => DashboardRouteRoute,
-} as any)
 const DashboardHistoryQuotationIdRoute =
   DashboardHistoryQuotationIdRouteImport.update({
     id: '/history/$quotationId',
     path: '/history/$quotationId',
-    getParentRoute: () => DashboardRouteRoute,
-  } as any)
-const DashboardFormsTile_formRoute = DashboardFormsTile_formRouteImport.update({
-  id: '/forms/tile_form',
-  path: '/forms/tile_form',
-  getParentRoute: () => DashboardRouteRoute,
-} as any)
-const DashboardFormsCurtains_formRoute =
-  DashboardFormsCurtains_formRouteImport.update({
-    id: '/forms/curtains_form',
-    path: '/forms/curtains_form',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
 
@@ -92,10 +73,7 @@ export interface FileRoutesByFullPath {
   '/sign-up': typeof SignUpRoute
   '/dashboard/form': typeof DashboardFormRoute
   '/dashboard/': typeof DashboardIndexRoute
-  '/dashboard/forms/curtains_form': typeof DashboardFormsCurtains_formRoute
-  '/dashboard/forms/tile_form': typeof DashboardFormsTile_formRoute
   '/dashboard/history/$quotationId': typeof DashboardHistoryQuotationIdRoute
-  '/dashboard/forms': typeof DashboardFormsIndexRoute
   '/dashboard/history': typeof DashboardHistoryIndexRoute
   '/dashboard/products': typeof DashboardProductsIndexRoute
 }
@@ -105,10 +83,7 @@ export interface FileRoutesByTo {
   '/sign-up': typeof SignUpRoute
   '/dashboard/form': typeof DashboardFormRoute
   '/dashboard': typeof DashboardIndexRoute
-  '/dashboard/forms/curtains_form': typeof DashboardFormsCurtains_formRoute
-  '/dashboard/forms/tile_form': typeof DashboardFormsTile_formRoute
   '/dashboard/history/$quotationId': typeof DashboardHistoryQuotationIdRoute
-  '/dashboard/forms': typeof DashboardFormsIndexRoute
   '/dashboard/history': typeof DashboardHistoryIndexRoute
   '/dashboard/products': typeof DashboardProductsIndexRoute
 }
@@ -120,10 +95,7 @@ export interface FileRoutesById {
   '/sign-up': typeof SignUpRoute
   '/dashboard/form': typeof DashboardFormRoute
   '/dashboard/': typeof DashboardIndexRoute
-  '/dashboard/forms/curtains_form': typeof DashboardFormsCurtains_formRoute
-  '/dashboard/forms/tile_form': typeof DashboardFormsTile_formRoute
   '/dashboard/history/$quotationId': typeof DashboardHistoryQuotationIdRoute
-  '/dashboard/forms/': typeof DashboardFormsIndexRoute
   '/dashboard/history/': typeof DashboardHistoryIndexRoute
   '/dashboard/products/': typeof DashboardProductsIndexRoute
 }
@@ -136,10 +108,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/dashboard/form'
     | '/dashboard/'
-    | '/dashboard/forms/curtains_form'
-    | '/dashboard/forms/tile_form'
     | '/dashboard/history/$quotationId'
-    | '/dashboard/forms'
     | '/dashboard/history'
     | '/dashboard/products'
   fileRoutesByTo: FileRoutesByTo
@@ -149,10 +118,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/dashboard/form'
     | '/dashboard'
-    | '/dashboard/forms/curtains_form'
-    | '/dashboard/forms/tile_form'
     | '/dashboard/history/$quotationId'
-    | '/dashboard/forms'
     | '/dashboard/history'
     | '/dashboard/products'
   id:
@@ -163,10 +129,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/dashboard/form'
     | '/dashboard/'
-    | '/dashboard/forms/curtains_form'
-    | '/dashboard/forms/tile_form'
     | '/dashboard/history/$quotationId'
-    | '/dashboard/forms/'
     | '/dashboard/history/'
     | '/dashboard/products/'
   fileRoutesById: FileRoutesById
@@ -236,32 +199,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardHistoryIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/dashboard/forms/': {
-      id: '/dashboard/forms/'
-      path: '/forms'
-      fullPath: '/dashboard/forms'
-      preLoaderRoute: typeof DashboardFormsIndexRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
     '/dashboard/history/$quotationId': {
       id: '/dashboard/history/$quotationId'
       path: '/history/$quotationId'
       fullPath: '/dashboard/history/$quotationId'
       preLoaderRoute: typeof DashboardHistoryQuotationIdRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
-    '/dashboard/forms/tile_form': {
-      id: '/dashboard/forms/tile_form'
-      path: '/forms/tile_form'
-      fullPath: '/dashboard/forms/tile_form'
-      preLoaderRoute: typeof DashboardFormsTile_formRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
-    '/dashboard/forms/curtains_form': {
-      id: '/dashboard/forms/curtains_form'
-      path: '/forms/curtains_form'
-      fullPath: '/dashboard/forms/curtains_form'
-      preLoaderRoute: typeof DashboardFormsCurtains_formRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
   }
@@ -270,10 +212,7 @@ declare module '@tanstack/react-router' {
 interface DashboardRouteRouteChildren {
   DashboardFormRoute: typeof DashboardFormRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
-  DashboardFormsCurtains_formRoute: typeof DashboardFormsCurtains_formRoute
-  DashboardFormsTile_formRoute: typeof DashboardFormsTile_formRoute
   DashboardHistoryQuotationIdRoute: typeof DashboardHistoryQuotationIdRoute
-  DashboardFormsIndexRoute: typeof DashboardFormsIndexRoute
   DashboardHistoryIndexRoute: typeof DashboardHistoryIndexRoute
   DashboardProductsIndexRoute: typeof DashboardProductsIndexRoute
 }
@@ -281,10 +220,7 @@ interface DashboardRouteRouteChildren {
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardFormRoute: DashboardFormRoute,
   DashboardIndexRoute: DashboardIndexRoute,
-  DashboardFormsCurtains_formRoute: DashboardFormsCurtains_formRoute,
-  DashboardFormsTile_formRoute: DashboardFormsTile_formRoute,
   DashboardHistoryQuotationIdRoute: DashboardHistoryQuotationIdRoute,
-  DashboardFormsIndexRoute: DashboardFormsIndexRoute,
   DashboardHistoryIndexRoute: DashboardHistoryIndexRoute,
   DashboardProductsIndexRoute: DashboardProductsIndexRoute,
 }

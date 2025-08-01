@@ -1,11 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Card, CardContent } from '@/components/ui/card'
 import type { DataModel, Id } from 'convex/_generated/dataModel'
-import { useQuery } from 'convex/react'
+import { useQuery } from 'convex-helpers/react/cache'
 import { api } from 'convex/_generated/api'
 import { Step6 } from '@/components/curtains_form/step6'
 import { generateQuotePDF } from '@/components/curtains_form/pdf'
 import { openPdf } from '@/lib/pdf'
+import { LoaderComponent } from '@/components/loader-component'
 
 export const Route = createFileRoute('/dashboard/history/$quotationId')({
   component: RouteComponent,
@@ -27,6 +28,10 @@ function QuotationDetails({
     description?: string
   }
 }) {
+  const productDatabase = useQuery(
+    api.product_categoreis.getProductAndCategories,
+  )
+  if (!productDatabase) return <LoaderComponent />
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto py-8 px-4">
@@ -35,9 +40,10 @@ function QuotationDetails({
           <Card>
             <CardContent className="p-6">
               <Step6
+                productDatabase={productDatabase}
                 quoteData={quotation.quoteData}
                 onGeneratePDF={async (data) => {
-                  const blob = await generateQuotePDF(data)
+                  const blob = await generateQuotePDF(data, productDatabase)
                   openPdf(blob)
                 }}
               />

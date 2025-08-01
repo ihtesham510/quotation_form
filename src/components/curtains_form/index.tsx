@@ -11,7 +11,7 @@ import {
   DollarSign,
   Eye,
 } from 'lucide-react'
-import type { QuoteData, QuoteCalculatedData } from './types'
+import type { QuoteData, QuoteCalculatedData, ProductDatabase } from './types'
 import { Step1 } from './step1'
 import { Step2 } from './step2'
 import { Step3 } from './step3'
@@ -24,11 +24,13 @@ export function CurtainsForm({
   onEmail,
   onPrint,
   onGeneratePDF,
+  productDatabase,
 }: {
   onSaveQuote?: (data: QuoteCalculatedData) => void
   onGeneratePDF?: (data: QuoteCalculatedData) => void
   onPrint?: (data: QuoteCalculatedData) => void
   onEmail?: (data: QuoteCalculatedData) => void
+  productDatabase: ProductDatabase
 }) {
   const [currentStep, setCurrentStep] = useState(1)
   const [quoteData, setQuoteData] = useState<QuoteData>({
@@ -145,16 +147,24 @@ export function CurtainsForm({
           <Step3
             quoteData={quoteData}
             setQuoteData={setQuoteData}
+            productDatabase={productDatabase}
             errors={errors}
           />
         )
       case 4:
         return <Step4 quoteData={quoteData} setQuoteData={setQuoteData} />
       case 5:
-        return <Step5 quoteData={quoteData} setQuoteData={setQuoteData} />
+        return (
+          <Step5
+            quoteData={quoteData}
+            productDatabase={productDatabase}
+            setQuoteData={setQuoteData}
+          />
+        )
       case 6:
         return (
           <Step6
+            productDatabase={productDatabase}
             quoteData={quoteData}
             onSaveQuote={onSaveQuote}
             onGeneratePDF={onGeneratePDF}

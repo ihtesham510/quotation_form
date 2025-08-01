@@ -1,6 +1,7 @@
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
-import type { QuoteCalculatedData } from './types'
-import { productDatabase } from './data'
+import type { QuoteCalculatedData, ProductDatabase } from './types' // Import ProductDatabase
+// productDatabase will be passed as a parameter, no longer imported directly
+// import { productDatabase } from "@/data/data"
 import {
   calculateProductTotal,
   calculateProductGST,
@@ -221,6 +222,7 @@ class PDFBuilder {
 
 export async function generateQuotePDF(
   data: QuoteCalculatedData,
+  productDatabase: ProductDatabase,
 ): Promise<Blob> {
   const { quoteData } = data
   const doc = await PDFDocument.create()
@@ -256,19 +258,26 @@ export async function generateQuotePDF(
 
     for (const product of room.products) {
       const productInfo = productDatabase.products.find(
-        (p) => p.id === product.productId,
-      )
+        (p) => p._id === product.productId,
+      ) // Changed p.id to p._id
       const sqm = product.width * product.height
-      const baseTotal = calculateProductTotal(product, false, 0)
+      const baseTotal = calculateProductTotal(
+        product,
+        false,
+        0,
+        productDatabase,
+      )
       const gstAmount = calculateProductGST(
         product,
         quoteData.gstEnabled,
         quoteData.gstRate,
+        productDatabase,
       )
       const totalWithGST = calculateProductTotal(
         product,
         quoteData.gstEnabled,
         quoteData.gstRate,
+        productDatabase,
       )
 
       // Product name and total
@@ -313,11 +322,13 @@ export async function generateQuotePDF(
       room,
       quoteData.gstEnabled,
       quoteData.gstRate,
+      productDatabase,
     )
     const roomGST = calculateRoomGST(
       room,
       quoteData.gstEnabled,
       quoteData.gstRate,
+      productDatabase,
     )
 
     builder.drawTwoColumn(`Room Total:`, `$${roomTotal.toFixed(2)}`, true)
@@ -438,10 +449,10 @@ export async function generateQuotePDF(
   // Pricing Summary
   builder.drawHeading('Pricing Summary')
 
-  const subtotal = calculateSubtotal(quoteData)
-  const discount = calculateDiscount(quoteData)
-  const totalGST = calculateTotalGST(quoteData)
-  const total = calculateTotal(quoteData)
+  const subtotal = calculateSubtotal(quoteData, productDatabase)
+  const discount = calculateDiscount(quoteData, productDatabase)
+  const totalGST = calculateTotalGST(quoteData, productDatabase)
+  const total = calculateTotal(quoteData, productDatabase)
 
   builder.drawTwoColumn(
     `Subtotal ${quoteData.gstEnabled ? '(incl. GST)' : ''}:`,
@@ -459,7 +470,7 @@ export async function generateQuotePDF(
     const discountLabel =
       quoteData.discountType === 'percentage'
         ? `Discount (${quoteData.discountValue}%)`
-        : `Discount ($${quoteData.discountValue})`
+        : `$${quoteData.discountValue}`
 
     const fullDiscountLabel = quoteData.discountReason
       ? `${discountLabel} - ${quoteData.discountReason}:`
