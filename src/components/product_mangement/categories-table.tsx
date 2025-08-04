@@ -24,6 +24,7 @@ import { useIsMobile } from '@/hooks/use-mobile'
 import { useMutation } from 'convex/react'
 import { api } from 'convex/_generated/api'
 import { toast } from 'sonner'
+import { useAuth } from '@/context/auth'
 
 interface CategoriesTableProps {
   categories: Category[]
@@ -53,8 +54,10 @@ export function CategoriesTable({
     id: Id<'categories'>,
     data: CategoryFormValues,
   ) => {
+    const { user } = useAuth()
     try {
       await updateCategoryMutation({
+        userId: user!._id,
         categoryId: id,
         name: data.title,
         description: data.description,

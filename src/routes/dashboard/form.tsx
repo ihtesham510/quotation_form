@@ -18,6 +18,9 @@ function RouteComponent() {
   const saveQuote = useMutation(api.quotation.addCurtainQuotation)
   const productDatabase = useQuery(
     api.product_categoreis.getProductAndCategories,
+    {
+      userId: user ? user._id : undefined,
+    },
   )
   if (!productDatabase) return <LoaderComponent />
   return (

@@ -98,12 +98,13 @@ export const productSchema = {
 }
 
 export const categorySchema = {
+  userId: v.id('user'),
   name: v.string(),
   description: v.string(),
 }
 
 export default defineSchema({
-  categories: defineTable(categorySchema),
+  categories: defineTable(categorySchema).index('by_userId', ['userId']),
   products: defineTable(productSchema).index('by_category', ['categoryId']),
   user: defineTable({
     first_name: v.string(),

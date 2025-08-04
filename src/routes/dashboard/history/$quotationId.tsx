@@ -7,6 +7,7 @@ import { Step6 } from '@/components/curtains_form/step6'
 import { generateQuotePDF } from '@/components/curtains_form/pdf'
 import { openPdf } from '@/lib/pdf'
 import { LoaderComponent } from '@/components/loader-component'
+import { useAuth } from '@/context/auth'
 
 export const Route = createFileRoute('/dashboard/history/$quotationId')({
   component: RouteComponent,
@@ -28,8 +29,12 @@ function QuotationDetails({
     description?: string
   }
 }) {
+  const { user } = useAuth()
   const productDatabase = useQuery(
     api.product_categoreis.getProductAndCategories,
+    {
+      userId: user ? user._id : undefined,
+    },
   )
   if (!productDatabase) return <LoaderComponent />
   return (

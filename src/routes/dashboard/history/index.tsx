@@ -20,9 +20,13 @@ function RouteComponent() {
 }
 
 function History({ userId }: { userId: Id<'user'> }) {
+  const { user } = useAuth()
   const quotations = useQuery(api.quotation.getQuotations, { userId })
   const productDatabase = useQuery(
     api.product_categoreis.getProductAndCategories,
+    {
+      userId: user ? user._id : undefined,
+    },
   )
 
   const isEmpty = quotations && quotations.length === 0

@@ -3,10 +3,27 @@ import { mutation, query } from './_generated/server'
 import { categorySchema, productSchema } from './schema'
 
 export const getProductAndCategories = query({
-  async handler(ctx) {
+  args: {
+    userId: v.optional(v.id('user')),
+  },
+  async handler(ctx, { userId }) {
+    if (!userId) return null
+    const categories = await ctx.db
+      .query('categories')
+      .withIndex('by_userId', (q) => q.eq('userId', userId))
+      .collect()
+    const products = await Promise.all(
+      categories.map(
+        async (cat) =>
+          await ctx.db
+            .query('products')
+            .withIndex('by_category', (q) => q.eq('categoryId', cat._id))
+            .collect(),
+      ),
+    ).then((results) => results.flat())
     return {
-      categories: await ctx.db.query('categories').collect(),
-      products: await ctx.db.query('products').collect(),
+      categories,
+      products,
     }
   },
 })
