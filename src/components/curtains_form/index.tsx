@@ -11,27 +11,30 @@ import {
 	DollarSign,
 	Eye,
 } from 'lucide-react'
-import type { QuoteData, QuoteCalculatedData, ProductDatabase } from './types'
-import { Step1 } from './step1'
-import { Step2 } from './step2'
-import { Step3 } from './step3'
-import { Step4 } from './step4'
-import { Step5 } from './step5'
-import { Step6 } from './step6'
+import type {
+	QuoteData,
+	ProductDatabase,
+	SelfContainedQuoteData,
+} from './types'
+import { Step1CustomerInfo } from './step1'
+import { Step2ProductSelection } from './step2'
+import { Step3AddonsServices } from './step3'
+import { Step4PricingDiscounts } from './step4'
+import { Step5QuotePreview } from './step5'
 
-export function CurtainsForm({
-	onSaveQuote,
-	onEmail,
-	onPrint,
-	onGeneratePDF,
-	productDatabase,
-}: {
-	onSaveQuote?: (data: QuoteCalculatedData) => void
-	onGeneratePDF?: (data: QuoteCalculatedData) => void
-	onPrint?: (data: QuoteCalculatedData) => void
-	onEmail?: (data: QuoteCalculatedData) => void
+interface BlindQuotationFormProps {
 	productDatabase: ProductDatabase
-}) {
+	onSaveQuote: (data: SelfContainedQuoteData) => void
+	onGeneratePDF: (data: SelfContainedQuoteData) => Promise<void>
+	onEmail: (data: SelfContainedQuoteData) => void
+}
+
+export function BlindQuotationForm({
+	productDatabase,
+	onSaveQuote,
+	onGeneratePDF,
+	onEmail,
+}: BlindQuotationFormProps) {
 	const [currentStep, setCurrentStep] = useState(1)
 	const [quoteData, setQuoteData] = useState<QuoteData>({
 		customer: {
@@ -41,11 +44,9 @@ export function CurtainsForm({
 			address: '',
 			projectAddress: '',
 		},
-		rooms: [],
+		products: [],
 		addOns: [],
-		deliveryOption: 'standard',
-		installationService: false,
-		siteMeasurement: false,
+		customServices: [],
 		discountType: 'percentage',
 		discountValue: 0,
 		discountReason: '',
@@ -54,17 +55,19 @@ export function CurtainsForm({
 		quoteDate: new Date().toISOString().split('T')[0],
 		gstEnabled: false,
 		gstRate: 10,
+		markupEnabled: false,
+		markupType: 'percentage',
+		markupValue: 0,
 	})
 
 	const [errors, setErrors] = useState<Record<string, string>>({})
 
 	const steps = [
 		{ number: 1, title: 'Customer Info', icon: Home },
-		{ number: 2, title: 'Room Setup', icon: Home },
-		{ number: 3, title: 'Product Selection', icon: Package },
-		{ number: 4, title: 'Add-ons & Services', icon: Plus },
-		{ number: 5, title: 'Pricing & Discounts', icon: DollarSign },
-		{ number: 6, title: 'Quote Preview', icon: Eye },
+		{ number: 2, title: 'Product Selection', icon: Package },
+		{ number: 3, title: 'Add-ons & Services', icon: Plus },
+		{ number: 4, title: 'Pricing & Discounts', icon: DollarSign },
+		{ number: 5, title: 'Quote Preview', icon: Eye },
 	]
 
 	// Validation functions
@@ -80,26 +83,23 @@ export function CurtainsForm({
 				if (!quoteData.customer.phone)
 					newErrors.customerPhone = 'Phone is required'
 				break
-			case 2:
-				if (quoteData.rooms.length === 0)
-					newErrors.rooms = 'At least one room is required'
-				break
-			case 3:
-				quoteData.rooms.forEach((room, roomIndex) => {
-					if (room.products.length === 0) {
-						newErrors[`room${roomIndex}Products`] =
-							`${room.name} must have at least one product`
-					}
-					room.products.forEach((product, productIndex) => {
+			case 2: // Product Selection step
+				if (quoteData.products.length === 0)
+					newErrors.products = 'At least one product is required'
+				quoteData.products.forEach((product, productIndex) => {
+					const productInfo = productDatabase.products.find(
+						p => p._id === product.productId,
+					)
+					if (productInfo?.priceType === 'sqm') {
 						if (!product.width || product.width <= 0) {
-							newErrors[`room${roomIndex}Product${productIndex}Width`] =
+							newErrors[`product${productIndex}Width`] =
 								'Width must be greater than 0'
 						}
 						if (!product.height || product.height <= 0) {
-							newErrors[`room${roomIndex}Product${productIndex}Height`] =
+							newErrors[`product${productIndex}Height`] =
 								'Height must be greater than 0'
 						}
-					})
+					}
 				})
 				break
 		}
@@ -108,9 +108,10 @@ export function CurtainsForm({
 		return Object.keys(newErrors).length === 0
 	}
 
+	// Navigation functions
 	const nextStep = () => {
 		if (validateStep(currentStep)) {
-			setCurrentStep(prev => Math.min(prev + 1, 6))
+			setCurrentStep(prev => Math.min(prev + 1, 5))
 		}
 	}
 
@@ -124,11 +125,17 @@ export function CurtainsForm({
 		}
 	}
 
+	// Internal print handler
+	const handlePrint = (data: SelfContainedQuoteData) => {
+		console.log('Printing quote data:', data)
+		window.print()
+	}
+
 	const renderStepContent = () => {
 		switch (currentStep) {
 			case 1:
 				return (
-					<Step1
+					<Step1CustomerInfo
 						quoteData={quoteData}
 						setQuoteData={setQuoteData}
 						errors={errors}
@@ -136,40 +143,37 @@ export function CurtainsForm({
 				)
 			case 2:
 				return (
-					<Step2
+					<Step2ProductSelection
 						quoteData={quoteData}
 						setQuoteData={setQuoteData}
 						errors={errors}
+						productDatabase={productDatabase}
 					/>
 				)
 			case 3:
 				return (
-					<Step3
+					<Step3AddonsServices
 						quoteData={quoteData}
 						setQuoteData={setQuoteData}
-						productDatabase={productDatabase}
-						errors={errors}
 					/>
 				)
 			case 4:
-				return <Step4 quoteData={quoteData} setQuoteData={setQuoteData} />
-			case 5:
 				return (
-					<Step5
+					<Step4PricingDiscounts
 						quoteData={quoteData}
-						productDatabase={productDatabase}
 						setQuoteData={setQuoteData}
+						productDatabase={productDatabase}
 					/>
 				)
-			case 6:
+			case 5:
 				return (
-					<Step6
-						productDatabase={productDatabase}
+					<Step5QuotePreview
 						quoteData={quoteData}
 						onSaveQuote={onSaveQuote}
 						onGeneratePDF={onGeneratePDF}
-						onPrint={onPrint}
+						onPrint={handlePrint}
 						onEmail={onEmail}
+						productDatabase={productDatabase}
 					/>
 				)
 			default:
@@ -219,7 +223,7 @@ export function CurtainsForm({
 								)
 							})}
 						</div>
-						<Progress value={(currentStep / 6) * 100} className='w-full' />
+						<Progress value={(currentStep / 5) * 100} className='w-full' />
 					</div>
 
 					{/* Step Content */}
@@ -239,7 +243,7 @@ export function CurtainsForm({
 							Previous
 						</Button>
 
-						{currentStep < 6 && (
+						{currentStep < 5 && (
 							<Button onClick={nextStep} className='flex items-center gap-2'>
 								Next
 								<ArrowRight className='w-4 h-4' />

@@ -1,21 +1,5 @@
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
-import type { QuoteCalculatedData, ProductDatabase } from './types' // Import ProductDatabase
-// productDatabase will be passed as a parameter, no longer imported directly
-// import { productDatabase } from "@/data/data"
-import {
-	calculateProductTotal,
-	calculateProductGST,
-	calculateRoomTotal,
-	calculateRoomGST,
-	calculateAddOnTotal,
-	calculateAddOnGST,
-	calculateServiceTotal,
-	calculateServiceGST,
-	calculateSubtotal,
-	calculateDiscount,
-	calculateTotalGST,
-	calculateTotal,
-} from './calculations'
+import type { SelfContainedQuoteData } from './types'
 
 interface PDFConfig {
 	pageWidth: number
@@ -221,10 +205,8 @@ class PDFBuilder {
 }
 
 export async function generateQuotePDF(
-	data: QuoteCalculatedData,
-	productDatabase: ProductDatabase,
+	data: SelfContainedQuoteData,
 ): Promise<Blob> {
-	const { quoteData } = data
 	const doc = await PDFDocument.create()
 	const builder = new PDFBuilder(doc)
 
@@ -232,63 +214,37 @@ export async function generateQuotePDF(
 
 	// Title and Date
 	builder.drawTitle('BLINDS QUOTATION')
-	builder.drawBodyText(`Quote Date: ${quoteData.quoteDate}`)
+	builder.drawBodyText(`Quote Date: ${data.quoteDate}`)
 
 	// Customer Information
 	builder.drawHeading('Customer Information')
-	builder.drawBodyText(`Name: ${quoteData.customer.name}`)
-	builder.drawBodyText(`Email: ${quoteData.customer.email}`)
-	builder.drawBodyText(`Phone: ${quoteData.customer.phone}`)
+	builder.drawBodyText(`Name: ${data.customer.name}`)
+	builder.drawBodyText(`Email: ${data.customer.email}`)
+	builder.drawBodyText(`Phone: ${data.customer.phone}`)
 
-	if (quoteData.customer.address) {
-		builder.drawBodyText(`Address: ${quoteData.customer.address}`)
+	if (data.customer.address) {
+		builder.drawBodyText(`Address: ${data.customer.address}`)
 	}
 
-	if (quoteData.customer.projectAddress) {
-		builder.drawBodyText(
-			`Project Address: ${quoteData.customer.projectAddress}`,
-		)
+	if (data.customer.projectAddress) {
+		builder.drawBodyText(`Project Address: ${data.customer.projectAddress}`)
 	}
 
-	// Room Breakdown
-	builder.drawHeading('Room Breakdown')
+	// Product Breakdown
+	builder.drawHeading('Product Breakdown')
 
-	for (const room of quoteData.rooms) {
-		builder.drawSubheading(`${room.name} (${room.type})`)
-
-		for (const product of room.products) {
-			const productInfo = productDatabase.products.find(
-				p => p._id === product.productId,
-			) // Changed p.id to p._id
+	if (data.products.length === 0) {
+		builder.drawBodyText('No products added to this quote.')
+	} else {
+		for (const product of data.products) {
 			const sqm = product.width * product.height
-			const baseTotal = calculateProductTotal(
-				product,
-				false,
-				0,
-				productDatabase,
-			)
-			const gstAmount = calculateProductGST(
-				product,
-				quoteData.gstEnabled,
-				quoteData.gstRate,
-				productDatabase,
-			)
-			const totalWithGST = calculateProductTotal(
-				product,
-				quoteData.gstEnabled,
-				quoteData.gstRate,
-				productDatabase,
-			)
 
 			// Product name and total
-			builder.drawTwoColumn(
-				productInfo?.name || 'Unknown Product',
-				`$${totalWithGST.toFixed(2)}`,
-			)
+			builder.drawTwoColumn(product.name, `$${product.total.toFixed(2)}`)
 
 			// Product details
 			let details = ''
-			if (productInfo?.priceType === 'sqm') {
+			if (product.priceType === 'sqm') {
 				details = `${product.width}m × ${product.height}m (${sqm.toFixed(2)} sqm) × ${product.quantity}`
 			} else {
 				details = `Quantity: ${product.quantity}`
@@ -303,10 +259,18 @@ export async function generateQuotePDF(
 
 			builder.drawSmallText(details, 20)
 
-			// GST breakdown if enabled
-			if (quoteData.gstEnabled && gstAmount > 0) {
+			// Display original price and markup if enabled
+			if (product.effectivePrice !== product.basePrice) {
 				builder.drawSmallText(
-					`Base: $${baseTotal.toFixed(2)} + GST: $${gstAmount.toFixed(2)}`,
+					`Original Price: $${product.basePrice.toFixed(2)} ${product.priceType === 'sqm' ? '/sqm' : '/each'} • Marked Up: $${product.effectivePrice.toFixed(2)} ${product.priceType === 'sqm' ? '/sqm' : '/each'}`,
+					20,
+				)
+			}
+
+			// GST breakdown if enabled
+			if (data.pricing.gstEnabled && product.gstAmount > 0) {
+				builder.drawSmallText(
+					`Base: $${(product.total - product.gstAmount).toFixed(2)} + GST: $${product.gstAmount.toFixed(2)}`,
 					20,
 				)
 			}
@@ -316,130 +280,50 @@ export async function generateQuotePDF(
 				builder.drawSmallText(product.specialFeatures, 20)
 			}
 		}
-
-		// Room total
-		const roomTotal = calculateRoomTotal(
-			room,
-			quoteData.gstEnabled,
-			quoteData.gstRate,
-			productDatabase,
-		)
-		const roomGST = calculateRoomGST(
-			room,
-			quoteData.gstEnabled,
-			quoteData.gstRate,
-			productDatabase,
-		)
-
-		builder.drawTwoColumn(`Room Total:`, `$${roomTotal.toFixed(2)}`, true)
-
-		if (quoteData.gstEnabled && roomGST > 0) {
-			builder.drawTwoColumnSmall(`(GST: $${roomGST.toFixed(2)})`, '')
-		}
 	}
 
 	// Additional Items & Services
 	const hasAdditionalItems =
-		quoteData.addOns.length > 0 ||
-		quoteData.installationService ||
-		quoteData.siteMeasurement ||
-		quoteData.deliveryOption === 'express'
+		data.addOns.length > 0 || data.customServices.length > 0
 
 	if (hasAdditionalItems) {
 		builder.drawHeading('Additional Items & Services')
 
 		// Add-ons
-		for (const addOn of quoteData.addOns) {
-			const baseTotal = addOn.quantity * addOn.unitPrice
-			const gstAmount = calculateAddOnGST(
-				addOn,
-				quoteData.gstEnabled,
-				quoteData.gstRate,
-			)
-			const totalWithGST = calculateAddOnTotal(
-				addOn,
-				quoteData.gstEnabled,
-				quoteData.gstRate,
-			)
+		for (const addOn of data.addOns) {
+			let addOnDetails = `${addOn.name} (${addOn.quantity} × $${addOn.unitPrice.toFixed(2)} ${addOn.unitType})`
 
-			builder.drawTwoColumn(
-				`${addOn.name} (${addOn.quantity} × $${addOn.unitPrice})`,
-				`$${totalWithGST.toFixed(2)}`,
-			)
+			if (addOn.unitType === 'sqm' && addOn.width && addOn.height) {
+				addOnDetails += ` (${addOn.width.toFixed(2)}m × ${addOn.height.toFixed(2)}m)`
+			} else if (addOn.unitType === 'linear' && addOn.length) {
+				addOnDetails += ` (${addOn.length.toFixed(2)}m)`
+			}
 
-			if (quoteData.gstEnabled && gstAmount > 0) {
+			builder.drawTwoColumn(addOnDetails, `$${addOn.total.toFixed(2)}`)
+
+			if (addOn.description) {
+				builder.drawSmallText(addOn.description, 20)
+			}
+
+			if (data.pricing.gstEnabled && addOn.gstAmount > 0) {
 				builder.drawSmallText(
-					`Base: $${baseTotal.toFixed(2)} + GST: $${gstAmount.toFixed(2)}`,
+					`Base: $${(addOn.total - addOn.gstAmount).toFixed(2)} + GST: $${addOn.gstAmount.toFixed(2)}`,
 					20,
 				)
 			}
 		}
 
-		// Services
-		if (quoteData.installationService) {
-			const serviceTotal = calculateServiceTotal(
-				150,
-				quoteData.gstEnabled,
-				quoteData.gstRate,
-			)
-			const serviceGST = calculateServiceGST(
-				150,
-				quoteData.gstEnabled,
-				quoteData.gstRate,
-			)
+		// Custom Services
+		for (const service of data.customServices) {
+			builder.drawTwoColumn(`${service.name}`, `$${service.total.toFixed(2)}`)
 
-			builder.drawTwoColumn(
-				'Installation Service',
-				`$${serviceTotal.toFixed(2)}`,
-			)
-
-			if (quoteData.gstEnabled && serviceGST > 0) {
-				builder.drawSmallText(
-					`Base: $150.00 + GST: $${serviceGST.toFixed(2)}`,
-					20,
-				)
+			if (service.description) {
+				builder.drawSmallText(service.description, 20)
 			}
-		}
 
-		if (quoteData.siteMeasurement) {
-			const serviceTotal = calculateServiceTotal(
-				75,
-				quoteData.gstEnabled,
-				quoteData.gstRate,
-			)
-			const serviceGST = calculateServiceGST(
-				75,
-				quoteData.gstEnabled,
-				quoteData.gstRate,
-			)
-
-			builder.drawTwoColumn('Site Measurement', `$${serviceTotal.toFixed(2)}`)
-
-			if (quoteData.gstEnabled && serviceGST > 0) {
+			if (data.pricing.gstEnabled && service.gstAmount > 0) {
 				builder.drawSmallText(
-					`Base: $75.00 + GST: $${serviceGST.toFixed(2)}`,
-					20,
-				)
-			}
-		}
-
-		if (quoteData.deliveryOption === 'express') {
-			const serviceTotal = calculateServiceTotal(
-				50,
-				quoteData.gstEnabled,
-				quoteData.gstRate,
-			)
-			const serviceGST = calculateServiceGST(
-				50,
-				quoteData.gstEnabled,
-				quoteData.gstRate,
-			)
-
-			builder.drawTwoColumn('Express Delivery', `$${serviceTotal.toFixed(2)}`)
-
-			if (quoteData.gstEnabled && serviceGST > 0) {
-				builder.drawSmallText(
-					`Base: $50.00 + GST: $${serviceGST.toFixed(2)}`,
+					`Base: $${(service.total - service.gstAmount).toFixed(2)} + GST: $${service.gstAmount.toFixed(2)}`,
 					20,
 				)
 			}
@@ -449,45 +333,54 @@ export async function generateQuotePDF(
 	// Pricing Summary
 	builder.drawHeading('Pricing Summary')
 
-	const subtotal = calculateSubtotal(quoteData, productDatabase)
-	const discount = calculateDiscount(quoteData, productDatabase)
-	const totalGST = calculateTotalGST(quoteData, productDatabase)
-	const total = calculateTotal(quoteData, productDatabase)
-
 	builder.drawTwoColumn(
-		`Subtotal ${quoteData.gstEnabled ? '(incl. GST)' : ''}:`,
-		`$${subtotal.toFixed(2)}`,
+		`Subtotal:`, // Updated label
+		`$${data.pricing.subtotalBeforeMarkupAndDiscount.toFixed(2)}`,
 	)
 
-	if (quoteData.gstEnabled && totalGST > 0) {
+	if (data.pricing.totalMarkup > 0) {
 		builder.drawTwoColumn(
-			`Total GST (${quoteData.gstRate}%):`,
-			`$${totalGST.toFixed(2)}`,
+			`Total Markup:`, // Simplified label
+			`$${data.pricing.totalMarkup.toFixed(2)}`,
 		)
 	}
 
-	if (discount > 0) {
-		const discountLabel =
-			quoteData.discountType === 'percentage'
-				? `Discount (${quoteData.discountValue}%)`
-				: `$${quoteData.discountValue}`
-
-		const fullDiscountLabel = quoteData.discountReason
-			? `${discountLabel} - ${quoteData.discountReason}:`
-			: `${discountLabel}:`
-
-		builder.drawTwoColumn(fullDiscountLabel, `-$${discount.toFixed(2)}`)
+	if (data.pricing.gstEnabled && data.pricing.totalGST > 0) {
+		builder.drawTwoColumn(
+			`Total GST (${data.pricing.gstRate}%):`,
+			`$${data.pricing.totalGST.toFixed(2)}`,
+		)
 	}
 
-	builder.drawTwoColumn('TOTAL:', `$${total.toFixed(2)}`, true)
+	if (data.pricing.discountAmount > 0) {
+		const discountLabel =
+			data.pricing.discountType === 'percentage'
+				? `Discount (${data.pricing.discountValue}%)`
+				: `$${data.pricing.discountValue}`
+
+		const fullDiscountLabel = data.pricing.discountReason
+			? `${discountLabel} - ${data.pricing.discountReason}:`
+			: `${discountLabel}:`
+
+		builder.drawTwoColumn(
+			fullDiscountLabel,
+			`-$${data.pricing.discountAmount.toFixed(2)}`,
+		)
+	}
+
+	builder.drawTwoColumn(
+		'TOTAL:',
+		`$${data.pricing.grandTotal.toFixed(2)}`,
+		true,
+	)
 
 	// Payment Terms and Notes
 	builder.drawHeading('Terms & Conditions')
-	builder.drawBodyText(`Payment Terms: ${quoteData.paymentTerms}`)
+	builder.drawBodyText(`Payment Terms: ${data.paymentTerms}`)
 
-	if (quoteData.gstEnabled) {
+	if (data.pricing.gstEnabled) {
 		builder.drawBodyText(
-			`All prices include GST (${quoteData.gstRate}%) as requested.`,
+			`All prices include GST (${data.pricing.gstRate}%) as requested.`,
 		)
 	}
 

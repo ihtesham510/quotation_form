@@ -1,4 +1,8 @@
+'use client'
+
 import type React from 'react'
+import { useState } from 'react' // Import useState
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -12,475 +16,535 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import {
-	CommandSelect,
-	type CommandSelectOption,
-} from '@/components/ui/command-select'
 import { Plus, Trash2, Calculator } from 'lucide-react'
-import type { QuoteData, RoomProduct, ProductDatabase, Id } from './types' // Import Id and ProductDatabase
-import { controlTypes } from './data' // productDatabase will be passed as prop
-import {
-	calculateProductTotal,
-	calculateProductGST,
-	calculateRoomTotal,
-} from './calculations'
+import type { QuoteData, AddOn, CustomService } from './types'
+import { unitTypes } from './data'
+import { calculateAddOnTotal, calculateAddOnGST } from './calculations'
 
 interface Step3Props {
 	quoteData: QuoteData
 	setQuoteData: React.Dispatch<React.SetStateAction<QuoteData>>
-	errors: Record<string, string>
-	productDatabase: ProductDatabase // New prop
 }
 
-export function Step3({
-	quoteData,
-	setQuoteData,
-	errors,
-	productDatabase,
-}: Step3Props) {
-	const addProductToRoom = (roomId: string) => {
-		const newProduct: RoomProduct = {
-			id: Date.now().toString(),
-			productId: productDatabase.products[0]._id, // Changed .id to ._id
-			width: 1,
-			height: 1,
-			quantity: 1,
-			color: 'White',
-			controlType: 'Cord',
-			installation: false,
-			specialFeatures: '',
-		}
+type MeasurementUnit = 'm' | 'cm' | 'mm'
 
+const convertToMeters = (value: number, unit: MeasurementUnit): number => {
+	if (unit === 'cm') return value / 100
+	if (unit === 'mm') return value / 1000
+	return value // Already in meters
+}
+
+const convertFromMeters = (
+	valueInMeters: number,
+	unit: MeasurementUnit,
+): number => {
+	if (unit === 'cm') return valueInMeters * 100
+	if (unit === 'mm') return valueInMeters * 1000
+	return valueInMeters // Already in meters
+}
+
+export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
+	// State to manage the selected unit for each add-on's dimensions
+	const [addOnUnits, setAddOnUnits] = useState<Record<string, MeasurementUnit>>(
+		{},
+	)
+
+	const addAddOn = () => {
+		const newAddOn: AddOn = {
+			id: Date.now().toString(),
+			name: '',
+			description: '',
+			unitType: 'each', // Default to 'each'
+			unitPrice: 0,
+			quantity: 1,
+			width: 0, // Initialize dimensions
+			height: 0,
+			length: 0,
+		}
 		setQuoteData(prev => ({
 			...prev,
-			rooms: prev.rooms.map(room =>
-				room.id === roomId
-					? { ...room, products: [...room.products, newProduct] }
-					: room,
-			),
+			addOns: [...prev.addOns, newAddOn],
+		}))
+		setAddOnUnits(prev => ({ ...prev, [newAddOn.id]: 'm' })) // Default to meters
+	}
+
+	const updateAddOn = (addOnId: string, updates: Partial<AddOn>) => {
+		setQuoteData(prev => ({
+			...prev,
+			addOns: prev.addOns.map(addOn => {
+				if (addOn.id === addOnId) {
+					const updatedAddOn = { ...addOn, ...updates }
+					// Reset dimensions if unitType changes
+					if (updates.unitType && updates.unitType !== addOn.unitType) {
+						updatedAddOn.width = 0
+						updatedAddOn.height = 0
+						updatedAddOn.length = 0
+					}
+					return updatedAddOn
+				}
+				return addOn
+			}),
 		}))
 	}
 
-	const updateRoomProduct = (
-		roomId: string,
-		productId: string,
-		updates: Partial<RoomProduct>,
+	const removeAddOn = (addOnId: string) => {
+		setQuoteData(prev => ({
+			...prev,
+			addOns: prev.addOns.filter(addOn => addOn.id !== addOnId),
+		}))
+		setAddOnUnits(prev => {
+			const newUnits = { ...prev }
+			delete newUnits[addOnId]
+			return newUnits
+		})
+	}
+
+	const handleAddOnUnitChange = (addOnId: string, unit: MeasurementUnit) => {
+		setAddOnUnits(prev => ({ ...prev, [addOnId]: unit }))
+	}
+
+	// Functions for Custom Services
+	const addCustomService = () => {
+		const newService: CustomService = {
+			id: Date.now().toString(),
+			name: '',
+			description: '',
+			price: 0,
+		}
+		setQuoteData(prev => ({
+			...prev,
+			customServices: [...prev.customServices, newService],
+		}))
+	}
+
+	const updateCustomService = (
+		serviceId: string,
+		updates: Partial<CustomService>,
 	) => {
 		setQuoteData(prev => ({
 			...prev,
-			rooms: prev.rooms.map(room =>
-				room.id === roomId
-					? {
-							...room,
-							products: room.products.map(product =>
-								product.id === productId ? { ...product, ...updates } : product,
-							),
-						}
-					: room,
+			customServices: prev.customServices.map(service =>
+				service.id === serviceId ? { ...service, ...updates } : service,
 			),
 		}))
 	}
 
-	const removeRoomProduct = (roomId: string, productId: string) => {
+	const removeCustomService = (serviceId: string) => {
 		setQuoteData(prev => ({
 			...prev,
-			rooms: prev.rooms.map(room =>
-				room.id === roomId
-					? {
-							...room,
-							products: room.products.filter(
-								product => product.id !== productId,
-							),
-						}
-					: room,
+			customServices: prev.customServices.filter(
+				service => service.id !== serviceId,
 			),
 		}))
-	}
-
-	// Prepare category options for CommandSelect
-	const categoryOptions: CommandSelectOption[] = productDatabase.categories.map(
-		category => ({
-			value: category._id, // Changed .id to ._id
-			label: category.name,
-			description: category.description,
-		}),
-	)
-
-	// Get product options for a specific category
-	const getProductOptions = (
-		categoryId: Id<'categories'>,
-	): CommandSelectOption[] => {
-		return productDatabase.products
-			.filter(product => product.categoryId === categoryId)
-			.map(product => ({
-				value: product._id, // Changed .id to ._id
-				label: product.name,
-				description: `$${product.basePrice}/${product.priceType}`,
-			}))
 	}
 
 	return (
 		<div className='space-y-6'>
-			<h3 className='text-lg font-semibold'>Product Selection</h3>
-
-			{quoteData.rooms.map((room, roomIndex) => (
-				<Card key={room.id}>
-					<CardHeader>
-						<div className='flex justify-between items-center'>
-							<CardTitle className='text-base'>
-								{room.name} ({room.type})
-							</CardTitle>
-							<Button
-								onClick={() => addProductToRoom(room.id)}
-								size='sm'
-								className='flex items-center gap-2'
-							>
-								<Plus className='w-4 h-4' />
-								Add Product
-							</Button>
-						</div>
-						{errors[`room${roomIndex}Products`] && (
-							<Alert>
-								<AlertDescription>
-									{errors[`room${roomIndex}Products`]}
-								</AlertDescription>
-							</Alert>
-						)}
-					</CardHeader>
-					<CardContent className='space-y-4'>
-						{room.products.map((product, productIndex) => {
-							const productInfo = productDatabase.products.find(
-								p => p._id === product.productId,
-							) // Changed p.id to p._id
-							const sqm = product.width * product.height
-							const baseTotal = calculateProductTotal(
-								product,
-								false,
-								0,
-								productDatabase,
-							) // Pass productDatabase
-							const gstAmount = calculateProductGST(
-								product,
-								quoteData.gstEnabled,
-								quoteData.gstRate,
-								productDatabase,
-							) // Pass productDatabase
-							const totalWithGST = calculateProductTotal(
-								product,
-								quoteData.gstEnabled,
-								quoteData.gstRate,
-								productDatabase,
-							) // Pass productDatabase
-
-							return (
-								<div
-									key={product.id}
-									className='border rounded-lg p-4 space-y-4'
+			{/* Custom Services and Charges */}
+			<Card>
+				<CardHeader>
+					<div className='flex justify-between items-center'>
+						<CardTitle className='text-base'>
+							Custom Services & Charges
+						</CardTitle>
+						<Button
+							onClick={addCustomService}
+							size='sm'
+							className='flex items-center gap-2'
+						>
+							<Plus className='w-4 h-4' />
+							Add Service
+						</Button>
+					</div>
+				</CardHeader>
+				<CardContent className='space-y-4'>
+					{quoteData.customServices.map(service => (
+						<div key={service.id} className='border rounded-lg p-4 space-y-4'>
+							<div className='flex justify-between items-start'>
+								<h4 className='font-medium'>Custom Service</h4>
+								<Button
+									variant='outline'
+									size='sm'
+									onClick={() => removeCustomService(service.id)}
+									className='text-red-600 hover:text-red-700'
 								>
-									<div className='flex justify-between items-start'>
-										<h4 className='font-medium'>Product {productIndex + 1}</h4>
-										<Button
-											variant='outline'
-											size='sm'
-											onClick={() => removeRoomProduct(room.id, product.id)}
-											className='text-red-600 hover:text-red-700'
-										>
-											<Trash2 className='w-4 h-4' />
-										</Button>
+									<Trash2 className='w-4 h-4' />
+								</Button>
+							</div>
+
+							<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+								<div className='space-y-2'>
+									<Label>Service Name *</Label>
+									<Input
+										value={service.name}
+										onChange={e =>
+											updateCustomService(service.id, { name: e.target.value })
+										}
+										placeholder='e.g., Express Delivery, Installation'
+									/>
+								</div>
+								<div className='space-y-2'>
+									<Label>Price ($) *</Label>
+									<Input
+										type='number'
+										step='0.01'
+										min='0'
+										value={service.price}
+										onChange={e =>
+											updateCustomService(service.id, {
+												price: Number.parseFloat(e.target.value) || 0,
+											})
+										}
+										placeholder='Enter price'
+									/>
+								</div>
+							</div>
+							<div className='space-y-2'>
+								<Label>Description</Label>
+								<Textarea
+									value={service.description}
+									onChange={e =>
+										updateCustomService(service.id, {
+											description: e.target.value,
+										})
+									}
+									placeholder='Optional description for the service'
+								/>
+							</div>
+						</div>
+					))}
+					{quoteData.customServices.length === 0 && (
+						<div className='text-center py-8 text-muted-foreground'>
+							No custom services added.
+						</div>
+					)}
+				</CardContent>
+			</Card>
+
+			<Card>
+				<CardHeader>
+					<CardTitle className='text-base'>GST Configuration</CardTitle>
+				</CardHeader>
+				<CardContent className='space-y-4'>
+					<div className='flex items-center space-x-2'>
+						<Checkbox
+							id='gstEnabled'
+							checked={quoteData.gstEnabled}
+							onCheckedChange={checked =>
+								setQuoteData(prev => ({
+									...prev,
+									gstEnabled: checked as boolean,
+								}))
+							}
+						/>
+						<Label htmlFor='gstEnabled'>Apply GST to this quote</Label>
+					</div>
+
+					{quoteData.gstEnabled && (
+						<div className='space-y-2'>
+							<Label htmlFor='gstRate'>GST Rate (%)</Label>
+							<Input
+								id='gstRate'
+								type='number'
+								step='0.1'
+								min='0'
+								max='100'
+								value={quoteData.gstRate}
+								onChange={e =>
+									setQuoteData(prev => ({
+										...prev,
+										gstRate: Number.parseFloat(e.target.value) || 0,
+									}))
+								}
+								placeholder='Enter GST rate (e.g., 10)'
+							/>
+							<p className='text-sm text-muted-foreground'>
+								GST will be calculated on the total amount after tax and
+								discount
+							</p>
+						</div>
+					)}
+				</CardContent>
+			</Card>
+
+			<Card>
+				<CardHeader>
+					<div className='flex justify-between items-center'>
+						<CardTitle className='text-base'>Additional Items</CardTitle>
+						<Button
+							onClick={addAddOn}
+							size='sm'
+							className='flex items-center gap-2'
+						>
+							<Plus className='w-4 h-4' />
+							Add Item
+						</Button>
+					</div>
+				</CardHeader>
+				<CardContent className='space-y-4'>
+					{quoteData.addOns.map(addOn => {
+						const currentUnit = addOnUnits[addOn.id] || 'm' // Default to 'm' if not set
+						const baseTotal =
+							addOn.unitPrice *
+							addOn.quantity *
+							(addOn.unitType === 'sqm'
+								? (addOn.width || 0) * (addOn.height || 0)
+								: addOn.unitType === 'linear'
+									? addOn.length || 0
+									: 1)
+						const gstAmount = calculateAddOnGST(
+							addOn,
+							quoteData.gstEnabled,
+							quoteData.gstRate,
+						)
+						const totalWithGST = calculateAddOnTotal(
+							addOn,
+							quoteData.gstEnabled,
+							quoteData.gstRate,
+						)
+						// const areaOrLength =
+						// 	addOn.unitType === 'sqm'
+						// 		? (addOn.width ?? 0 * (addOn.height ?? 0)).toFixed(2)
+						// 		: (addOn.length || 0).toFixed(2)
+						//
+						return (
+							<div key={addOn.id} className='border rounded-lg p-4 space-y-4'>
+								<div className='flex justify-between items-start'>
+									<h4 className='font-medium'>Custom Item</h4>
+									<Button
+										variant='outline'
+										size='sm'
+										onClick={() => removeAddOn(addOn.id)}
+										className='text-red-600 hover:text-red-700'
+									>
+										<Trash2 className='w-4 h-4' />
+									</Button>
+								</div>
+
+								<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+									<div className='space-y-2'>
+										<Label>Item Name *</Label>
+										<Input
+											value={addOn.name}
+											onChange={e =>
+												updateAddOn(addOn.id, { name: e.target.value })
+											}
+											placeholder='Enter item name'
+										/>
 									</div>
 
-									<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-										<div className='space-y-2'>
-											<Label>Category</Label>
-											<CommandSelect
-												options={categoryOptions}
-												value={productInfo?.categoryId || ''}
-												onValueChange={categoryId => {
-													const firstProductInCategory =
-														productDatabase.products.find(
-															p => p.categoryId === categoryId,
-														)
-													if (firstProductInCategory) {
-														updateRoomProduct(room.id, product.id, {
-															productId: firstProductInCategory._id,
-														}) // Changed .id to ._id
-													}
-												}}
-												placeholder='Select category...'
-												searchPlaceholder='Search categories...'
-												emptyMessage='No category found.'
-											/>
-										</div>
+									<div className='space-y-2'>
+										<Label>Unit Type</Label>
+										<Select
+											value={addOn.unitType}
+											onValueChange={value =>
+												updateAddOn(addOn.id, {
+													unitType: value as 'each' | 'sqm' | 'linear',
+												})
+											}
+										>
+											<SelectTrigger>
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												{unitTypes.map(type => (
+													<SelectItem key={type} value={type}>
+														{type === 'each'
+															? 'Each'
+															: type === 'sqm'
+																? 'Square Meter'
+																: 'Linear Meter'}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+									</div>
+								</div>
 
+								{addOn.unitType === 'sqm' && (
+									<div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
 										<div className='space-y-2'>
-											<Label>Product</Label>
-											<CommandSelect
-												options={getProductOptions(
-													productInfo?.categoryId ||
-														productDatabase.categories[0]._id,
-												)} // Changed .id to ._id
-												value={product.productId}
-												onValueChange={productId =>
-													updateRoomProduct(room.id, product.id, {
-														productId: productId as Id<'products'>,
-													})
-												}
-												placeholder='Select product...'
-												searchPlaceholder='Search products...'
-												emptyMessage='No product found.'
-											/>
-										</div>
-
-										<div className='space-y-2'>
-											<Label>Quantity</Label>
+											<Label>Width ({currentUnit})</Label>
 											<Input
 												type='number'
-												min='1'
-												value={product.quantity}
+												step='0.01'
+												min='0'
+												value={convertFromMeters(addOn.width || 0, currentUnit)}
 												onChange={e =>
-													updateRoomProduct(room.id, product.id, {
-														quantity: Number.parseInt(e.target.value) || 1,
+													updateAddOn(addOn.id, {
+														width: convertToMeters(
+															Number.parseFloat(e.target.value) || 0,
+															currentUnit,
+														),
 													})
 												}
 											/>
 										</div>
-									</div>
-
-									{productInfo?.priceType === 'sqm' && (
-										<div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-											<div className='space-y-2'>
-												<Label>Width (m) *</Label>
-												<Input
-													type='number'
-													step='0.01'
-													min='0.01'
-													value={product.width}
-													onChange={e =>
-														updateRoomProduct(room.id, product.id, {
-															width: Number.parseFloat(e.target.value) || 0,
-														})
-													}
-													className={
-														errors[
-															`room${roomIndex}Product${productIndex}Width`
-														]
-															? 'border-red-500'
-															: ''
-													}
-												/>
-												{errors[
-													`room${roomIndex}Product${productIndex}Width`
-												] && (
-													<p className='text-red-500 text-sm'>
-														{
-															errors[
-																`room${roomIndex}Product${productIndex}Width`
-															]
-														}
-													</p>
-												)}
-											</div>
-
-											<div className='space-y-2'>
-												<Label>Height (m) *</Label>
-												<Input
-													type='number'
-													step='0.01'
-													min='0.01'
-													value={product.height}
-													onChange={e =>
-														updateRoomProduct(room.id, product.id, {
-															height: Number.parseFloat(e.target.value) || 0,
-														})
-													}
-													className={
-														errors[
-															`room${roomIndex}Product${productIndex}Height`
-														]
-															? 'border-red-500'
-															: ''
-													}
-												/>
-												{errors[
-													`room${roomIndex}Product${productIndex}Height`
-												] && (
-													<p className='text-red-500 text-sm'>
-														{
-															errors[
-																`room${roomIndex}Product${productIndex}Height`
-															]
-														}
-													</p>
-												)}
-											</div>
-
-											<div className='space-y-2'>
-												<Label>Area</Label>
-												<div className='flex items-center h-10 px-3 border rounded-md bg-muted'>
-													<Calculator className='w-4 h-4 mr-2' />
-													{sqm.toFixed(2)} sqm
-												</div>
-											</div>
-										</div>
-									)}
-
-									{productInfo?.priceType === 'each' && (
-										<div className='bg-blue-50 border border-blue-200 rounded-lg p-3'>
-											<p className='text-sm text-blue-700'>
-												<strong>Per Unit Pricing:</strong> This product is
-												priced per unit. Dimensions are not required.
-											</p>
-										</div>
-									)}
-
-									<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
 										<div className='space-y-2'>
-											<Label>Color/Finish</Label>
+											<Label>Height ({currentUnit})</Label>
 											<Input
-												value={product.color}
+												type='number'
+												step='0.01'
+												min='0'
+												value={convertFromMeters(
+													addOn.height || 0,
+													currentUnit,
+												)}
 												onChange={e =>
-													updateRoomProduct(room.id, product.id, {
-														color: e.target.value,
+													updateAddOn(addOn.id, {
+														height: convertToMeters(
+															Number.parseFloat(e.target.value) || 0,
+															currentUnit,
+														),
 													})
 												}
 											/>
 										</div>
-
 										<div className='space-y-2'>
-											<Label>Control Type</Label>
+											<Label>Unit</Label>
 											<Select
-												value={product.controlType}
-												onValueChange={value =>
-													updateRoomProduct(room.id, product.id, {
-														controlType: value,
-													})
+												value={currentUnit}
+												onValueChange={(value: MeasurementUnit) =>
+													handleAddOnUnitChange(addOn.id, value)
 												}
 											>
 												<SelectTrigger>
 													<SelectValue />
 												</SelectTrigger>
 												<SelectContent>
-													{controlTypes.map(type => (
-														<SelectItem key={type} value={type}>
-															{type}
-														</SelectItem>
-													))}
+													<SelectItem value='m'>Meters (m)</SelectItem>
+													<SelectItem value='cm'>Centimeters (cm)</SelectItem>
+													<SelectItem value='mm'>Millimeters (mm)</SelectItem>
 												</SelectContent>
 											</Select>
 										</div>
+										<div className='space-y-2'>
+											<Label>Area</Label>
+											<div className='flex items-center h-10 px-3 border rounded-md bg-muted'>
+												<Calculator className='w-4 h-4 mr-2' />
+												{(addOn.width ?? 0 * (addOn.height ?? 0)).toFixed(
+													2,
+												)}{' '}
+												sqm
+											</div>
+										</div>
+									</div>
+								)}
+
+								{addOn.unitType === 'linear' && (
+									<div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+										<div className='space-y-2'>
+											<Label>Length ({currentUnit})</Label>
+											<Input
+												type='number'
+												step='0.01'
+												min='0'
+												value={convertFromMeters(
+													addOn.length || 0,
+													currentUnit,
+												)}
+												onChange={e =>
+													updateAddOn(addOn.id, {
+														length: convertToMeters(
+															Number.parseFloat(e.target.value) || 0,
+															currentUnit,
+														),
+													})
+												}
+											/>
+										</div>
+										<div className='space-y-2'>
+											<Label>Unit</Label>
+											<Select
+												value={currentUnit}
+												onValueChange={(value: MeasurementUnit) =>
+													handleAddOnUnitChange(addOn.id, value)
+												}
+											>
+												<SelectTrigger>
+													<SelectValue />
+												</SelectTrigger>
+												<SelectContent>
+													<SelectItem value='m'>Meters (m)</SelectItem>
+													<SelectItem value='cm'>Centimeters (cm)</SelectItem>
+													<SelectItem value='mm'>Millimeters (mm)</SelectItem>
+												</SelectContent>
+											</Select>
+										</div>
+										<div className='space-y-2'>
+											<Label>Total Length</Label>
+											<div className='flex items-center h-10 px-3 border rounded-md bg-muted'>
+												<Calculator className='w-4 h-4 mr-2' />
+												{(addOn.length || 0).toFixed(2)} linear m
+											</div>
+										</div>
+									</div>
+								)}
+
+								<div className='space-y-2'>
+									<Label>Description</Label>
+									<Textarea
+										value={addOn.description}
+										onChange={e =>
+											updateAddOn(addOn.id, { description: e.target.value })
+										}
+										placeholder='Optional description'
+									/>
+								</div>
+
+								<div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+									<div className='space-y-2'>
+										<Label>Unit Price ($)</Label>
+										<Input
+											type='number'
+											step='0.01'
+											min='0'
+											value={addOn.unitPrice}
+											onChange={e =>
+												updateAddOn(addOn.id, {
+													unitPrice: Number.parseFloat(e.target.value) || 0,
+												})
+											}
+										/>
 									</div>
 
 									<div className='space-y-2'>
-										<Label>Special Features</Label>
-										<Textarea
-											value={product.specialFeatures}
+										<Label>Quantity</Label>
+										<Input
+											type='number'
+											min='1'
+											value={addOn.quantity}
 											onChange={e =>
-												updateRoomProduct(room.id, product.id, {
-													specialFeatures: e.target.value,
-												})
-											}
-											placeholder='Any special requirements or features...'
-										/>
-									</div>
-
-									<div className='flex items-center space-x-2'>
-										<Checkbox
-											id={`installation-${product.id}`}
-											checked={product.installation}
-											onCheckedChange={checked =>
-												updateRoomProduct(room.id, product.id, {
-													installation: checked as boolean,
+												updateAddOn(addOn.id, {
+													quantity: Number.parseInt(e.target.value) || 1,
 												})
 											}
 										/>
-										<Label htmlFor={`installation-${product.id}`}>
-											Requires Installation
-										</Label>
 									</div>
 
-									{productInfo?.specialConditions && (
-										<Alert>
-											<AlertDescription>
-												<strong>Note:</strong> {productInfo.specialConditions}
-											</AlertDescription>
-										</Alert>
-									)}
-
-									<div className='flex justify-between items-center pt-2 border-t'>
-										<div className='text-sm text-muted-foreground'>
-											{productInfo?.priceType === 'sqm' &&
-												productInfo.minimumQty > sqm && (
-													<span>
-														Minimum {productInfo.minimumQty} sqm applies
-													</span>
-												)}
-											{productInfo?.priceType === 'each' &&
-												productInfo.minimumQty > product.quantity && (
-													<span>
-														Minimum {productInfo.minimumQty} units required
-													</span>
-												)}
-										</div>
-										<div className='text-right'>
-											<div className='text-lg font-semibold'>
-												${totalWithGST.toFixed(2)}
-											</div>
-											{quoteData.gstEnabled && (
-												<div className='text-sm text-muted-foreground'>
-													Base: ${baseTotal.toFixed(2)} + GST: $
-													{gstAmount.toFixed(2)}
-												</div>
-											)}
+									<div className='space-y-2'>
+										<Label>Calculated Total</Label>
+										<div className='flex items-center h-10 px-3 border rounded-md bg-muted'>
+											${totalWithGST.toFixed(2)}
 										</div>
 									</div>
 								</div>
-							)
-						})}
-
-						{room.products.length === 0 && (
-							<div className='text-center py-8 text-muted-foreground'>
-								No products added to this room yet.
-							</div>
-						)}
-
-						{room.products.length > 0 && (
-							<div className='flex justify-end pt-4 border-t'>
-								<div className='text-right'>
-									<div className='text-xl font-bold'>
-										Room Total: $
-										{calculateRoomTotal(
-											room,
-											quoteData.gstEnabled,
-											quoteData.gstRate,
-											productDatabase,
-										).toFixed(2)}
+								{quoteData.gstEnabled && gstAmount > 0 && (
+									<div className='text-sm text-muted-foreground text-right'>
+										Base: ${baseTotal.toFixed(2)} + GST: ${gstAmount.toFixed(2)}
 									</div>
-									{quoteData.gstEnabled && (
-										<div className='text-sm text-muted-foreground'>
-											(Includes GST: $
-											{room.products
-												.reduce(
-													(total, product) =>
-														total +
-														calculateProductGST(
-															product,
-															quoteData.gstEnabled,
-															quoteData.gstRate,
-															productDatabase,
-														),
-													0,
-												)
-												.toFixed(2)}
-											)
-										</div>
-									)}
-								</div>
+								)}
 							</div>
-						)}
-					</CardContent>
-				</Card>
-			))}
+						)
+					})}
+
+					{quoteData.addOns.length === 0 && (
+						<div className='text-center py-8 text-muted-foreground'>
+							No additional items added.
+						</div>
+					)}
+				</CardContent>
+			</Card>
 		</div>
 	)
 }

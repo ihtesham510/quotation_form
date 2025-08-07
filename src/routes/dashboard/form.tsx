@@ -1,4 +1,4 @@
-import { CurtainsForm } from '@/components/curtains_form'
+import { BlindQuotationForm as CurtainsForm } from '@/components/curtains_form'
 import { generateQuotePDF } from '@/components/curtains_form/pdf'
 import { LoaderComponent } from '@/components/loader-component'
 import { useAuth } from '@/context/auth'
@@ -6,8 +6,8 @@ import { openPdf } from '@/lib/pdf'
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from 'convex-helpers/react/cache'
 import { api } from 'convex/_generated/api'
-import { useMutation } from 'convex/react'
-import { toast } from 'sonner'
+// import { useMutation } from 'convex/react'
+// import { toast } from 'sonner'
 
 export const Route = createFileRoute('/dashboard/form')({
 	component: RouteComponent,
@@ -15,7 +15,7 @@ export const Route = createFileRoute('/dashboard/form')({
 
 function RouteComponent() {
 	const { user } = useAuth()
-	const saveQuote = useMutation(api.quotation.addCurtainQuotation)
+	// const saveQuote = useMutation(api.quotation.addCurtainQuotation)
 	const productDatabase = useQuery(
 		api.product_categoreis.getProductAndCategories,
 		{
@@ -37,15 +37,14 @@ function RouteComponent() {
 			<CurtainsForm
 				productDatabase={productDatabase}
 				onGeneratePDF={async data => {
-					const blob = await generateQuotePDF(data, productDatabase)
+					const blob = await generateQuotePDF(data)
 					return openPdf(blob)
 				}}
-				onSaveQuote={async data => {
+				onSaveQuote={async _ => {
 					if (user) {
-						await saveQuote({ userId: user._id, ...data })
-						toast.success('Quotation Saved Successfully')
 					}
 				}}
+				onEmail={async _ => {}}
 			/>
 		</div>
 	)
