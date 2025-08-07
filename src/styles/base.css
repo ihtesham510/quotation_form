@@ -1,10 +1,10 @@
 .title {
-  @apply text-3xl font-bold;
+	@apply text-3xl font-bold;
 }
 .description {
-  @apply text-muted-foreground text-sm;
+	@apply text-muted-foreground text-sm;
 }
 
 .base-padding {
-  @apply px-4 md:px-8;
+	@apply px-4 md:px-8;
 }

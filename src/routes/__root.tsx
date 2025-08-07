@@ -4,9 +4,9 @@ import { api } from 'convex/_generated/api'
 import type { ConvexReactClient } from 'convex/react'
 
 export const Route = createRootRouteWithContext<{
-  auth: AuthContext
-  convex: ConvexReactClient
-  api: typeof api
+	auth: AuthContext
+	convex: ConvexReactClient
+	api: typeof api
 }>()({
-  component: () => <Outlet />,
+	component: () => <Outlet />,
 })

@@ -6,10 +6,10 @@ import tsconfigpaths from 'vite-tsconfig-paths'
 import { TanStackRouterVite } from '@tanstack/router-plugin/vite'
 
 export default defineConfig({
-  plugins: [
-    tsconfigpaths(),
-    TanStackRouterVite({ target: 'react', autoCodeSplitting: true }),
-    viteReact(),
-    tailwindcss(),
-  ],
+	plugins: [
+		tsconfigpaths(),
+		TanStackRouterVite({ target: 'react', autoCodeSplitting: true }),
+		viteReact(),
+		tailwindcss(),
+	],
 })

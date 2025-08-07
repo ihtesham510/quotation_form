@@ -10,52 +10,52 @@ import { LoaderComponent } from '@/components/loader-component'
 import { useAuth } from '@/context/auth'
 
 export const Route = createFileRoute('/dashboard/history/$quotationId')({
-  component: RouteComponent,
+	component: RouteComponent,
 })
 
 function RouteComponent() {
-  const { quotationId } = Route.useParams()
-  const quotation = useQuery(api.quotation.getQuotation, {
-    quotationId: quotationId as Id<'quotation'>,
-  })
-  return <div>{quotation && <QuotationDetails quotation={quotation} />}</div>
+	const { quotationId } = Route.useParams()
+	const quotation = useQuery(api.quotation.getQuotation, {
+		quotationId: quotationId as Id<'quotation'>,
+	})
+	return <div>{quotation && <QuotationDetails quotation={quotation} />}</div>
 }
 
 function QuotationDetails({
-  quotation,
+	quotation,
 }: {
-  quotation: DataModel['quotation']['document'] & {
-    title?: string
-    description?: string
-  }
+	quotation: DataModel['quotation']['document'] & {
+		title?: string
+		description?: string
+	}
 }) {
-  const { user } = useAuth()
-  const productDatabase = useQuery(
-    api.product_categoreis.getProductAndCategories,
-    {
-      userId: user ? user._id : undefined,
-    },
-  )
-  if (!productDatabase) return <LoaderComponent />
-  return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-8 px-4">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold mb-6">Quote Details</h1>
-          <Card>
-            <CardContent className="p-6">
-              <Step6
-                productDatabase={productDatabase}
-                quoteData={quotation.quoteData}
-                onGeneratePDF={async (data) => {
-                  const blob = await generateQuotePDF(data, productDatabase)
-                  openPdf(blob)
-                }}
-              />
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
-  )
+	const { user } = useAuth()
+	const productDatabase = useQuery(
+		api.product_categoreis.getProductAndCategories,
+		{
+			userId: user ? user._id : undefined,
+		},
+	)
+	if (!productDatabase) return <LoaderComponent />
+	return (
+		<div className='min-h-screen bg-background'>
+			<div className='container mx-auto py-8 px-4'>
+				<div className='max-w-6xl mx-auto'>
+					<h1 className='text-3xl font-bold mb-6'>Quote Details</h1>
+					<Card>
+						<CardContent className='p-6'>
+							<Step6
+								productDatabase={productDatabase}
+								quoteData={quotation.quoteData}
+								onGeneratePDF={async data => {
+									const blob = await generateQuotePDF(data, productDatabase)
+									openPdf(blob)
+								}}
+							/>
+						</CardContent>
+					</Card>
+				</div>
+			</div>
+		</div>
+	)
 }

@@ -86,43 +86,43 @@ Remember: Always be on the track of getting user to ask about the quote and give
 `
 
 const agent = new Agent(components.agent, {
-  chat: openai.chat('gpt-4o-mini'),
-  instructions: prompt,
-  tools: {},
-  textEmbedding: openai.embedding('text-embedding-3-small'),
-  maxSteps: 1,
-  maxRetries: 3,
+	chat: openai.chat('gpt-4o-mini'),
+	instructions: prompt,
+	tools: {},
+	textEmbedding: openai.embedding('text-embedding-3-small'),
+	maxSteps: 1,
+	maxRetries: 3,
 })
 
 export const continueConversation = action({
-  args: {
-    threadId: v.optional(v.string()),
-    message: v.string(),
-  },
-  async handler(ctx, { threadId, message }) {
-    if (threadId) {
-      const { thread } = await agent.continueThread(ctx, { threadId })
-      const text = await thread.generateText({ prompt: message })
-      console.log('text', text)
-      return threadId
-    }
-    const thread = await agent.createThread(ctx)
-    const text = await thread.thread.generateText({ prompt: message })
-    console.log('first text', text)
-    return thread.threadId
-  },
+	args: {
+		threadId: v.optional(v.string()),
+		message: v.string(),
+	},
+	async handler(ctx, { threadId, message }) {
+		if (threadId) {
+			const { thread } = await agent.continueThread(ctx, { threadId })
+			const text = await thread.generateText({ prompt: message })
+			console.log('text', text)
+			return threadId
+		}
+		const thread = await agent.createThread(ctx)
+		const text = await thread.thread.generateText({ prompt: message })
+		console.log('first text', text)
+		return thread.threadId
+	},
 })
 
 export const listThreadMessages = query({
-  args: {
-    threadId: v.string(),
-    paginationOpts: paginationOptsValidator,
-  },
-  handler: async (ctx, { threadId, paginationOpts }) => {
-    const paginated = await agent.listMessages(ctx, {
-      threadId,
-      paginationOpts,
-    })
-    return paginated
-  },
+	args: {
+		threadId: v.string(),
+		paginationOpts: paginationOptsValidator,
+	},
+	handler: async (ctx, { threadId, paginationOpts }) => {
+		const paginated = await agent.listMessages(ctx, {
+			threadId,
+			paginationOpts,
+		})
+		return paginated
+	},
 })
