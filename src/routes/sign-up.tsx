@@ -48,7 +48,6 @@ function SignUpForm() {
 		.superRefine(async ({ email, password }, ctx) => {
 			const userExits = await convex.query(api.user.userExists, { email })
 			const auth = await convex.query(api.user.auth, { email, password })
-			console.log('auth', [userExits, auth])
 			if (userExits) {
 				ctx.addIssue({
 					code: 'custom',

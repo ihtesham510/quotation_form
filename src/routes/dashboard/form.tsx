@@ -44,7 +44,9 @@ function RouteComponent() {
 					if (user) {
 					}
 				}}
-				onEmail={async _ => {}}
+				onEmail={async data => {
+					console.log(data)
+				}}
 			/>
 		</div>
 	)

@@ -162,10 +162,6 @@ export const calculateProductTotalAfterMarkup = (
 	} else {
 		total = effectivePrice * product.quantity
 	}
-	// Added a console.log to force re-compilation
-	console.log(
-		`Calculating total after markup for product ${product.id}: ${total}`,
-	)
 	return total
 }
 

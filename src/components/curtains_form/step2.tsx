@@ -1,6 +1,5 @@
 import type React from 'react'
-import { useState } from 'react' // Import useState
-
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -19,15 +18,10 @@ import {
 	CommandSelect,
 	type CommandSelectOption,
 } from '@/components/ui/command-select'
-import { Plus, Trash2, Calculator } from 'lucide-react'
+import { Plus, Trash2, Calculator, Edit, Save } from 'lucide-react'
 import type { QuoteData, QuoteProduct, ProductDatabase, Id } from './types'
 import { controlTypes } from './data'
-import {
-	calculateProductTotal,
-	calculateProductGST,
-	// calculateProductEffectiveBasePrice,
-	calculateProductOriginalBasePrice,
-} from './calculations'
+import { calculateProductTotal, calculateProductGST } from './calculations'
 
 interface Step2Props {
 	quoteData: QuoteData
@@ -59,10 +53,11 @@ export function Step2ProductSelection({
 	errors,
 	productDatabase,
 }: Step2Props) {
-	// State to manage the selected unit for each product's dimensions
 	const [productUnits, setProductUnits] = useState<
 		Record<string, MeasurementUnit>
 	>({})
+	const [editingProductId, setEditingProductId] = useState<string | null>(null)
+	const [tempProductName, setTempProductName] = useState<string>('')
 
 	const addProduct = () => {
 		const newProduct: QuoteProduct = {
@@ -75,13 +70,14 @@ export function Step2ProductSelection({
 			controlType: 'Cord',
 			installation: false,
 			specialFeatures: '',
+			label: `Product ${quoteData.products.length + 1}`,
 		}
 
 		setQuoteData(prev => ({
 			...prev,
 			products: [...prev.products, newProduct],
 		}))
-		setProductUnits(prev => ({ ...prev, [newProduct.id]: 'm' })) // Default to meters
+		setProductUnits(prev => ({ ...prev, [newProduct.id]: 'm' }))
 	}
 
 	const updateProduct = (productId: string, updates: Partial<QuoteProduct>) => {
@@ -109,7 +105,42 @@ export function Step2ProductSelection({
 		setProductUnits(prev => ({ ...prev, [productId]: unit }))
 	}
 
-	// Prepare category options for CommandSelect
+	const handleEditClick = (productId: string, currentName: string) => {
+		setEditingProductId(productId)
+		setTempProductName(currentName)
+	}
+
+	const handleSave = (productId: string) => {
+		const trimmedName = tempProductName.trim()
+		if (trimmedName) {
+			updateProduct(productId, { label: trimmedName })
+		}
+		setEditingProductId(null)
+		setTempProductName('')
+	}
+
+	const handleCancel = () => {
+		setEditingProductId(null)
+		setTempProductName('')
+	}
+
+	const handleNameInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setTempProductName(e.target.value)
+	}
+
+	const handleKeyDown = (
+		e: React.KeyboardEvent<HTMLInputElement>,
+		productId: string,
+	) => {
+		if (e.key === 'Enter') {
+			e.preventDefault()
+			handleSave(productId)
+		} else if (e.key === 'Escape') {
+			e.preventDefault()
+			handleCancel()
+		}
+	}
+
 	const categoryOptions: CommandSelectOption[] = productDatabase.categories.map(
 		category => ({
 			value: category._id,
@@ -118,7 +149,6 @@ export function Step2ProductSelection({
 		}),
 	)
 
-	// Get product options for a specific category
 	const getProductOptions = (
 		categoryId: Id<'categories'>,
 	): CommandSelectOption[] => {
@@ -133,13 +163,15 @@ export function Step2ProductSelection({
 
 	return (
 		<div className='space-y-6'>
-			<h3 className='text-lg font-semibold'>Product Selection</h3>
+			<div className='flex justify-between items-center'>
+				<h3 className='text-lg font-semibold'>Product Selection</h3>
 
-			<div className='flex justify-end mb-4'>
-				<Button onClick={addProduct} className='flex items-center gap-2'>
-					<Plus className='w-4 h-4' />
-					Add Product
-				</Button>
+				<div className='flex justify-end mb-4'>
+					<Button onClick={addProduct} className='flex items-center gap-2'>
+						<Plus className='w-4 h-4' />
+						<p className='hidden md:inline-flex'>Add Product</p>
+					</Button>
+				</div>
 			</div>
 
 			{errors.products && (
@@ -152,18 +184,8 @@ export function Step2ProductSelection({
 				const productInfo = productDatabase.products.find(
 					p => p._id === product.productId,
 				)
-				const currentUnit = productUnits[product.id] || 'm' // Default to 'm' if not set
+				const currentUnit = productUnits[product.id] || 'm'
 				const sqm = product.width * product.height
-				const originalBasePrice = calculateProductOriginalBasePrice(
-					product,
-					productDatabase,
-				)
-				// const effectiveBasePrice = calculateProductEffectiveBasePrice(
-				// 	product,
-				// 	quoteData,
-				// 	productDatabase,
-				// )
-
 				const baseTotal = calculateProductTotal(
 					product,
 					false,
@@ -186,21 +208,66 @@ export function Step2ProductSelection({
 					quoteData,
 				)
 
+				const currentProductName =
+					product.label || productInfo?.name || `Product ${productIndex + 1}`
+
 				return (
 					<Card key={product.id} className='mb-4'>
 						<CardHeader>
-							<div className='flex justify-between items-center'>
-								<CardTitle className='text-base'>
-									Product {productIndex + 1}
-								</CardTitle>
-								<Button
-									variant='outline'
-									size='sm'
-									onClick={() => removeProduct(product.id)}
-									className='text-red-600 hover:text-red-700'
-								>
-									<Trash2 className='w-4 h-4' />
-								</Button>
+							<div className='flex flex-col md:flex-row justify-between w-full md:w-auto items-center'>
+								{editingProductId === product.id ? (
+									<div className='flex items-center gap-2 w-full md:w-auto'>
+										<Input
+											value={tempProductName}
+											onChange={handleNameInputChange}
+											onKeyDown={e => handleKeyDown(e, product.id)}
+											autoFocus
+											onBlur={() => {
+												handleSave(product.id)
+											}}
+											className='text-base font-bold'
+											placeholder='Enter product name...'
+										/>
+									</div>
+								) : (
+									<CardTitle className='text-base'>
+										{currentProductName}
+									</CardTitle>
+								)}
+								<div className='flex flex-col md:flex-row w-full md:w-max gap-2 mt-6 md:mt-0'>
+									{editingProductId === product.id ? (
+										<>
+											<Button
+												variant='outline'
+												size='sm'
+												onClick={() => handleSave(product.id)}
+											>
+												<Save className='w-4 h-4' />
+												Save
+											</Button>
+										</>
+									) : (
+										<Button
+											variant='outline'
+											size='sm'
+											onClick={() =>
+												handleEditClick(product.id, currentProductName)
+											}
+										>
+											<Edit className='w-4 h-4' />
+											Edit
+										</Button>
+									)}
+									<Button
+										variant='outline'
+										size='sm'
+										onClick={() => removeProduct(product.id)}
+										className='text-red-600 hover:text-red-700'
+									>
+										<Trash2 className='w-4 h-4' />
+										Delete
+									</Button>
+								</div>
 							</div>
 						</CardHeader>
 						<CardContent className='space-y-4'>
@@ -268,7 +335,7 @@ export function Step2ProductSelection({
 										<Input
 											type='number'
 											step='0.01'
-											min='0.01'
+											min='0.001'
 											value={convertFromMeters(product.width, currentUnit)}
 											onChange={e =>
 												updateProduct(product.id, {
@@ -327,7 +394,7 @@ export function Step2ProductSelection({
 												handleUnitChange(product.id, value)
 											}
 										>
-											<SelectTrigger>
+											<SelectTrigger className='w-full'>
 												<SelectValue />
 											</SelectTrigger>
 											<SelectContent>
@@ -349,10 +416,13 @@ export function Step2ProductSelection({
 							)}
 
 							{productInfo?.priceType === 'each' && (
-								<div className='bg-blue-50 border border-blue-200 rounded-lg p-3'>
-									<p className='text-sm text-blue-700'>
-										<strong>Per Unit Pricing:</strong> This product is priced
-										per unit. Dimensions are not required.
+								<div className='bg-primary/10 border border-primary rounded-lg p-3'>
+									<p className='text-sm text-primary flex gap-2 items-center'>
+										<strong>Per Unit Pricing :</strong>
+										<span className='text-primary/70'>
+											This product is priced per unit. Dimensions are not
+											required.
+										</span>
 									</p>
 								</div>
 							)}
@@ -376,7 +446,7 @@ export function Step2ProductSelection({
 											updateProduct(product.id, { controlType: value })
 										}
 									>
-										<SelectTrigger>
+										<SelectTrigger className='w-full'>
 											<SelectValue />
 										</SelectTrigger>
 										<SelectContent>
@@ -391,15 +461,16 @@ export function Step2ProductSelection({
 							</div>
 
 							<div className='space-y-2'>
-								<Label>Special Features</Label>
+								<Label htmlFor={`notes-${product.id}`}>Notes</Label>
 								<Textarea
+									id={`notes-${product.id}`}
 									value={product.specialFeatures}
 									onChange={e =>
 										updateProduct(product.id, {
 											specialFeatures: e.target.value,
 										})
 									}
-									placeholder='Any special requirements or features...'
+									placeholder='Any special requirements or notes...'
 								/>
 							</div>
 
@@ -426,7 +497,7 @@ export function Step2ProductSelection({
 								</Alert>
 							)}
 
-							<div className='flex justify-between items-center pt-2 border-t'>
+							<div className='flex justify-between items-center pt-2'>
 								<div className='text-sm text-muted-foreground'>
 									{productInfo?.priceType === 'sqm' &&
 										productInfo.minimumQty > sqm && (
@@ -439,18 +510,13 @@ export function Step2ProductSelection({
 											</span>
 										)}
 								</div>
+
 								<div className='text-right'>
-									{quoteData.markupEnabled && (
-										<div className='text-sm text-muted-foreground'>
-											Original: ${originalBasePrice.toFixed(2)}{' '}
-											{productInfo?.priceType === 'sqm' ? '/sqm' : '/each'}
-										</div>
-									)}
 									<div className='text-lg font-semibold'>
 										${totalWithGST.toFixed(2)}
 									</div>
 									{quoteData.gstEnabled && (
-										<div className='text-sm text-muted-foreground'>
+										<div className='text-sm text-muted-foreground mb-2'>
 											Base: ${baseTotal.toFixed(2)} + GST: $
 											{gstAmount.toFixed(2)}
 										</div>

@@ -6,7 +6,6 @@ import type {
 	SelfContainedQuoteData,
 } from './types'
 import {
-	// calculateSubtotalAfterMarkup,
 	calculateDiscount,
 	calculateTotal,
 	calculateProductTotal,
@@ -19,18 +18,17 @@ import {
 	calculateProductEffectiveBasePrice,
 	calculateSubtotalBeforeAll,
 	calculateTotalGST,
-	calculateProductOriginalBasePrice, // Ensure this is imported
-	calculateAddOnBaseTotal, // Ensure this is imported
-	// calculateCustomServiceBaseTotal,
-	calculateProductTotalAfterMarkup, // Ensure this is imported
+	calculateProductOriginalBasePrice,
+	calculateAddOnBaseTotal,
+	calculateProductTotalAfterMarkup,
 } from './calculations'
+import { DownloadIcon, SaveIcon } from 'lucide-react'
 
 interface Step5Props {
 	quoteData: QuoteData
-	onSaveQuote?: (data: SelfContainedQuoteData) => void // Updated type
-	onGeneratePDF?: (data: SelfContainedQuoteData) => void // Updated type
-	onPrint?: (data: SelfContainedQuoteData) => void // Updated type
-	onEmail?: (data: SelfContainedQuoteData) => void // Updated type
+	onSaveQuote?: (data: SelfContainedQuoteData) => void
+	onGeneratePDF?: (data: SelfContainedQuoteData) => void
+	onEmail?: (data: SelfContainedQuoteData) => void
 	productDatabase: ProductDatabase
 }
 
@@ -38,12 +36,11 @@ export function Step5QuotePreview({
 	quoteData,
 	onSaveQuote,
 	onGeneratePDF,
-	onPrint,
 	onEmail,
 	productDatabase,
 }: Step5Props) {
 	const selfContainedData: SelfContainedQuoteData = {
-		id: Date.now().toString(), // Generate a new ID
+		id: Date.now().toString(),
 		savedAt: new Date().toISOString(),
 		customer: { ...quoteData.customer },
 		quoteDate: quoteData.quoteDate,
@@ -85,6 +82,7 @@ export function Step5QuotePreview({
 						c => c._id === productInfo?.categoryId,
 					)?.name || 'Unknown Category',
 				priceType: productInfo?.priceType || 'each',
+				label: product.label,
 				basePrice,
 				effectivePrice,
 				width: product.width,
@@ -154,32 +152,6 @@ export function Step5QuotePreview({
 		},
 	}
 
-	// const calculatedData = {
-	// 	quoteData: quoteData,
-	// 	calculations: {
-	// 		subtotal: calculateSubtotalAfterMarkup(quoteData, productDatabase),
-	// 		discount: calculateDiscount(quoteData, productDatabase),
-	// 		tax: 0,
-	// 		gst: calculateTotalGST(quoteData, productDatabase),
-	// 		markup: calculateTotalMarkup(quoteData, productDatabase),
-	// 		total: calculateTotal(quoteData, productDatabase),
-	// 		productTotals: quoteData.products.map(product => ({
-	// 			productId: product.id,
-	// 			total: calculateProductTotal(
-	// 				product,
-	// 				quoteData.gstEnabled,
-	// 				quoteData.gstRate,
-	// 				productDatabase,
-	// 				quoteData,
-	// 			),
-	// 		})),
-	// 	},
-	// 	metadata: {
-	// 		generatedAt: new Date().toISOString(),
-	// 		itemCount: quoteData.products.length,
-	// 	},
-	// }
-
 	return (
 		<div className='space-y-6'>
 			<h3 className='text-lg font-semibold'>Quote Preview</h3>
@@ -231,16 +203,6 @@ export function Step5QuotePreview({
 								p => p._id === product.productId,
 							)
 							const sqm = product.width * product.height
-							const originalBasePrice = calculateProductOriginalBasePrice(
-								product,
-								productDatabase,
-							)
-							const effectiveBasePrice = calculateProductEffectiveBasePrice(
-								product,
-								quoteData,
-								productDatabase,
-							)
-
 							const baseTotal = calculateProductTotalAfterMarkup(
 								product,
 								quoteData,
@@ -267,9 +229,12 @@ export function Step5QuotePreview({
 									className='border-b pb-2 last:border-b-0 last:pb-0'
 								>
 									<div className='flex justify-between items-start'>
-										<div className='font-medium'>
-											{productInfo?.name || 'Unknown Product'} (Qty:{' '}
-											{product.quantity})
+										<div className='grid'>
+											<h1 className='font-medium'>{product.label}</h1>
+											<div className='font-medium'>
+												{productInfo?.name || 'Unknown Product'} (Qty:{' '}
+												{product.quantity})
+											</div>
 										</div>
 										<div className='font-semibold'>
 											${totalWithGST.toFixed(2)}
@@ -282,14 +247,6 @@ export function Step5QuotePreview({
 										{product.controlType !== 'Cord' &&
 											` • ${product.controlType}`}
 									</div>
-									{quoteData.markupEnabled && (
-										<div className='text-xs text-muted-foreground'>
-											Original: ${originalBasePrice.toFixed(2)}{' '}
-											{productInfo?.priceType === 'sqm' ? '/sqm' : '/each'}
-											{effectiveBasePrice !== originalBasePrice &&
-												` • Marked Up: $${effectiveBasePrice.toFixed(2)} ${productInfo?.priceType === 'sqm' ? '/sqm' : '/each'}`}
-										</div>
-									)}
 									{quoteData.gstEnabled && gstAmount > 0 && (
 										<div className='text-xs text-muted-foreground'>
 											Base: ${baseTotal.toFixed(2)} + GST: $
@@ -350,12 +307,6 @@ export function Step5QuotePreview({
 							)
 						})}
 						{quoteData.customServices.map(service => {
-							// const baseTotal = calculateCustomServiceBaseTotal(service)
-							// const gstAmount = calculateCustomServiceGST(
-							// 	service,
-							// 	quoteData.gstEnabled,
-							// 	quoteData.gstRate,
-							// )
 							const totalWithGST = calculateCustomServiceTotal(
 								service,
 								quoteData.gstEnabled,
@@ -382,19 +333,12 @@ export function Step5QuotePreview({
 							<span>Subtotal:</span>
 							<span>
 								$
-								{selfContainedData.pricing.subtotalBeforeMarkupAndDiscount.toFixed(
-									2,
-								)}
+								{(
+									selfContainedData.pricing.subtotalBeforeMarkupAndDiscount +
+									selfContainedData.pricing.totalMarkup
+								).toFixed(2)}
 							</span>
 						</div>
-						{selfContainedData.pricing.totalMarkup > 0 && (
-							<div className='flex justify-between text-green-600'>
-								<span>Markup:</span>
-								<span>
-									+${selfContainedData.pricing.totalMarkup.toFixed(2)}
-								</span>
-							</div>
-						)}
 						{quoteData.gstEnabled && (
 							<div className='flex justify-between text-muted-foreground'>
 								<span>Total GST ({quoteData.gstRate}%):</span>
@@ -421,17 +365,20 @@ export function Step5QuotePreview({
 						variant='outline'
 						onClick={() => onSaveQuote(selfContainedData)}
 					>
-						Save Quote
+						<SaveIcon className='size-4' />
+						<p className='hidden md:inline-flex'>Save Quote</p>
 					</Button>
 				)}
 				{onGeneratePDF && (
-					<Button onClick={() => onGeneratePDF(selfContainedData)}>
-						Generate PDF
+					<Button
+						variant='outline'
+						onClick={() => onGeneratePDF(selfContainedData)}
+					>
+						<DownloadIcon className='size-4' />
+						<p className='hidden md:inline-flex'>Download PDF</p>
 					</Button>
 				)}
-				{onPrint && (
-					<Button onClick={() => onPrint(selfContainedData)}>Print</Button>
-				)}
+
 				{onEmail && (
 					<Button onClick={() => onEmail(selfContainedData)}>Email</Button>
 				)}

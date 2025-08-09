@@ -149,7 +149,7 @@ class PDFBuilder {
 			PDF_CONFIG.colors.primary,
 			'bold',
 		)
-		this.addSpacing(0.3)
+		this.addSpacing(0.5)
 	}
 
 	drawSubheading(text: string): void {
@@ -167,6 +167,16 @@ class PDFBuilder {
 		this.drawLine(
 			text,
 			PDF_CONFIG.fontSize.body,
+			PDF_CONFIG.colors.text,
+			'regular',
+			indent,
+		)
+	}
+
+	drawDescriptionText(text: string, indent = -1): void {
+		this.drawLine(
+			text,
+			PDF_CONFIG.fontSize.small,
 			PDF_CONFIG.colors.text,
 			'regular',
 			indent,
@@ -275,9 +285,8 @@ export async function generateQuotePDF(
 				)
 			}
 
-			// Special features
 			if (product.specialFeatures) {
-				builder.drawSmallText(product.specialFeatures, 20)
+				builder.drawDescriptionText(product.specialFeatures, 10)
 			}
 		}
 	}

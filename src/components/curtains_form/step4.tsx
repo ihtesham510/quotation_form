@@ -65,7 +65,7 @@ export function Step4PricingDiscounts({
 										setQuoteData(prev => ({ ...prev, markupType: value }))
 									}
 								>
-									<SelectTrigger>
+									<SelectTrigger className='w-full'>
 										<SelectValue />
 									</SelectTrigger>
 									<SelectContent>
@@ -120,7 +120,7 @@ export function Step4PricingDiscounts({
 									setQuoteData(prev => ({ ...prev, discountType: value }))
 								}
 							>
-								<SelectTrigger>
+								<SelectTrigger className='w-full'>
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>

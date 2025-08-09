@@ -20,8 +20,8 @@ export function ProductCategoryManager({
 }: {
 	categories: Category[]
 	products: Product[]
-	onImportData: (file: File) => void // New prop for import
-	onExportData: () => void // New prop for export
+	onImportData: (file: File) => void
+	onExportData: () => void
 }) {
 	const { user } = useAuth()
 	const addProductMutation = useMutation(api.product_categoreis.addProduct)

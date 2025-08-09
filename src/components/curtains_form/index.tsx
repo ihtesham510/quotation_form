@@ -125,12 +125,6 @@ export function BlindQuotationForm({
 		}
 	}
 
-	// Internal print handler
-	const handlePrint = (data: SelfContainedQuoteData) => {
-		console.log('Printing quote data:', data)
-		window.print()
-	}
-
 	const renderStepContent = () => {
 		switch (currentStep) {
 			case 1:
@@ -171,7 +165,6 @@ export function BlindQuotationForm({
 						quoteData={quoteData}
 						onSaveQuote={onSaveQuote}
 						onGeneratePDF={onGeneratePDF}
-						onPrint={handlePrint}
 						onEmail={onEmail}
 						productDatabase={productDatabase}
 					/>

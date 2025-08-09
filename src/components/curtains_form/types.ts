@@ -10,8 +10,8 @@ export interface Customer {
 }
 
 export interface QuoteProduct {
-	// Renamed from RoomProduct
 	id: string
+	label: string
 	productId: Id<'products'>
 	width: number
 	height: number
@@ -27,15 +27,14 @@ export interface AddOn {
 	id: string
 	name: string
 	description: string
-	unitType: 'each' | 'sqm' | 'linear' // Updated unit types
+	unitType: 'each' | 'sqm' | 'linear'
 	unitPrice: number
 	quantity: number
-	width?: number // New: Optional width for sqm
-	height?: number // New: Optional height for sqm
-	length?: number // New: Optional length for linear
+	width?: number
+	height?: number
+	length?: number
 }
 
-// New interface for custom services
 export interface CustomService {
 	id: string
 	name: string
@@ -45,21 +44,20 @@ export interface CustomService {
 
 export interface QuoteData {
 	customer: Customer
-	products: QuoteProduct[] // Changed from rooms: Room[]
+	products: QuoteProduct[]
 	addOns: AddOn[]
-	customServices: CustomService[] // New: Array for custom services
-	// Removed deliveryOption, installationService, siteMeasurement
+	customServices: CustomService[]
 	discountType: 'percentage' | 'fixed'
 	discountValue: number
 	discountReason: string
-	taxRate: number // This is now effectively unused for calculations, kept for type compatibility
+	taxRate: number
 	paymentTerms: string
 	quoteDate: string
 	gstEnabled: boolean
 	gstRate: number
-	markupEnabled: boolean // New: Enable/disable markup
-	markupType: 'percentage' | 'fixed' // New: Markup type
-	markupValue: number // New: Markup value
+	markupEnabled: boolean
+	markupType: 'percentage' | 'fixed'
+	markupValue: number
 }
 
 export type QuoteFormData = QuoteData
@@ -79,9 +77,9 @@ export interface QuoteCalculatedData {
 		discount: number
 		tax: number
 		gst: number
-		markup: number // New: Total markup amount
+		markup: number
 		total: number
-		productTotals: { productId: string; total: number }[] // Adjusted for flat products
+		productTotals: { productId: string; total: number }[]
 	}
 	metadata: {
 		generatedAt: string
@@ -89,7 +87,6 @@ export interface QuoteCalculatedData {
 	}
 }
 
-// New self-contained data structure for saved quotes
 export interface SelfContainedQuoteData {
 	id: string
 	savedAt: string
@@ -97,14 +94,14 @@ export interface SelfContainedQuoteData {
 	quoteDate: string
 	paymentTerms: string
 
-	// Products with all necessary details
 	products: Array<{
 		id: string
 		name: string
+		label: string
 		categoryName: string
 		priceType: 'sqm' | 'each'
 		basePrice: number
-		effectivePrice: number // Price after markup
+		effectivePrice: number
 		width: number
 		height: number
 		quantity: number
@@ -116,7 +113,6 @@ export interface SelfContainedQuoteData {
 		gstAmount: number
 	}>
 
-	// Add-ons with all details
 	addOns: Array<{
 		id: string
 		name: string
@@ -131,7 +127,6 @@ export interface SelfContainedQuoteData {
 		gstAmount: number
 	}>
 
-	// Custom services with all details
 	customServices: Array<{
 		id: string
 		name: string
@@ -141,7 +136,6 @@ export interface SelfContainedQuoteData {
 		gstAmount: number
 	}>
 
-	// Pricing details
 	pricing: {
 		subtotalBeforeMarkupAndDiscount: number
 		totalMarkup: number

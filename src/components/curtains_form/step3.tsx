@@ -1,7 +1,5 @@
-'use client'
-
 import type React from 'react'
-import { useState } from 'react' // Import useState
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -31,7 +29,7 @@ type MeasurementUnit = 'm' | 'cm' | 'mm'
 const convertToMeters = (value: number, unit: MeasurementUnit): number => {
 	if (unit === 'cm') return value / 100
 	if (unit === 'mm') return value / 1000
-	return value // Already in meters
+	return value
 }
 
 const convertFromMeters = (
@@ -40,11 +38,10 @@ const convertFromMeters = (
 ): number => {
 	if (unit === 'cm') return valueInMeters * 100
 	if (unit === 'mm') return valueInMeters * 1000
-	return valueInMeters // Already in meters
+	return valueInMeters
 }
 
 export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
-	// State to manage the selected unit for each add-on's dimensions
 	const [addOnUnits, setAddOnUnits] = useState<Record<string, MeasurementUnit>>(
 		{},
 	)
@@ -54,10 +51,10 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 			id: Date.now().toString(),
 			name: '',
 			description: '',
-			unitType: 'each', // Default to 'each'
+			unitType: 'each',
 			unitPrice: 0,
 			quantity: 1,
-			width: 0, // Initialize dimensions
+			width: 0,
 			height: 0,
 			length: 0,
 		}
@@ -65,7 +62,7 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 			...prev,
 			addOns: [...prev.addOns, newAddOn],
 		}))
-		setAddOnUnits(prev => ({ ...prev, [newAddOn.id]: 'm' })) // Default to meters
+		setAddOnUnits(prev => ({ ...prev, [newAddOn.id]: 'm' }))
 	}
 
 	const updateAddOn = (addOnId: string, updates: Partial<AddOn>) => {
@@ -74,7 +71,6 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 			addOns: prev.addOns.map(addOn => {
 				if (addOn.id === addOnId) {
 					const updatedAddOn = { ...addOn, ...updates }
-					// Reset dimensions if unitType changes
 					if (updates.unitType && updates.unitType !== addOn.unitType) {
 						updatedAddOn.width = 0
 						updatedAddOn.height = 0
@@ -103,7 +99,6 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 		setAddOnUnits(prev => ({ ...prev, [addOnId]: unit }))
 	}
 
-	// Functions for Custom Services
 	const addCustomService = () => {
 		const newService: CustomService = {
 			id: Date.now().toString(),
@@ -140,7 +135,6 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 
 	return (
 		<div className='space-y-6'>
-			{/* Custom Services and Charges */}
 			<Card>
 				<CardHeader>
 					<div className='flex justify-between items-center'>
@@ -153,7 +147,7 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 							className='flex items-center gap-2'
 						>
 							<Plus className='w-4 h-4' />
-							Add Service
+							<p className='hidden md:inline-flex'>Add Service</p>
 						</Button>
 					</div>
 				</CardHeader>
@@ -277,13 +271,13 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 							className='flex items-center gap-2'
 						>
 							<Plus className='w-4 h-4' />
-							Add Item
+							<p className='hidden md:inline-flex'>Add Item</p>
 						</Button>
 					</div>
 				</CardHeader>
 				<CardContent className='space-y-4'>
 					{quoteData.addOns.map(addOn => {
-						const currentUnit = addOnUnits[addOn.id] || 'm' // Default to 'm' if not set
+						const currentUnit = addOnUnits[addOn.id] || 'm'
 						const baseTotal =
 							addOn.unitPrice *
 							addOn.quantity *
@@ -302,11 +296,6 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 							quoteData.gstEnabled,
 							quoteData.gstRate,
 						)
-						// const areaOrLength =
-						// 	addOn.unitType === 'sqm'
-						// 		? (addOn.width ?? 0 * (addOn.height ?? 0)).toFixed(2)
-						// 		: (addOn.length || 0).toFixed(2)
-						//
 						return (
 							<div key={addOn.id} className='border rounded-lg p-4 space-y-4'>
 								<div className='flex justify-between items-start'>
@@ -343,7 +332,7 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 												})
 											}
 										>
-											<SelectTrigger>
+											<SelectTrigger className='w-full'>
 												<SelectValue />
 											</SelectTrigger>
 											<SelectContent>

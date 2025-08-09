@@ -20,4 +20,4 @@ export const paymentTerms = [
 
 export const controlTypes = ['Cord', 'Chain', 'Motorized', 'Remote Control']
 
-export const unitTypes = ['each', 'sqm', 'linear', 'hour']
+export const unitTypes = ['each', 'sqm', 'linear']
