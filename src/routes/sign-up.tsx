@@ -45,9 +45,8 @@ function SignUpForm() {
 			last_name: z.string(),
 			password: z.string().min(8),
 		})
-		.superRefine(async ({ email, password }, ctx) => {
+		.superRefine(async ({ email }, ctx) => {
 			const userExits = await convex.query(api.user.userExists, { email })
-			const auth = await convex.query(api.user.auth, { email, password })
 			if (userExits) {
 				ctx.addIssue({
 					code: 'custom',
