@@ -35,7 +35,6 @@ function RouteComponent() {
 				const content = e.target?.result as string
 				const importedData: ImportedData = JSON.parse(content)
 
-				// 1. Validate Schema
 				const schemaError = validateImportDataSchema(importedData)
 				if (schemaError) {
 					console.info('schema validation error', schemaError)
@@ -43,7 +42,6 @@ function RouteComponent() {
 					return
 				}
 
-				// 2. Validate Relations
 				const relationError = validateImportDataRelations(importedData)
 				if (relationError) {
 					console.info('relation validation error', relationError)
@@ -51,7 +49,6 @@ function RouteComponent() {
 					return
 				}
 
-				// Add categories first and build the ID map
 				toast.promise(
 					async () =>
 						await Promise.all(

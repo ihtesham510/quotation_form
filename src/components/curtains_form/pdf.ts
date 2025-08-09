@@ -22,8 +22,8 @@ interface PDFConfig {
 }
 
 const PDF_CONFIG: PDFConfig = {
-	pageWidth: 595.28, // A4 width in points
-	pageHeight: 841.89, // A4 height in points
+	pageWidth: 595.28,
+	pageHeight: 841.89,
 	margin: 50,
 	fontSize: {
 		title: 20,
@@ -33,10 +33,10 @@ const PDF_CONFIG: PDFConfig = {
 		small: 9,
 	},
 	colors: {
-		primary: [0.2, 0.2, 0.2], // Dark gray
-		secondary: [0.4, 0.4, 0.4], // Medium gray
-		text: [0.1, 0.1, 0.1], // Almost black
-		muted: [0.6, 0.6, 0.6], // Light gray
+		primary: [0.2, 0.2, 0.2],
+		secondary: [0.4, 0.4, 0.4],
+		text: [0.1, 0.1, 0.1],
+		muted: [0.6, 0.6, 0.6],
 	},
 	lineHeight: 1.4,
 }
@@ -142,14 +142,14 @@ class PDFBuilder {
 	}
 
 	drawHeading(text: string): void {
-		this.addSpacing(0.5)
+		this.addSpacing(1.5)
 		this.drawLine(
 			text,
 			PDF_CONFIG.fontSize.heading,
 			PDF_CONFIG.colors.primary,
 			'bold',
 		)
-		this.addSpacing(0.5)
+		this.addSpacing(0.1)
 	}
 
 	drawSubheading(text: string): void {
@@ -222,11 +222,9 @@ export async function generateQuotePDF(
 
 	await builder.loadFonts()
 
-	// Title and Date
 	builder.drawTitle('BLINDS QUOTATION')
 	builder.drawBodyText(`Quote Date: ${data.quoteDate}`)
 
-	// Customer Information
 	builder.drawHeading('Customer Information')
 	builder.drawBodyText(`Name: ${data.customer.name}`)
 	builder.drawBodyText(`Email: ${data.customer.email}`)
@@ -240,7 +238,6 @@ export async function generateQuotePDF(
 		builder.drawBodyText(`Project Address: ${data.customer.projectAddress}`)
 	}
 
-	// Product Breakdown
 	builder.drawHeading('Product Breakdown')
 
 	if (data.products.length === 0) {
@@ -249,10 +246,8 @@ export async function generateQuotePDF(
 		for (const product of data.products) {
 			const sqm = product.width * product.height
 
-			// Product name and total
 			builder.drawTwoColumn(product.name, `$${product.total.toFixed(2)}`)
 
-			// Product details
 			let details = ''
 			if (product.priceType === 'sqm') {
 				details = `${product.width}m × ${product.height}m (${sqm.toFixed(2)} sqm) × ${product.quantity}`
@@ -269,7 +264,6 @@ export async function generateQuotePDF(
 
 			builder.drawSmallText(details, 20)
 
-			// Display original price and markup if enabled
 			if (product.effectivePrice !== product.basePrice) {
 				builder.drawSmallText(
 					`Original Price: $${product.basePrice.toFixed(2)} ${product.priceType === 'sqm' ? '/sqm' : '/each'} • Marked Up: $${product.effectivePrice.toFixed(2)} ${product.priceType === 'sqm' ? '/sqm' : '/each'}`,
@@ -277,7 +271,6 @@ export async function generateQuotePDF(
 				)
 			}
 
-			// GST breakdown if enabled
 			if (data.pricing.gstEnabled && product.gstAmount > 0) {
 				builder.drawSmallText(
 					`Base: $${(product.total - product.gstAmount).toFixed(2)} + GST: $${product.gstAmount.toFixed(2)}`,
@@ -291,14 +284,12 @@ export async function generateQuotePDF(
 		}
 	}
 
-	// Additional Items & Services
 	const hasAdditionalItems =
 		data.addOns.length > 0 || data.customServices.length > 0
 
 	if (hasAdditionalItems) {
 		builder.drawHeading('Additional Items & Services')
 
-		// Add-ons
 		for (const addOn of data.addOns) {
 			let addOnDetails = `${addOn.name} (${addOn.quantity} × $${addOn.unitPrice.toFixed(2)} ${addOn.unitType})`
 
@@ -322,7 +313,6 @@ export async function generateQuotePDF(
 			}
 		}
 
-		// Custom Services
 		for (const service of data.customServices) {
 			builder.drawTwoColumn(`${service.name}`, `$${service.total.toFixed(2)}`)
 
@@ -339,20 +329,12 @@ export async function generateQuotePDF(
 		}
 	}
 
-	// Pricing Summary
 	builder.drawHeading('Pricing Summary')
 
 	builder.drawTwoColumn(
-		`Subtotal:`, // Updated label
-		`$${data.pricing.subtotalBeforeMarkupAndDiscount.toFixed(2)}`,
+		`Subtotal:`,
+		`$${(data.pricing.subtotalBeforeMarkupAndDiscount + data.pricing.totalMarkup).toFixed(2)}`,
 	)
-
-	if (data.pricing.totalMarkup > 0) {
-		builder.drawTwoColumn(
-			`Total Markup:`, // Simplified label
-			`$${data.pricing.totalMarkup.toFixed(2)}`,
-		)
-	}
 
 	if (data.pricing.gstEnabled && data.pricing.totalGST > 0) {
 		builder.drawTwoColumn(
@@ -383,17 +365,6 @@ export async function generateQuotePDF(
 		true,
 	)
 
-	// Payment Terms and Notes
-	builder.drawHeading('Terms & Conditions')
-	builder.drawBodyText(`Payment Terms: ${data.paymentTerms}`)
-
-	if (data.pricing.gstEnabled) {
-		builder.drawBodyText(
-			`All prices include GST (${data.pricing.gstRate}%) as requested.`,
-		)
-	}
-
-	// Footer
 	builder.drawSmallText('Thank you for your business!')
 	builder.drawSmallText(
 		`Generated on: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}`,

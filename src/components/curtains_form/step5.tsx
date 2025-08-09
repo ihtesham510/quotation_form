@@ -45,7 +45,6 @@ export function Step5QuotePreview({
 		customer: { ...quoteData.customer },
 		quoteDate: quoteData.quoteDate,
 		paymentTerms: quoteData.paymentTerms,
-
 		products: quoteData.products.map(product => {
 			const productInfo = productDatabase.products.find(
 				p => p._id === product.productId,

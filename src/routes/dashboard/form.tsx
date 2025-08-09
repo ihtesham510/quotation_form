@@ -6,8 +6,8 @@ import { openPdf } from '@/lib/pdf'
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from 'convex-helpers/react/cache'
 import { api } from 'convex/_generated/api'
-// import { useMutation } from 'convex/react'
-// import { toast } from 'sonner'
+import { useMutation } from 'convex/react'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/dashboard/form')({
 	component: RouteComponent,
@@ -15,7 +15,7 @@ export const Route = createFileRoute('/dashboard/form')({
 
 function RouteComponent() {
 	const { user } = useAuth()
-	// const saveQuote = useMutation(api.quotation.addCurtainQuotation)
+	const saveQuote = useMutation(api.quotation.addCurtainQuotation)
 	const productDatabase = useQuery(
 		api.product_categoreis.getProductAndCategories,
 		{
@@ -40,8 +40,19 @@ function RouteComponent() {
 					const blob = await generateQuotePDF(data)
 					return openPdf(blob)
 				}}
-				onSaveQuote={async _ => {
+				onSaveQuote={async data => {
 					if (user) {
+						toast.promise(
+							async () =>
+								await saveQuote({
+									userId: user._id,
+									...data,
+								}),
+							{
+								success: 'Quote Saved Successfully',
+								error: 'Error while saving quote.',
+							},
+						)
 					}
 				}}
 				onEmail={async data => {
