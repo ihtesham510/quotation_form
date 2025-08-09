@@ -9,6 +9,8 @@
  */
 
 import type * as conversation from "../conversation.js";
+import type * as email from "../email.js";
+import type * as node_functions from "../node_functions.js";
 import type * as product_categoreis from "../product_categoreis.js";
 import type * as quotation from "../quotation.js";
 import type * as user from "../user.js";
@@ -29,6 +31,8 @@ import type {
  */
 declare const fullApi: ApiFromModules<{
   conversation: typeof conversation;
+  email: typeof email;
+  node_functions: typeof node_functions;
   product_categoreis: typeof product_categoreis;
   quotation: typeof quotation;
   user: typeof user;
@@ -658,188 +662,11 @@ export declare const components: {
           >;
         }>
       >;
-      getThreadMessages: FunctionReference<
-        "query",
-        "internal",
-        { deprecated: "Use listMessagesByThreadId instead" },
-        {
-          continueCursor: string;
-          isDone: boolean;
-          page: Array<{
-            _creationTime: number;
-            _id: string;
-            agentName?: string;
-            embeddingId?: string;
-            error?: string;
-            fileIds?: Array<string>;
-            finishReason?:
-              | "stop"
-              | "length"
-              | "content-filter"
-              | "tool-calls"
-              | "error"
-              | "other"
-              | "unknown";
-            id?: string;
-            message?:
-              | {
-                  content:
-                    | string
-                    | Array<
-                        | {
-                            providerOptions?: Record<
-                              string,
-                              Record<string, any>
-                            >;
-                            text: string;
-                            type: "text";
-                          }
-                        | {
-                            image: string | ArrayBuffer;
-                            mimeType?: string;
-                            providerOptions?: Record<
-                              string,
-                              Record<string, any>
-                            >;
-                            type: "image";
-                          }
-                        | {
-                            data: string | ArrayBuffer;
-                            filename?: string;
-                            mimeType: string;
-                            providerOptions?: Record<
-                              string,
-                              Record<string, any>
-                            >;
-                            type: "file";
-                          }
-                      >;
-                  providerOptions?: Record<string, Record<string, any>>;
-                  role: "user";
-                }
-              | {
-                  content:
-                    | string
-                    | Array<
-                        | {
-                            providerOptions?: Record<
-                              string,
-                              Record<string, any>
-                            >;
-                            text: string;
-                            type: "text";
-                          }
-                        | {
-                            data: string | ArrayBuffer;
-                            filename?: string;
-                            mimeType: string;
-                            providerOptions?: Record<
-                              string,
-                              Record<string, any>
-                            >;
-                            type: "file";
-                          }
-                        | {
-                            providerOptions?: Record<
-                              string,
-                              Record<string, any>
-                            >;
-                            signature?: string;
-                            text: string;
-                            type: "reasoning";
-                          }
-                        | {
-                            data: string;
-                            providerOptions?: Record<
-                              string,
-                              Record<string, any>
-                            >;
-                            type: "redacted-reasoning";
-                          }
-                        | {
-                            args: any;
-                            providerOptions?: Record<
-                              string,
-                              Record<string, any>
-                            >;
-                            toolCallId: string;
-                            toolName: string;
-                            type: "tool-call";
-                          }
-                      >;
-                  providerOptions?: Record<string, Record<string, any>>;
-                  role: "assistant";
-                }
-              | {
-                  content: Array<{
-                    args?: any;
-                    experimental_content?: Array<
-                      | { text: string; type: "text" }
-                      | { data: string; mimeType?: string; type: "image" }
-                    >;
-                    isError?: boolean;
-                    providerOptions?: Record<string, Record<string, any>>;
-                    result: any;
-                    toolCallId: string;
-                    toolName: string;
-                    type: "tool-result";
-                  }>;
-                  providerOptions?: Record<string, Record<string, any>>;
-                  role: "tool";
-                }
-              | {
-                  content: string;
-                  providerOptions?: Record<string, Record<string, any>>;
-                  role: "system";
-                };
-            model?: string;
-            order: number;
-            provider?: string;
-            providerMetadata?: Record<string, Record<string, any>>;
-            providerOptions?: Record<string, Record<string, any>>;
-            reasoning?: string;
-            reasoningDetails?: Array<
-              | { signature?: string; text: string; type: "text" }
-              | { data: string; type: "redacted" }
-            >;
-            sources?: Array<{
-              id: string;
-              providerOptions?: Record<string, Record<string, any>>;
-              sourceType: "url";
-              title?: string;
-              url: string;
-            }>;
-            status: "pending" | "success" | "failed";
-            stepOrder: number;
-            text?: string;
-            threadId: string;
-            tool: boolean;
-            usage?: {
-              completionTokens: number;
-              promptTokens: number;
-              totalTokens: number;
-            };
-            userId?: string;
-            warnings?: Array<
-              | {
-                  details?: string;
-                  setting: string;
-                  type: "unsupported-setting";
-                }
-              | { details?: string; tool: any; type: "unsupported-tool" }
-              | { message: string; type: "other" }
-            >;
-          }>;
-          pageStatus?: "SplitRecommended" | "SplitRequired" | null;
-          splitCursor?: string | null;
-        }
-      >;
       listMessagesByThreadId: FunctionReference<
         "query",
         "internal",
         {
           excludeToolMessages?: boolean;
-          isTool?: "use excludeToolMessages instead of this";
           order: "asc" | "desc";
           paginationOpts?: {
             cursor: string | null;
@@ -1036,13 +863,13 @@ export declare const components: {
         "internal",
         {
           beforeMessageId?: string;
+          embedding?: Array<number>;
+          embeddingModel?: string;
           limit: number;
           messageRange?: { after: number; before: number };
           searchAllMessagesForUserId?: string;
           text?: string;
           threadId?: string;
-          vector?: Array<number>;
-          vectorModel?: string;
           vectorScoreThreshold?: number;
         },
         Array<{
@@ -1593,6 +1420,18 @@ export declare const components: {
       >;
     };
     streams: {
+      abort: FunctionReference<
+        "mutation",
+        "internal",
+        { reason: string; streamId: string },
+        boolean
+      >;
+      abortByOrder: FunctionReference<
+        "mutation",
+        "internal",
+        { order: number; reason: string; threadId: string },
+        boolean
+      >;
       addDelta: FunctionReference<
         "mutation",
         "internal",
@@ -1748,13 +1587,18 @@ export declare const components: {
       list: FunctionReference<
         "query",
         "internal",
-        { threadId: string },
+        {
+          startOrder?: number;
+          statuses?: Array<"streaming" | "finished" | "aborted">;
+          threadId: string;
+        },
         Array<{
           agentName?: string;
           model?: string;
           order: number;
           provider?: string;
           providerOptions?: Record<string, Record<string, any>>;
+          status: "streaming" | "finished" | "aborted";
           stepOrder: number;
           streamId: string;
           userId?: string;

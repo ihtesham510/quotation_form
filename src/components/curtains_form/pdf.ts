@@ -371,5 +371,6 @@ export async function generateQuotePDF(
 	)
 
 	const pdfBytes = await doc.save()
+	// @ts-ignore
 	return new Blob([pdfBytes], { type: 'application/pdf' })
 }
