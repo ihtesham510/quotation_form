@@ -1,6 +1,6 @@
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
-import { categorySchema, productSchema } from './schema'
+import { categorySchema, productSchema } from './curtains_schema'
 
 export const getProductAndCategories = query({
 	args: {

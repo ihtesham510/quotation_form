@@ -9,10 +9,13 @@
  */
 
 import type * as conversation from "../conversation.js";
+import type * as curtains_schema from "../curtains_schema.js";
 import type * as email from "../email.js";
 import type * as node_functions from "../node_functions.js";
 import type * as product_categoreis from "../product_categoreis.js";
 import type * as quotation from "../quotation.js";
+import type * as tile_materials from "../tile_materials.js";
+import type * as tile_schema from "../tile_schema.js";
 import type * as user from "../user.js";
 
 import type {
@@ -31,10 +34,13 @@ import type {
  */
 declare const fullApi: ApiFromModules<{
   conversation: typeof conversation;
+  curtains_schema: typeof curtains_schema;
   email: typeof email;
   node_functions: typeof node_functions;
   product_categoreis: typeof product_categoreis;
   quotation: typeof quotation;
+  tile_materials: typeof tile_materials;
+  tile_schema: typeof tile_schema;
   user: typeof user;
 }>;
 declare const fullApiWithMounts: typeof fullApi;

@@ -13,7 +13,7 @@ import { useMutation, useQuery } from 'convex/react'
 import { Suspense } from 'react'
 import { toast } from 'sonner'
 
-export const Route = createFileRoute('/dashboard/products/')({
+export const Route = createFileRoute('/dashboard/curtains_quotation/products/')({
 	component: () => (
 		<Suspense fallback={<LoaderComponent />}>
 			<RouteComponent />

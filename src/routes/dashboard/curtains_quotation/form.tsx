@@ -23,7 +23,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 
-export const Route = createFileRoute('/dashboard/form')({
+export const Route = createFileRoute('/dashboard/curtains_quotation/form')({
 	component: RouteComponent,
 })
 

@@ -9,18 +9,11 @@ import React from 'react'
 import { LoaderComponent } from '@/components/loader-component'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { generateQuotePDF } from '@/components/curtains_form/pdf'
 import { openPdf } from '@/lib/pdf'
 
-export const Route = createFileRoute('/dashboard/history/')({
+export const Route = createFileRoute('/dashboard/curtains_quotation/history/')({
 	component: RouteComponent,
 })
 
@@ -48,10 +41,9 @@ function RenderEmptyQuotations() {
 			<FileText className='h-16 w-16 text-muted-foreground mb-4' />
 			<h2 className='text-2xl font-bold mb-2'>No Quotations Found</h2>
 			<p className='text-muted-foreground mb-6 max-w-md'>
-				It looks like you haven't created any curtain quotations yet. Get
-				started by creating your first one!
+				It looks like you haven't created any curtain quotations yet. Get started by creating your first one!
 			</p>
-			<Link to='/dashboard/form'>
+			<Link to='/dashboard/curtains_quotation/form'>
 				<Button>
 					<FileText className='mr-2 h-4 w-4' />
 					Create New Quotation
@@ -61,16 +53,12 @@ function RenderEmptyQuotations() {
 	)
 }
 
-function RenderQuotations({
-	mockQuotations,
-}: {
-	mockQuotations: DataModel['quotation']['document'][]
-}) {
+function RenderQuotations({ mockQuotations }: { mockQuotations: DataModel['quotation']['document'][] }) {
 	return (
 		<main className='container mx-auto py-8'>
 			<div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6'>
 				<h1 className='text-2xl sm:text-3xl font-bold'>Curtains Quotations</h1>
-				<Link to='/dashboard/form'>
+				<Link to='/dashboard/curtains_quotation/form'>
 					<Button className='w-full sm:w-auto'>
 						<FileText className='mr-2 h-4 w-4' />
 						New Quotation
@@ -94,8 +82,7 @@ function RenderQuotations({
 						</TableHeader>
 						<TableBody>
 							{mockQuotations.map(q => {
-								const itemCount =
-									q.products.length + q.addOns.length + q.customServices.length
+								const itemCount = q.products.length + q.addOns.length + q.customServices.length
 								return (
 									<TableRow key={q.id}>
 										<TableCell className='font-medium'>{q.id}</TableCell>
@@ -103,15 +90,10 @@ function RenderQuotations({
 										<TableCell>{formatDate(q.savedAt)}</TableCell>
 										<TableCell>{formatDate(q.quoteDate)}</TableCell>
 										<TableCell>{itemCount}</TableCell>
-										<TableCell className='text-right'>
-											{formatCurrency(q.pricing.grandTotal)}
-										</TableCell>
+										<TableCell className='text-right'>{formatCurrency(q.pricing.grandTotal)}</TableCell>
 										<TableCell>
 											<div className='flex justify-center gap-2'>
-												<Link
-													to='/dashboard/history/$quotationId'
-													params={{ quotationId: q._id }}
-												>
+												<Link to='/dashboard/curtains_quotation/history/$quotationId' params={{ quotationId: q._id }}>
 													<Button size='sm' variant='outline'>
 														<Eye className='h-4 w-4' />
 														<span className='sr-only'>Preview</span>
@@ -142,8 +124,7 @@ function RenderQuotations({
 			{/* Mobile cards */}
 			<div className='grid md:hidden gap-4'>
 				{mockQuotations.map(q => {
-					const itemCount =
-						q.products.length + q.addOns.length + q.customServices.length
+					const itemCount = q.products.length + q.addOns.length + q.customServices.length
 					return (
 						<Card key={q.id} className='border'>
 							<CardContent className='p-4'>
@@ -152,24 +133,14 @@ function RenderQuotations({
 										<div className='text-sm text-muted-foreground'>{q.id}</div>
 										<div className='font-semibold'>{q.customer.name}</div>
 										<div className='text-sm text-muted-foreground mt-1'>
-											Saved: {formatDate(q.savedAt)} • Quote:{' '}
-											{formatDate(q.quoteDate)}
+											Saved: {formatDate(q.savedAt)} • Quote: {formatDate(q.quoteDate)}
 										</div>
 										<div className='text-sm mt-1'>Items: {itemCount}</div>
-										<div className='text-lg font-bold mt-2'>
-											{formatCurrency(q.pricing.grandTotal)}
-										</div>
+										<div className='text-lg font-bold mt-2'>{formatCurrency(q.pricing.grandTotal)}</div>
 									</div>
 									<div className='flex flex-col gap-2'>
-										<Link
-											to='/dashboard/history/$quotationId'
-											params={{ quotationId: q._id }}
-										>
-											<Button
-												size='sm'
-												variant='outline'
-												className='w-full bg-transparent'
-											>
+										<Link to='/dashboard/curtains_quotation/history/$quotationId' params={{ quotationId: q._id }}>
+											<Button size='sm' variant='outline' className='w-full bg-transparent'>
 												<Eye className='h-4 w-4' />
 											</Button>
 										</Link>
