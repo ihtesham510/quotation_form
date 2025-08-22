@@ -1,16 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ProtectedRoute } from '@/hoc/protected-routes'
-import { ChatBot } from '@/components/chat-bot'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export const Route = createFileRoute('/dashboard/')({
 	beforeLoad: async () => {},
-	component: () => (
-		<ProtectedRoute>
-			<ChatBot />
-			<RootComponent />
-		</ProtectedRoute>
-	),
+	component: RootComponent,
 })
 
 function RootComponent() {

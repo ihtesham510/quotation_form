@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as SignInRouteImport } from './routes/sign-in'
+import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as DashboardTile_quotationRouteRouteImport } from './routes/dashboard/tile_quotation/route'
@@ -36,27 +37,32 @@ const SignInRoute = SignInRouteImport.update({
   path: '/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRouteRoute = DashboardRouteRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
-  id: '/dashboard/',
-  path: '/dashboard/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRouteRoute,
 } as any)
 const DashboardTile_quotationRouteRoute =
   DashboardTile_quotationRouteRouteImport.update({
-    id: '/dashboard/tile_quotation',
-    path: '/dashboard/tile_quotation',
-    getParentRoute: () => rootRouteImport,
+    id: '/tile_quotation',
+    path: '/tile_quotation',
+    getParentRoute: () => DashboardRouteRoute,
   } as any)
 const DashboardCurtains_quotationRouteRoute =
   DashboardCurtains_quotationRouteRouteImport.update({
-    id: '/dashboard/curtains_quotation',
-    path: '/dashboard/curtains_quotation',
-    getParentRoute: () => rootRouteImport,
+    id: '/curtains_quotation',
+    path: '/curtains_quotation',
+    getParentRoute: () => DashboardRouteRoute,
   } as any)
 const DashboardTile_quotationIndexRoute =
   DashboardTile_quotationIndexRouteImport.update({
@@ -121,11 +127,12 @@ const DashboardCurtains_quotationHistoryQuotationIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/dashboard/curtains_quotation': typeof DashboardCurtains_quotationRouteRouteWithChildren
   '/dashboard/tile_quotation': typeof DashboardTile_quotationRouteRouteWithChildren
-  '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/curtains_quotation/form': typeof DashboardCurtains_quotationFormRoute
   '/dashboard/tile_quotation/form': typeof DashboardTile_quotationFormRoute
   '/dashboard/curtains_quotation/': typeof DashboardCurtains_quotationIndexRoute
@@ -156,6 +163,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/dashboard/curtains_quotation': typeof DashboardCurtains_quotationRouteRouteWithChildren
@@ -176,11 +184,12 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/dashboard'
     | '/sign-in'
     | '/sign-up'
     | '/dashboard/curtains_quotation'
     | '/dashboard/tile_quotation'
-    | '/dashboard'
+    | '/dashboard/'
     | '/dashboard/curtains_quotation/form'
     | '/dashboard/tile_quotation/form'
     | '/dashboard/curtains_quotation/'
@@ -210,6 +219,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/dashboard'
     | '/sign-in'
     | '/sign-up'
     | '/dashboard/curtains_quotation'
@@ -229,11 +239,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
-  DashboardCurtains_quotationRouteRoute: typeof DashboardCurtains_quotationRouteRouteWithChildren
-  DashboardTile_quotationRouteRoute: typeof DashboardTile_quotationRouteRouteWithChildren
-  DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -252,6 +260,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignInRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -261,24 +276,24 @@ declare module '@tanstack/react-router' {
     }
     '/dashboard/': {
       id: '/dashboard/'
-      path: '/dashboard'
-      fullPath: '/dashboard'
+      path: '/'
+      fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/tile_quotation': {
       id: '/dashboard/tile_quotation'
-      path: '/dashboard/tile_quotation'
+      path: '/tile_quotation'
       fullPath: '/dashboard/tile_quotation'
       preLoaderRoute: typeof DashboardTile_quotationRouteRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/curtains_quotation': {
       id: '/dashboard/curtains_quotation'
-      path: '/dashboard/curtains_quotation'
+      path: '/curtains_quotation'
       fullPath: '/dashboard/curtains_quotation'
       preLoaderRoute: typeof DashboardCurtains_quotationRouteRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/tile_quotation/': {
       id: '/dashboard/tile_quotation/'
@@ -404,15 +419,29 @@ const DashboardTile_quotationRouteRouteWithChildren =
     DashboardTile_quotationRouteRouteChildren,
   )
 
-const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  SignInRoute: SignInRoute,
-  SignUpRoute: SignUpRoute,
+interface DashboardRouteRouteChildren {
+  DashboardCurtains_quotationRouteRoute: typeof DashboardCurtains_quotationRouteRouteWithChildren
+  DashboardTile_quotationRouteRoute: typeof DashboardTile_quotationRouteRouteWithChildren
+  DashboardIndexRoute: typeof DashboardIndexRoute
+}
+
+const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardCurtains_quotationRouteRoute:
     DashboardCurtains_quotationRouteRouteWithChildren,
   DashboardTile_quotationRouteRoute:
     DashboardTile_quotationRouteRouteWithChildren,
   DashboardIndexRoute: DashboardIndexRoute,
+}
+
+const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
+  DashboardRouteRouteChildren,
+)
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DashboardRouteRoute: DashboardRouteRouteWithChildren,
+  SignInRoute: SignInRoute,
+  SignUpRoute: SignUpRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
