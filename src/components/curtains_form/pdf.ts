@@ -74,7 +74,7 @@ export async function generateQuotePDF(data: SelfContainedQuoteData): Promise<Bl
 			if (details.length > 0) {
 				productRows.push([
 					'', // Empty product column
-					`- ${details.join(' • ')}`, // Details span dimensions column
+					`${details.join(' • ')}`, // Details span dimensions column
 					'', // Empty qty
 					'', // Empty unit price
 					'', // Empty total
@@ -85,7 +85,7 @@ export async function generateQuotePDF(data: SelfContainedQuoteData): Promise<Bl
 			if (product.effectivePrice !== product.basePrice) {
 				productRows.push([
 					'', // Empty product column
-					`- Original: $${product.basePrice.toFixed(2)} → Marked Up: $${product.effectivePrice.toFixed(2)}`,
+					`Original: $${product.basePrice.toFixed(2)} - Marked Up: $${product.effectivePrice.toFixed(1)}`,
 					'', // Empty qty
 					'', // Empty unit price
 					'', // Empty total
@@ -96,7 +96,7 @@ export async function generateQuotePDF(data: SelfContainedQuoteData): Promise<Bl
 			if (data.pricing.gstEnabled && product.gstAmount > 0) {
 				productRows.push([
 					'', // Empty product column
-					`- Base: $${(product.total - product.gstAmount).toFixed(2)} + GST: $${product.gstAmount.toFixed(2)}`,
+					`Base: $${(product.total - product.gstAmount).toFixed(2)} + GST: $${product.gstAmount.toFixed(2)}`,
 					'', // Empty qty
 					'', // Empty unit price
 					'', // Empty total
@@ -142,7 +142,7 @@ export async function generateQuotePDF(data: SelfContainedQuoteData): Promise<Bl
 				if (addOn.description) {
 					addOnRows.push([
 						'', // Empty item
-						`- ${addOn.description}`, // Description
+						`${addOn.description}`, // Description
 						'', // Empty quantity
 						'', // Empty unit price
 						'', // Empty total
@@ -153,7 +153,7 @@ export async function generateQuotePDF(data: SelfContainedQuoteData): Promise<Bl
 				if (data.pricing.gstEnabled && addOn.gstAmount > 0) {
 					addOnRows.push([
 						'', // Empty item
-						`- Base: $${(addOn.total - addOn.gstAmount).toFixed(2)} + GST: $${addOn.gstAmount.toFixed(2)}`,
+						`Base: $${(addOn.total - addOn.gstAmount).toFixed(2)} + GST: $${addOn.gstAmount.toFixed(2)}`,
 						'', // Empty quantity
 						'', // Empty unit price
 						'', // Empty total
@@ -178,7 +178,7 @@ export async function generateQuotePDF(data: SelfContainedQuoteData): Promise<Bl
 				if (data.pricing.gstEnabled && service.gstAmount > 0) {
 					serviceRows.push([
 						'', // Empty service
-						`- Base: $${(service.total - service.gstAmount).toFixed(2)} + GST: $${service.gstAmount.toFixed(2)}`,
+						`Base: $${(service.total - service.gstAmount).toFixed(2)} + GST: $${service.gstAmount.toFixed(2)}`,
 						'', // Empty total
 					])
 				}
