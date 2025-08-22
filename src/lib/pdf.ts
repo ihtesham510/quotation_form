@@ -191,7 +191,6 @@ export class PDFBuilder {
 
 	// Enhanced methods with box styling
 	drawTitle(text: string): void {
-		this.addSpacing(0.5)
 		const boxHeight = PDF_CONFIG.fontSize.title * PDF_CONFIG.lineHeight + PDF_CONFIG.boxPadding * 2
 		const boxWidth = PDF_CONFIG.pageWidth - PDF_CONFIG.margin * 2
 
@@ -218,7 +217,6 @@ export class PDFBuilder {
 		)
 
 		this.currentY -= boxHeight
-		this.addSpacing(0.5)
 	}
 
 	drawHeading(text: string): void {
@@ -249,7 +247,6 @@ export class PDFBuilder {
 		)
 
 		this.currentY -= boxHeight
-		this.addSpacing(0.3)
 	}
 
 	drawInfoBox(text: string, type: 'success' | 'warning' | 'error' | 'info' = 'info'): void {
