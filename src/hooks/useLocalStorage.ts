@@ -4,11 +4,7 @@ const encrypt = (text: string, key: string): string => {
 	try {
 		const encrypted = text
 			.split('')
-			.map((char, index) =>
-				String.fromCharCode(
-					char.charCodeAt(0) ^ key.charCodeAt(index % key.length),
-				),
-			)
+			.map((char, index) => String.fromCharCode(char.charCodeAt(0) ^ key.charCodeAt(index % key.length)))
 			.join('')
 		return btoa(encrypted)
 	} catch (error) {
@@ -22,11 +18,7 @@ const decrypt = (encryptedText: string, key: string): string => {
 		const decoded = atob(encryptedText)
 		const decrypted = decoded
 			.split('')
-			.map((char, index) =>
-				String.fromCharCode(
-					char.charCodeAt(0) ^ key.charCodeAt(index % key.length),
-				),
-			)
+			.map((char, index) => String.fromCharCode(char.charCodeAt(0) ^ key.charCodeAt(index % key.length)))
 			.join('')
 		return decrypted
 	} catch (error) {
@@ -87,10 +79,7 @@ export function useEncryptedLocalStorage<T = string>(
 					setStoredValue(deserialize(decryptedItem))
 				}
 			} catch (error) {
-				console.error(
-					`Error reading localStorage key "${key}" in effect:`,
-					error,
-				)
+				console.error(`Error reading localStorage key "${key}" in effect:`, error)
 			}
 		}
 	}, [key, deserialize, encryptionKey, getInitialValueInEffect])
@@ -103,10 +92,7 @@ export function useEncryptedLocalStorage<T = string>(
 					const decryptedValue = decrypt(e.newValue, encryptionKey)
 					setStoredValue(deserialize(decryptedValue))
 				} catch (error) {
-					console.error(
-						`Error processing storage change for key "${key}":`,
-						error,
-					)
+					console.error(`Error processing storage change for key "${key}":`, error)
 				}
 			}
 		}
@@ -118,8 +104,7 @@ export function useEncryptedLocalStorage<T = string>(
 	const setValue = useCallback(
 		(value: T | ((prevValue: T) => T)) => {
 			try {
-				const valueToStore =
-					value instanceof Function ? value(storedValue) : value
+				const valueToStore = value instanceof Function ? value(storedValue) : value
 				setStoredValue(valueToStore)
 
 				const serializedValue = serialize(valueToStore)
@@ -148,15 +133,9 @@ export function useEncryptedLocalStorage<T = string>(
 export function readEncryptedLocalStorageValue<T>(
 	key: string,
 	defaultValue: T,
-	options: Pick<
-		UseEncryptedLocalStorageOptions<T>,
-		'deserialize' | 'encryptionKey'
-	> = {},
+	options: Pick<UseEncryptedLocalStorageOptions<T>, 'deserialize' | 'encryptionKey'> = {},
 ): T {
-	const {
-		deserialize = defaultDeserialize,
-		encryptionKey = 'default-encryption-key',
-	} = options
+	const { deserialize = defaultDeserialize, encryptionKey = 'default-encryption-key' } = options
 
 	try {
 		const item = window.localStorage.getItem(key)

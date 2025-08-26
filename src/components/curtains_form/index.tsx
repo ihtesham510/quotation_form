@@ -2,20 +2,8 @@ import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import {
-	ArrowLeft,
-	ArrowRight,
-	Home,
-	Package,
-	Plus,
-	DollarSign,
-	Eye,
-} from 'lucide-react'
-import type {
-	QuoteData,
-	ProductDatabase,
-	SelfContainedQuoteData,
-} from './types'
+import { ArrowLeft, ArrowRight, Home, Package, Plus, DollarSign, Eye } from 'lucide-react'
+import type { QuoteData, ProductDatabase, SelfContainedQuoteData } from './types'
 import { Step1CustomerInfo } from './step1'
 import { Step2ProductSelection } from './step2'
 import { Step3AddonsServices } from './step3'
@@ -29,12 +17,7 @@ interface BlindQuotationFormProps {
 	onEmail: (data: SelfContainedQuoteData) => void
 }
 
-export function BlindQuotationForm({
-	productDatabase,
-	onSaveQuote,
-	onGeneratePDF,
-	onEmail,
-}: BlindQuotationFormProps) {
+export function BlindQuotationForm({ productDatabase, onSaveQuote, onGeneratePDF, onEmail }: BlindQuotationFormProps) {
 	const [currentStep, setCurrentStep] = useState(1)
 	const [quoteData, setQuoteData] = useState<QuoteData>({
 		customer: {
@@ -76,28 +59,20 @@ export function BlindQuotationForm({
 
 		switch (step) {
 			case 1:
-				if (!quoteData.customer.name)
-					newErrors.customerName = 'Customer name is required'
-				if (!quoteData.customer.email)
-					newErrors.customerEmail = 'Email is required'
-				if (!quoteData.customer.phone)
-					newErrors.customerPhone = 'Phone is required'
+				if (!quoteData.customer.name) newErrors.customerName = 'Customer name is required'
+				if (!quoteData.customer.email) newErrors.customerEmail = 'Email is required'
+				if (!quoteData.customer.phone) newErrors.customerPhone = 'Phone is required'
 				break
 			case 2: // Product Selection step
-				if (quoteData.products.length === 0)
-					newErrors.products = 'At least one product is required'
+				if (quoteData.products.length === 0) newErrors.products = 'At least one product is required'
 				quoteData.products.forEach((product, productIndex) => {
-					const productInfo = productDatabase.products.find(
-						p => p._id === product.productId,
-					)
+					const productInfo = productDatabase.products.find(p => p._id === product.productId)
 					if (productInfo?.priceType === 'sqm') {
 						if (!product.width || product.width <= 0) {
-							newErrors[`product${productIndex}Width`] =
-								'Width must be greater than 0'
+							newErrors[`product${productIndex}Width`] = 'Width must be greater than 0'
 						}
 						if (!product.height || product.height <= 0) {
-							newErrors[`product${productIndex}Height`] =
-								'Height must be greater than 0'
+							newErrors[`product${productIndex}Height`] = 'Height must be greater than 0'
 						}
 					}
 				})
@@ -128,13 +103,7 @@ export function BlindQuotationForm({
 	const renderStepContent = () => {
 		switch (currentStep) {
 			case 1:
-				return (
-					<Step1CustomerInfo
-						quoteData={quoteData}
-						setQuoteData={setQuoteData}
-						errors={errors}
-					/>
-				)
+				return <Step1CustomerInfo quoteData={quoteData} setQuoteData={setQuoteData} errors={errors} />
 			case 2:
 				return (
 					<Step2ProductSelection
@@ -145,19 +114,10 @@ export function BlindQuotationForm({
 					/>
 				)
 			case 3:
-				return (
-					<Step3AddonsServices
-						quoteData={quoteData}
-						setQuoteData={setQuoteData}
-					/>
-				)
+				return <Step3AddonsServices quoteData={quoteData} setQuoteData={setQuoteData} />
 			case 4:
 				return (
-					<Step4PricingDiscounts
-						quoteData={quoteData}
-						setQuoteData={setQuoteData}
-						productDatabase={productDatabase}
-					/>
+					<Step4PricingDiscounts quoteData={quoteData} setQuoteData={setQuoteData} productDatabase={productDatabase} />
 				)
 			case 5:
 				return (
@@ -208,9 +168,7 @@ export function BlindQuotationForm({
 											</div>
 										</div>
 										{index < steps.length - 1 && (
-											<div
-												className={`flex-1 h-0.5 mx-4 ${isCompleted ? 'bg-green-500' : 'bg-muted'}`}
-											/>
+											<div className={`flex-1 h-0.5 mx-4 ${isCompleted ? 'bg-green-500' : 'bg-muted'}`} />
 										)}
 									</div>
 								)

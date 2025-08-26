@@ -55,9 +55,7 @@ export function validateImportDataSchema(data: any): string | null {
  * Validates the referential integrity of imported data (product categoryIds against category _ids).
  * Returns an error message if validation fails, otherwise null.
  */
-export function validateImportDataRelations(
-	importedData: ImportedData,
-): string | null {
+export function validateImportDataRelations(importedData: ImportedData): string | null {
 	const categoryIds = new Set(importedData.categories.map(cat => cat._id))
 
 	for (const product of importedData.products) {

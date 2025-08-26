@@ -16,13 +16,10 @@ interface UseEncryptedLocalStorageReturn<T> {
 
 const generateKey = async (password: string): Promise<CryptoKey> => {
 	const encoder = new TextEncoder()
-	const keyMaterial = await window.crypto.subtle.importKey(
-		'raw',
-		encoder.encode(password),
-		'PBKDF2',
-		false,
-		['deriveBits', 'deriveKey'],
-	)
+	const keyMaterial = await window.crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, [
+		'deriveBits',
+		'deriveKey',
+	])
 
 	return window.crypto.subtle.deriveKey(
 		{
@@ -42,11 +39,7 @@ const encryptData = async (data: string, key: CryptoKey): Promise<string> => {
 	const encoder = new TextEncoder()
 	const iv = window.crypto.getRandomValues(new Uint8Array(12))
 
-	const encrypted = await window.crypto.subtle.encrypt(
-		{ name: 'AES-GCM', iv },
-		key,
-		encoder.encode(data),
-	)
+	const encrypted = await window.crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoder.encode(data))
 
 	const combined = new Uint8Array(iv.length + encrypted.byteLength)
 	combined.set(iv)
@@ -55,10 +48,7 @@ const encryptData = async (data: string, key: CryptoKey): Promise<string> => {
 	return btoa(String.fromCharCode(...combined))
 }
 
-const decryptData = async (
-	encryptedData: string,
-	key: CryptoKey,
-): Promise<string> => {
+const decryptData = async (encryptedData: string, key: CryptoKey): Promise<string> => {
 	try {
 		const combined = new Uint8Array(
 			atob(encryptedData)
@@ -69,11 +59,7 @@ const decryptData = async (
 		const iv = combined.slice(0, 12)
 		const data = combined.slice(12)
 
-		const decrypted = await window.crypto.subtle.decrypt(
-			{ name: 'AES-GCM', iv },
-			key,
-			data,
-		)
+		const decrypted = await window.crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data)
 
 		return new TextDecoder().decode(decrypted)
 	} catch (error) {

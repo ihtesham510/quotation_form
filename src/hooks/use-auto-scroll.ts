@@ -35,8 +35,7 @@ export function useAutoScroll(options: UseAutoScrollOptions = {}) {
 		(instant?: boolean) => {
 			if (!scrollRef.current) return
 
-			const targetScrollTop =
-				scrollRef.current.scrollHeight - scrollRef.current.clientHeight
+			const targetScrollTop = scrollRef.current.scrollHeight - scrollRef.current.clientHeight
 
 			if (instant) {
 				scrollRef.current.scrollTop = targetScrollTop
@@ -108,9 +107,7 @@ export function useAutoScroll(options: UseAutoScrollOptions = {}) {
 	}, [scrollState.autoScrollEnabled, scrollToBottom])
 
 	const disableAutoScroll = useCallback(() => {
-		const atBottom = scrollRef.current
-			? checkIsAtBottom(scrollRef.current)
-			: false
+		const atBottom = scrollRef.current ? checkIsAtBottom(scrollRef.current) : false
 
 		// Only disable if not at bottom
 		if (!atBottom) {

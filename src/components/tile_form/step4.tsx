@@ -14,13 +14,7 @@ interface Step4Props {
 	pricing: CalculationResult
 }
 
-export function Step4({
-	pricingOptions,
-	onPricingOptionsChange,
-	onNext,
-	onPrevious,
-	pricing,
-}: Step4Props) {
+export function Step4({ pricingOptions, onPricingOptionsChange, onNext, onPrevious, pricing }: Step4Props) {
 	const handleDiscountChange = (enabled: boolean, value?: number) => {
 		onPricingOptionsChange({
 			...pricingOptions,
@@ -53,9 +47,7 @@ export function Step4({
 						<div className='flex items-center space-x-2'>
 							<Switch
 								checked={pricingOptions.discount.enabled}
-								onCheckedChange={checked =>
-									handleDiscountChange(checked, pricingOptions.discount.value)
-								}
+								onCheckedChange={checked => handleDiscountChange(checked, pricingOptions.discount.value)}
 							/>
 							<Label>Apply discount</Label>
 						</div>
@@ -70,16 +62,9 @@ export function Step4({
 									max='100'
 									step='0.1'
 									value={pricingOptions.discount.value || 0}
-									onChange={e =>
-										handleDiscountChange(
-											true,
-											Number.parseFloat(e.target.value) || 0,
-										)
-									}
+									onChange={e => handleDiscountChange(true, Number.parseFloat(e.target.value) || 0)}
 								/>
-								<p className='text-sm text-gray-600'>
-									Discount applies to the grand total before GST
-								</p>
+								<p className='text-sm text-gray-600'>Discount applies to the grand total before GST</p>
 							</div>
 						)}
 					</CardContent>
@@ -94,9 +79,7 @@ export function Step4({
 						<div className='flex items-center space-x-2'>
 							<Switch
 								checked={pricingOptions.gst.enabled}
-								onCheckedChange={checked =>
-									handleGSTChange(checked, pricingOptions.gst.percentage)
-								}
+								onCheckedChange={checked => handleGSTChange(checked, pricingOptions.gst.percentage)}
 							/>
 							<Label>Apply GST/Tax</Label>
 						</div>
@@ -111,16 +94,9 @@ export function Step4({
 									max='100'
 									step='0.1'
 									value={pricingOptions.gst.percentage || 13}
-									onChange={e =>
-										handleGSTChange(
-											true,
-											Number.parseFloat(e.target.value) || 13,
-										)
-									}
+									onChange={e => handleGSTChange(true, Number.parseFloat(e.target.value) || 13)}
 								/>
-								<p className='text-sm text-gray-600'>
-									GST applies to each item individually when enabled
-								</p>
+								<p className='text-sm text-gray-600'>GST applies to each item individually when enabled</p>
 							</div>
 						)}
 					</CardContent>

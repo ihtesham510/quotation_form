@@ -44,25 +44,15 @@ export function CategoryTableRow({
 						<div className='flex justify-between items-start mb-2'>
 							<h3 className='font-medium text-lg'>{category.name}</h3>
 							<div className='flex items-center gap-2'>
-								<Button
-									variant='ghost'
-									size='sm'
-									onClick={() => setShowEditSheet(true)}
-								>
+								<Button variant='ghost' size='sm' onClick={() => setShowEditSheet(true)}>
 									<Pencil className='h-4 w-4' />
 								</Button>
-								<Button
-									variant='ghost'
-									size='sm'
-									onClick={() => setShowDeleteDialog(true)}
-								>
+								<Button variant='ghost' size='sm' onClick={() => setShowDeleteDialog(true)}>
 									<Trash2 className='h-4 w-4' />
 								</Button>
 							</div>
 						</div>
-						<p className='text-sm text-muted-foreground mb-3'>
-							{category.description}
-						</p>
+						<p className='text-sm text-muted-foreground mb-3'>{category.description}</p>
 						<Badge variant='secondary'>{productCount} products</Badge>
 					</CardContent>
 				</Card>
@@ -95,18 +85,10 @@ export function CategoryTableRow({
 				</TableCell>
 				<TableCell className='text-right'>
 					<div className='flex items-center justify-end gap-2'>
-						<Button
-							variant='ghost'
-							size='sm'
-							onClick={() => setShowEditSheet(true)}
-						>
+						<Button variant='ghost' size='sm' onClick={() => setShowEditSheet(true)}>
 							<Pencil className='h-4 w-4' />
 						</Button>
-						<Button
-							variant='ghost'
-							size='sm'
-							onClick={() => setShowDeleteDialog(true)}
-						>
+						<Button variant='ghost' size='sm' onClick={() => setShowDeleteDialog(true)}>
 							<Trash2 className='h-4 w-4' />
 						</Button>
 					</div>

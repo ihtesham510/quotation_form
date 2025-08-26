@@ -8,8 +8,7 @@ import { cn } from '@/lib/utils'
 export function PasswordInput({ className, ...props }: InputProps) {
 	const [showPassword, setShowPassword] = React.useState(false)
 
-	const isDisabled =
-		props.value === '' || props.value === undefined || props.disabled
+	const isDisabled = props.value === '' || props.value === undefined || props.disabled
 
 	return (
 		<div className='relative'>
@@ -32,9 +31,7 @@ export function PasswordInput({ className, ...props }: InputProps) {
 				) : (
 					<EyeOffIcon className='h-4 w-4' aria-hidden='true' />
 				)}
-				<span className='sr-only'>
-					{showPassword ? 'Hide password' : 'Show password'}
-				</span>
+				<span className='sr-only'>{showPassword ? 'Hide password' : 'Show password'}</span>
 			</Button>
 
 			<style>{`

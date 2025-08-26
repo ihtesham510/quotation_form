@@ -11,11 +11,7 @@ interface Step1Props {
 	errors: Record<string, string>
 }
 
-export function Step1CustomerInfo({
-	quoteData,
-	setQuoteData,
-	errors,
-}: Step1Props) {
+export function Step1CustomerInfo({ quoteData, setQuoteData, errors }: Step1Props) {
 	return (
 		<div className='space-y-6'>
 			<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
@@ -32,9 +28,7 @@ export function Step1CustomerInfo({
 						}
 						className={errors.customerName ? 'border-red-500' : ''}
 					/>
-					{errors.customerName && (
-						<p className='text-red-500 text-sm'>{errors.customerName}</p>
-					)}
+					{errors.customerName && <p className='text-red-500 text-sm'>{errors.customerName}</p>}
 				</div>
 
 				<div className='space-y-2'>
@@ -51,9 +45,7 @@ export function Step1CustomerInfo({
 						}
 						className={errors.customerEmail ? 'border-red-500' : ''}
 					/>
-					{errors.customerEmail && (
-						<p className='text-red-500 text-sm'>{errors.customerEmail}</p>
-					)}
+					{errors.customerEmail && <p className='text-red-500 text-sm'>{errors.customerEmail}</p>}
 				</div>
 
 				<div className='space-y-2'>
@@ -69,9 +61,7 @@ export function Step1CustomerInfo({
 						}
 						className={errors.customerPhone ? 'border-red-500' : ''}
 					/>
-					{errors.customerPhone && (
-						<p className='text-red-500 text-sm'>{errors.customerPhone}</p>
-					)}
+					{errors.customerPhone && <p className='text-red-500 text-sm'>{errors.customerPhone}</p>}
 				</div>
 
 				<div className='space-y-2'>

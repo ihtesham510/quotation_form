@@ -53,9 +53,7 @@ function RouteComponent() {
 					async () =>
 						await Promise.all(
 							importedData.categories.map(async cat => {
-								const importedProducts = importedData.products.filter(
-									prod => prod.categoryId === cat._id,
-								)
+								const importedProducts = importedData.products.filter(prod => prod.categoryId === cat._id)
 								if (user) {
 									const catId = await addCategoryMutation({
 										userId: user._id,

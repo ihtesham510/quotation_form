@@ -5,15 +5,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useConvex } from 'convex/react'
-import {
-	Form,
-	FormControl,
-	FormDescription,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from '@/components/ui/form'
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { api } from 'convex/_generated/api'
 import { useAuth } from '@/context/auth'
 import { PasswordInput } from '@/components/ui/password-input'
@@ -64,10 +56,7 @@ function SignUpForm() {
 
 	return (
 		<Form {...form}>
-			<form
-				onSubmit={form.handleSubmit(onSubmit)}
-				className='max-w-92 m-auto h-fit w-full'
-			>
+			<form onSubmit={form.handleSubmit(onSubmit)} className='max-w-92 m-auto h-fit w-full'>
 				<div className='p-6'>
 					<div>
 						<h1 className='mt-6 text-balance text-xl font-semibold'>
@@ -149,11 +138,7 @@ function SignUpForm() {
 									<FormItem>
 										<FormLabel>Password</FormLabel>
 										<FormControl>
-											<PasswordInput
-												required
-												{...field}
-												className='ring-foreground/15 border-transparent ring-1'
-											/>
+											<PasswordInput required {...field} className='ring-foreground/15 border-transparent ring-1' />
 										</FormControl>
 										<FormDescription />
 										<FormMessage />

@@ -28,421 +28,393 @@ import { Route as DashboardTile_quotationHistoryQuotationIdRouteImport } from '.
 import { Route as DashboardCurtains_quotationHistoryQuotationIdRouteImport } from './routes/dashboard/curtains_quotation/history/$quotationId'
 
 const SignUpRoute = SignUpRouteImport.update({
-  id: '/sign-up',
-  path: '/sign-up',
-  getParentRoute: () => rootRouteImport,
+	id: '/sign-up',
+	path: '/sign-up',
+	getParentRoute: () => rootRouteImport,
 } as any)
 const SignInRoute = SignInRouteImport.update({
-  id: '/sign-in',
-  path: '/sign-in',
-  getParentRoute: () => rootRouteImport,
+	id: '/sign-in',
+	path: '/sign-in',
+	getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
+	id: '/dashboard',
+	path: '/dashboard',
+	getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
+	id: '/',
+	path: '/',
+	getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => DashboardRouteRoute,
+	id: '/',
+	path: '/',
+	getParentRoute: () => DashboardRouteRoute,
 } as any)
-const DashboardTile_quotationRouteRoute =
-  DashboardTile_quotationRouteRouteImport.update({
-    id: '/tile_quotation',
-    path: '/tile_quotation',
-    getParentRoute: () => DashboardRouteRoute,
-  } as any)
-const DashboardCurtains_quotationRouteRoute =
-  DashboardCurtains_quotationRouteRouteImport.update({
-    id: '/curtains_quotation',
-    path: '/curtains_quotation',
-    getParentRoute: () => DashboardRouteRoute,
-  } as any)
-const DashboardTile_quotationIndexRoute =
-  DashboardTile_quotationIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => DashboardTile_quotationRouteRoute,
-  } as any)
-const DashboardCurtains_quotationIndexRoute =
-  DashboardCurtains_quotationIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => DashboardCurtains_quotationRouteRoute,
-  } as any)
-const DashboardTile_quotationFormRoute =
-  DashboardTile_quotationFormRouteImport.update({
-    id: '/form',
-    path: '/form',
-    getParentRoute: () => DashboardTile_quotationRouteRoute,
-  } as any)
-const DashboardCurtains_quotationFormRoute =
-  DashboardCurtains_quotationFormRouteImport.update({
-    id: '/form',
-    path: '/form',
-    getParentRoute: () => DashboardCurtains_quotationRouteRoute,
-  } as any)
-const DashboardTile_quotationProductsIndexRoute =
-  DashboardTile_quotationProductsIndexRouteImport.update({
-    id: '/products/',
-    path: '/products/',
-    getParentRoute: () => DashboardTile_quotationRouteRoute,
-  } as any)
-const DashboardTile_quotationHistoryIndexRoute =
-  DashboardTile_quotationHistoryIndexRouteImport.update({
-    id: '/history/',
-    path: '/history/',
-    getParentRoute: () => DashboardTile_quotationRouteRoute,
-  } as any)
-const DashboardCurtains_quotationProductsIndexRoute =
-  DashboardCurtains_quotationProductsIndexRouteImport.update({
-    id: '/products/',
-    path: '/products/',
-    getParentRoute: () => DashboardCurtains_quotationRouteRoute,
-  } as any)
-const DashboardCurtains_quotationHistoryIndexRoute =
-  DashboardCurtains_quotationHistoryIndexRouteImport.update({
-    id: '/history/',
-    path: '/history/',
-    getParentRoute: () => DashboardCurtains_quotationRouteRoute,
-  } as any)
-const DashboardTile_quotationHistoryQuotationIdRoute =
-  DashboardTile_quotationHistoryQuotationIdRouteImport.update({
-    id: '/history/$quotationId',
-    path: '/history/$quotationId',
-    getParentRoute: () => DashboardTile_quotationRouteRoute,
-  } as any)
+const DashboardTile_quotationRouteRoute = DashboardTile_quotationRouteRouteImport.update({
+	id: '/tile_quotation',
+	path: '/tile_quotation',
+	getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardCurtains_quotationRouteRoute = DashboardCurtains_quotationRouteRouteImport.update({
+	id: '/curtains_quotation',
+	path: '/curtains_quotation',
+	getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardTile_quotationIndexRoute = DashboardTile_quotationIndexRouteImport.update({
+	id: '/',
+	path: '/',
+	getParentRoute: () => DashboardTile_quotationRouteRoute,
+} as any)
+const DashboardCurtains_quotationIndexRoute = DashboardCurtains_quotationIndexRouteImport.update({
+	id: '/',
+	path: '/',
+	getParentRoute: () => DashboardCurtains_quotationRouteRoute,
+} as any)
+const DashboardTile_quotationFormRoute = DashboardTile_quotationFormRouteImport.update({
+	id: '/form',
+	path: '/form',
+	getParentRoute: () => DashboardTile_quotationRouteRoute,
+} as any)
+const DashboardCurtains_quotationFormRoute = DashboardCurtains_quotationFormRouteImport.update({
+	id: '/form',
+	path: '/form',
+	getParentRoute: () => DashboardCurtains_quotationRouteRoute,
+} as any)
+const DashboardTile_quotationProductsIndexRoute = DashboardTile_quotationProductsIndexRouteImport.update({
+	id: '/products/',
+	path: '/products/',
+	getParentRoute: () => DashboardTile_quotationRouteRoute,
+} as any)
+const DashboardTile_quotationHistoryIndexRoute = DashboardTile_quotationHistoryIndexRouteImport.update({
+	id: '/history/',
+	path: '/history/',
+	getParentRoute: () => DashboardTile_quotationRouteRoute,
+} as any)
+const DashboardCurtains_quotationProductsIndexRoute = DashboardCurtains_quotationProductsIndexRouteImport.update({
+	id: '/products/',
+	path: '/products/',
+	getParentRoute: () => DashboardCurtains_quotationRouteRoute,
+} as any)
+const DashboardCurtains_quotationHistoryIndexRoute = DashboardCurtains_quotationHistoryIndexRouteImport.update({
+	id: '/history/',
+	path: '/history/',
+	getParentRoute: () => DashboardCurtains_quotationRouteRoute,
+} as any)
+const DashboardTile_quotationHistoryQuotationIdRoute = DashboardTile_quotationHistoryQuotationIdRouteImport.update({
+	id: '/history/$quotationId',
+	path: '/history/$quotationId',
+	getParentRoute: () => DashboardTile_quotationRouteRoute,
+} as any)
 const DashboardCurtains_quotationHistoryQuotationIdRoute =
-  DashboardCurtains_quotationHistoryQuotationIdRouteImport.update({
-    id: '/history/$quotationId',
-    path: '/history/$quotationId',
-    getParentRoute: () => DashboardCurtains_quotationRouteRoute,
-  } as any)
+	DashboardCurtains_quotationHistoryQuotationIdRouteImport.update({
+		id: '/history/$quotationId',
+		path: '/history/$quotationId',
+		getParentRoute: () => DashboardCurtains_quotationRouteRoute,
+	} as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRouteRouteWithChildren
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
-  '/dashboard/curtains_quotation': typeof DashboardCurtains_quotationRouteRouteWithChildren
-  '/dashboard/tile_quotation': typeof DashboardTile_quotationRouteRouteWithChildren
-  '/dashboard/': typeof DashboardIndexRoute
-  '/dashboard/curtains_quotation/form': typeof DashboardCurtains_quotationFormRoute
-  '/dashboard/tile_quotation/form': typeof DashboardTile_quotationFormRoute
-  '/dashboard/curtains_quotation/': typeof DashboardCurtains_quotationIndexRoute
-  '/dashboard/tile_quotation/': typeof DashboardTile_quotationIndexRoute
-  '/dashboard/curtains_quotation/history/$quotationId': typeof DashboardCurtains_quotationHistoryQuotationIdRoute
-  '/dashboard/tile_quotation/history/$quotationId': typeof DashboardTile_quotationHistoryQuotationIdRoute
-  '/dashboard/curtains_quotation/history': typeof DashboardCurtains_quotationHistoryIndexRoute
-  '/dashboard/curtains_quotation/products': typeof DashboardCurtains_quotationProductsIndexRoute
-  '/dashboard/tile_quotation/history': typeof DashboardTile_quotationHistoryIndexRoute
-  '/dashboard/tile_quotation/products': typeof DashboardTile_quotationProductsIndexRoute
+	'/': typeof IndexRoute
+	'/dashboard': typeof DashboardRouteRouteWithChildren
+	'/sign-in': typeof SignInRoute
+	'/sign-up': typeof SignUpRoute
+	'/dashboard/curtains_quotation': typeof DashboardCurtains_quotationRouteRouteWithChildren
+	'/dashboard/tile_quotation': typeof DashboardTile_quotationRouteRouteWithChildren
+	'/dashboard/': typeof DashboardIndexRoute
+	'/dashboard/curtains_quotation/form': typeof DashboardCurtains_quotationFormRoute
+	'/dashboard/tile_quotation/form': typeof DashboardTile_quotationFormRoute
+	'/dashboard/curtains_quotation/': typeof DashboardCurtains_quotationIndexRoute
+	'/dashboard/tile_quotation/': typeof DashboardTile_quotationIndexRoute
+	'/dashboard/curtains_quotation/history/$quotationId': typeof DashboardCurtains_quotationHistoryQuotationIdRoute
+	'/dashboard/tile_quotation/history/$quotationId': typeof DashboardTile_quotationHistoryQuotationIdRoute
+	'/dashboard/curtains_quotation/history': typeof DashboardCurtains_quotationHistoryIndexRoute
+	'/dashboard/curtains_quotation/products': typeof DashboardCurtains_quotationProductsIndexRoute
+	'/dashboard/tile_quotation/history': typeof DashboardTile_quotationHistoryIndexRoute
+	'/dashboard/tile_quotation/products': typeof DashboardTile_quotationProductsIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
-  '/dashboard': typeof DashboardIndexRoute
-  '/dashboard/curtains_quotation/form': typeof DashboardCurtains_quotationFormRoute
-  '/dashboard/tile_quotation/form': typeof DashboardTile_quotationFormRoute
-  '/dashboard/curtains_quotation': typeof DashboardCurtains_quotationIndexRoute
-  '/dashboard/tile_quotation': typeof DashboardTile_quotationIndexRoute
-  '/dashboard/curtains_quotation/history/$quotationId': typeof DashboardCurtains_quotationHistoryQuotationIdRoute
-  '/dashboard/tile_quotation/history/$quotationId': typeof DashboardTile_quotationHistoryQuotationIdRoute
-  '/dashboard/curtains_quotation/history': typeof DashboardCurtains_quotationHistoryIndexRoute
-  '/dashboard/curtains_quotation/products': typeof DashboardCurtains_quotationProductsIndexRoute
-  '/dashboard/tile_quotation/history': typeof DashboardTile_quotationHistoryIndexRoute
-  '/dashboard/tile_quotation/products': typeof DashboardTile_quotationProductsIndexRoute
+	'/': typeof IndexRoute
+	'/sign-in': typeof SignInRoute
+	'/sign-up': typeof SignUpRoute
+	'/dashboard': typeof DashboardIndexRoute
+	'/dashboard/curtains_quotation/form': typeof DashboardCurtains_quotationFormRoute
+	'/dashboard/tile_quotation/form': typeof DashboardTile_quotationFormRoute
+	'/dashboard/curtains_quotation': typeof DashboardCurtains_quotationIndexRoute
+	'/dashboard/tile_quotation': typeof DashboardTile_quotationIndexRoute
+	'/dashboard/curtains_quotation/history/$quotationId': typeof DashboardCurtains_quotationHistoryQuotationIdRoute
+	'/dashboard/tile_quotation/history/$quotationId': typeof DashboardTile_quotationHistoryQuotationIdRoute
+	'/dashboard/curtains_quotation/history': typeof DashboardCurtains_quotationHistoryIndexRoute
+	'/dashboard/curtains_quotation/products': typeof DashboardCurtains_quotationProductsIndexRoute
+	'/dashboard/tile_quotation/history': typeof DashboardTile_quotationHistoryIndexRoute
+	'/dashboard/tile_quotation/products': typeof DashboardTile_quotationProductsIndexRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRouteRouteWithChildren
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
-  '/dashboard/curtains_quotation': typeof DashboardCurtains_quotationRouteRouteWithChildren
-  '/dashboard/tile_quotation': typeof DashboardTile_quotationRouteRouteWithChildren
-  '/dashboard/': typeof DashboardIndexRoute
-  '/dashboard/curtains_quotation/form': typeof DashboardCurtains_quotationFormRoute
-  '/dashboard/tile_quotation/form': typeof DashboardTile_quotationFormRoute
-  '/dashboard/curtains_quotation/': typeof DashboardCurtains_quotationIndexRoute
-  '/dashboard/tile_quotation/': typeof DashboardTile_quotationIndexRoute
-  '/dashboard/curtains_quotation/history/$quotationId': typeof DashboardCurtains_quotationHistoryQuotationIdRoute
-  '/dashboard/tile_quotation/history/$quotationId': typeof DashboardTile_quotationHistoryQuotationIdRoute
-  '/dashboard/curtains_quotation/history/': typeof DashboardCurtains_quotationHistoryIndexRoute
-  '/dashboard/curtains_quotation/products/': typeof DashboardCurtains_quotationProductsIndexRoute
-  '/dashboard/tile_quotation/history/': typeof DashboardTile_quotationHistoryIndexRoute
-  '/dashboard/tile_quotation/products/': typeof DashboardTile_quotationProductsIndexRoute
+	__root__: typeof rootRouteImport
+	'/': typeof IndexRoute
+	'/dashboard': typeof DashboardRouteRouteWithChildren
+	'/sign-in': typeof SignInRoute
+	'/sign-up': typeof SignUpRoute
+	'/dashboard/curtains_quotation': typeof DashboardCurtains_quotationRouteRouteWithChildren
+	'/dashboard/tile_quotation': typeof DashboardTile_quotationRouteRouteWithChildren
+	'/dashboard/': typeof DashboardIndexRoute
+	'/dashboard/curtains_quotation/form': typeof DashboardCurtains_quotationFormRoute
+	'/dashboard/tile_quotation/form': typeof DashboardTile_quotationFormRoute
+	'/dashboard/curtains_quotation/': typeof DashboardCurtains_quotationIndexRoute
+	'/dashboard/tile_quotation/': typeof DashboardTile_quotationIndexRoute
+	'/dashboard/curtains_quotation/history/$quotationId': typeof DashboardCurtains_quotationHistoryQuotationIdRoute
+	'/dashboard/tile_quotation/history/$quotationId': typeof DashboardTile_quotationHistoryQuotationIdRoute
+	'/dashboard/curtains_quotation/history/': typeof DashboardCurtains_quotationHistoryIndexRoute
+	'/dashboard/curtains_quotation/products/': typeof DashboardCurtains_quotationProductsIndexRoute
+	'/dashboard/tile_quotation/history/': typeof DashboardTile_quotationHistoryIndexRoute
+	'/dashboard/tile_quotation/products/': typeof DashboardTile_quotationProductsIndexRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/dashboard'
-    | '/sign-in'
-    | '/sign-up'
-    | '/dashboard/curtains_quotation'
-    | '/dashboard/tile_quotation'
-    | '/dashboard/'
-    | '/dashboard/curtains_quotation/form'
-    | '/dashboard/tile_quotation/form'
-    | '/dashboard/curtains_quotation/'
-    | '/dashboard/tile_quotation/'
-    | '/dashboard/curtains_quotation/history/$quotationId'
-    | '/dashboard/tile_quotation/history/$quotationId'
-    | '/dashboard/curtains_quotation/history'
-    | '/dashboard/curtains_quotation/products'
-    | '/dashboard/tile_quotation/history'
-    | '/dashboard/tile_quotation/products'
-  fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/sign-in'
-    | '/sign-up'
-    | '/dashboard'
-    | '/dashboard/curtains_quotation/form'
-    | '/dashboard/tile_quotation/form'
-    | '/dashboard/curtains_quotation'
-    | '/dashboard/tile_quotation'
-    | '/dashboard/curtains_quotation/history/$quotationId'
-    | '/dashboard/tile_quotation/history/$quotationId'
-    | '/dashboard/curtains_quotation/history'
-    | '/dashboard/curtains_quotation/products'
-    | '/dashboard/tile_quotation/history'
-    | '/dashboard/tile_quotation/products'
-  id:
-    | '__root__'
-    | '/'
-    | '/dashboard'
-    | '/sign-in'
-    | '/sign-up'
-    | '/dashboard/curtains_quotation'
-    | '/dashboard/tile_quotation'
-    | '/dashboard/'
-    | '/dashboard/curtains_quotation/form'
-    | '/dashboard/tile_quotation/form'
-    | '/dashboard/curtains_quotation/'
-    | '/dashboard/tile_quotation/'
-    | '/dashboard/curtains_quotation/history/$quotationId'
-    | '/dashboard/tile_quotation/history/$quotationId'
-    | '/dashboard/curtains_quotation/history/'
-    | '/dashboard/curtains_quotation/products/'
-    | '/dashboard/tile_quotation/history/'
-    | '/dashboard/tile_quotation/products/'
-  fileRoutesById: FileRoutesById
+	fileRoutesByFullPath: FileRoutesByFullPath
+	fullPaths:
+		| '/'
+		| '/dashboard'
+		| '/sign-in'
+		| '/sign-up'
+		| '/dashboard/curtains_quotation'
+		| '/dashboard/tile_quotation'
+		| '/dashboard/'
+		| '/dashboard/curtains_quotation/form'
+		| '/dashboard/tile_quotation/form'
+		| '/dashboard/curtains_quotation/'
+		| '/dashboard/tile_quotation/'
+		| '/dashboard/curtains_quotation/history/$quotationId'
+		| '/dashboard/tile_quotation/history/$quotationId'
+		| '/dashboard/curtains_quotation/history'
+		| '/dashboard/curtains_quotation/products'
+		| '/dashboard/tile_quotation/history'
+		| '/dashboard/tile_quotation/products'
+	fileRoutesByTo: FileRoutesByTo
+	to:
+		| '/'
+		| '/sign-in'
+		| '/sign-up'
+		| '/dashboard'
+		| '/dashboard/curtains_quotation/form'
+		| '/dashboard/tile_quotation/form'
+		| '/dashboard/curtains_quotation'
+		| '/dashboard/tile_quotation'
+		| '/dashboard/curtains_quotation/history/$quotationId'
+		| '/dashboard/tile_quotation/history/$quotationId'
+		| '/dashboard/curtains_quotation/history'
+		| '/dashboard/curtains_quotation/products'
+		| '/dashboard/tile_quotation/history'
+		| '/dashboard/tile_quotation/products'
+	id:
+		| '__root__'
+		| '/'
+		| '/dashboard'
+		| '/sign-in'
+		| '/sign-up'
+		| '/dashboard/curtains_quotation'
+		| '/dashboard/tile_quotation'
+		| '/dashboard/'
+		| '/dashboard/curtains_quotation/form'
+		| '/dashboard/tile_quotation/form'
+		| '/dashboard/curtains_quotation/'
+		| '/dashboard/tile_quotation/'
+		| '/dashboard/curtains_quotation/history/$quotationId'
+		| '/dashboard/tile_quotation/history/$quotationId'
+		| '/dashboard/curtains_quotation/history/'
+		| '/dashboard/curtains_quotation/products/'
+		| '/dashboard/tile_quotation/history/'
+		| '/dashboard/tile_quotation/products/'
+	fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
-  SignInRoute: typeof SignInRoute
-  SignUpRoute: typeof SignUpRoute
+	IndexRoute: typeof IndexRoute
+	DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
+	SignInRoute: typeof SignInRoute
+	SignUpRoute: typeof SignUpRoute
 }
 
 declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/sign-up': {
-      id: '/sign-up'
-      path: '/sign-up'
-      fullPath: '/sign-up'
-      preLoaderRoute: typeof SignUpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sign-in': {
-      id: '/sign-in'
-      path: '/sign-in'
-      fullPath: '/sign-in'
-      preLoaderRoute: typeof SignInRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard/': {
-      id: '/dashboard/'
-      path: '/'
-      fullPath: '/dashboard/'
-      preLoaderRoute: typeof DashboardIndexRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
-    '/dashboard/tile_quotation': {
-      id: '/dashboard/tile_quotation'
-      path: '/tile_quotation'
-      fullPath: '/dashboard/tile_quotation'
-      preLoaderRoute: typeof DashboardTile_quotationRouteRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
-    '/dashboard/curtains_quotation': {
-      id: '/dashboard/curtains_quotation'
-      path: '/curtains_quotation'
-      fullPath: '/dashboard/curtains_quotation'
-      preLoaderRoute: typeof DashboardCurtains_quotationRouteRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
-    '/dashboard/tile_quotation/': {
-      id: '/dashboard/tile_quotation/'
-      path: '/'
-      fullPath: '/dashboard/tile_quotation/'
-      preLoaderRoute: typeof DashboardTile_quotationIndexRouteImport
-      parentRoute: typeof DashboardTile_quotationRouteRoute
-    }
-    '/dashboard/curtains_quotation/': {
-      id: '/dashboard/curtains_quotation/'
-      path: '/'
-      fullPath: '/dashboard/curtains_quotation/'
-      preLoaderRoute: typeof DashboardCurtains_quotationIndexRouteImport
-      parentRoute: typeof DashboardCurtains_quotationRouteRoute
-    }
-    '/dashboard/tile_quotation/form': {
-      id: '/dashboard/tile_quotation/form'
-      path: '/form'
-      fullPath: '/dashboard/tile_quotation/form'
-      preLoaderRoute: typeof DashboardTile_quotationFormRouteImport
-      parentRoute: typeof DashboardTile_quotationRouteRoute
-    }
-    '/dashboard/curtains_quotation/form': {
-      id: '/dashboard/curtains_quotation/form'
-      path: '/form'
-      fullPath: '/dashboard/curtains_quotation/form'
-      preLoaderRoute: typeof DashboardCurtains_quotationFormRouteImport
-      parentRoute: typeof DashboardCurtains_quotationRouteRoute
-    }
-    '/dashboard/tile_quotation/products/': {
-      id: '/dashboard/tile_quotation/products/'
-      path: '/products'
-      fullPath: '/dashboard/tile_quotation/products'
-      preLoaderRoute: typeof DashboardTile_quotationProductsIndexRouteImport
-      parentRoute: typeof DashboardTile_quotationRouteRoute
-    }
-    '/dashboard/tile_quotation/history/': {
-      id: '/dashboard/tile_quotation/history/'
-      path: '/history'
-      fullPath: '/dashboard/tile_quotation/history'
-      preLoaderRoute: typeof DashboardTile_quotationHistoryIndexRouteImport
-      parentRoute: typeof DashboardTile_quotationRouteRoute
-    }
-    '/dashboard/curtains_quotation/products/': {
-      id: '/dashboard/curtains_quotation/products/'
-      path: '/products'
-      fullPath: '/dashboard/curtains_quotation/products'
-      preLoaderRoute: typeof DashboardCurtains_quotationProductsIndexRouteImport
-      parentRoute: typeof DashboardCurtains_quotationRouteRoute
-    }
-    '/dashboard/curtains_quotation/history/': {
-      id: '/dashboard/curtains_quotation/history/'
-      path: '/history'
-      fullPath: '/dashboard/curtains_quotation/history'
-      preLoaderRoute: typeof DashboardCurtains_quotationHistoryIndexRouteImport
-      parentRoute: typeof DashboardCurtains_quotationRouteRoute
-    }
-    '/dashboard/tile_quotation/history/$quotationId': {
-      id: '/dashboard/tile_quotation/history/$quotationId'
-      path: '/history/$quotationId'
-      fullPath: '/dashboard/tile_quotation/history/$quotationId'
-      preLoaderRoute: typeof DashboardTile_quotationHistoryQuotationIdRouteImport
-      parentRoute: typeof DashboardTile_quotationRouteRoute
-    }
-    '/dashboard/curtains_quotation/history/$quotationId': {
-      id: '/dashboard/curtains_quotation/history/$quotationId'
-      path: '/history/$quotationId'
-      fullPath: '/dashboard/curtains_quotation/history/$quotationId'
-      preLoaderRoute: typeof DashboardCurtains_quotationHistoryQuotationIdRouteImport
-      parentRoute: typeof DashboardCurtains_quotationRouteRoute
-    }
-  }
+	interface FileRoutesByPath {
+		'/sign-up': {
+			id: '/sign-up'
+			path: '/sign-up'
+			fullPath: '/sign-up'
+			preLoaderRoute: typeof SignUpRouteImport
+			parentRoute: typeof rootRouteImport
+		}
+		'/sign-in': {
+			id: '/sign-in'
+			path: '/sign-in'
+			fullPath: '/sign-in'
+			preLoaderRoute: typeof SignInRouteImport
+			parentRoute: typeof rootRouteImport
+		}
+		'/dashboard': {
+			id: '/dashboard'
+			path: '/dashboard'
+			fullPath: '/dashboard'
+			preLoaderRoute: typeof DashboardRouteRouteImport
+			parentRoute: typeof rootRouteImport
+		}
+		'/': {
+			id: '/'
+			path: '/'
+			fullPath: '/'
+			preLoaderRoute: typeof IndexRouteImport
+			parentRoute: typeof rootRouteImport
+		}
+		'/dashboard/': {
+			id: '/dashboard/'
+			path: '/'
+			fullPath: '/dashboard/'
+			preLoaderRoute: typeof DashboardIndexRouteImport
+			parentRoute: typeof DashboardRouteRoute
+		}
+		'/dashboard/tile_quotation': {
+			id: '/dashboard/tile_quotation'
+			path: '/tile_quotation'
+			fullPath: '/dashboard/tile_quotation'
+			preLoaderRoute: typeof DashboardTile_quotationRouteRouteImport
+			parentRoute: typeof DashboardRouteRoute
+		}
+		'/dashboard/curtains_quotation': {
+			id: '/dashboard/curtains_quotation'
+			path: '/curtains_quotation'
+			fullPath: '/dashboard/curtains_quotation'
+			preLoaderRoute: typeof DashboardCurtains_quotationRouteRouteImport
+			parentRoute: typeof DashboardRouteRoute
+		}
+		'/dashboard/tile_quotation/': {
+			id: '/dashboard/tile_quotation/'
+			path: '/'
+			fullPath: '/dashboard/tile_quotation/'
+			preLoaderRoute: typeof DashboardTile_quotationIndexRouteImport
+			parentRoute: typeof DashboardTile_quotationRouteRoute
+		}
+		'/dashboard/curtains_quotation/': {
+			id: '/dashboard/curtains_quotation/'
+			path: '/'
+			fullPath: '/dashboard/curtains_quotation/'
+			preLoaderRoute: typeof DashboardCurtains_quotationIndexRouteImport
+			parentRoute: typeof DashboardCurtains_quotationRouteRoute
+		}
+		'/dashboard/tile_quotation/form': {
+			id: '/dashboard/tile_quotation/form'
+			path: '/form'
+			fullPath: '/dashboard/tile_quotation/form'
+			preLoaderRoute: typeof DashboardTile_quotationFormRouteImport
+			parentRoute: typeof DashboardTile_quotationRouteRoute
+		}
+		'/dashboard/curtains_quotation/form': {
+			id: '/dashboard/curtains_quotation/form'
+			path: '/form'
+			fullPath: '/dashboard/curtains_quotation/form'
+			preLoaderRoute: typeof DashboardCurtains_quotationFormRouteImport
+			parentRoute: typeof DashboardCurtains_quotationRouteRoute
+		}
+		'/dashboard/tile_quotation/products/': {
+			id: '/dashboard/tile_quotation/products/'
+			path: '/products'
+			fullPath: '/dashboard/tile_quotation/products'
+			preLoaderRoute: typeof DashboardTile_quotationProductsIndexRouteImport
+			parentRoute: typeof DashboardTile_quotationRouteRoute
+		}
+		'/dashboard/tile_quotation/history/': {
+			id: '/dashboard/tile_quotation/history/'
+			path: '/history'
+			fullPath: '/dashboard/tile_quotation/history'
+			preLoaderRoute: typeof DashboardTile_quotationHistoryIndexRouteImport
+			parentRoute: typeof DashboardTile_quotationRouteRoute
+		}
+		'/dashboard/curtains_quotation/products/': {
+			id: '/dashboard/curtains_quotation/products/'
+			path: '/products'
+			fullPath: '/dashboard/curtains_quotation/products'
+			preLoaderRoute: typeof DashboardCurtains_quotationProductsIndexRouteImport
+			parentRoute: typeof DashboardCurtains_quotationRouteRoute
+		}
+		'/dashboard/curtains_quotation/history/': {
+			id: '/dashboard/curtains_quotation/history/'
+			path: '/history'
+			fullPath: '/dashboard/curtains_quotation/history'
+			preLoaderRoute: typeof DashboardCurtains_quotationHistoryIndexRouteImport
+			parentRoute: typeof DashboardCurtains_quotationRouteRoute
+		}
+		'/dashboard/tile_quotation/history/$quotationId': {
+			id: '/dashboard/tile_quotation/history/$quotationId'
+			path: '/history/$quotationId'
+			fullPath: '/dashboard/tile_quotation/history/$quotationId'
+			preLoaderRoute: typeof DashboardTile_quotationHistoryQuotationIdRouteImport
+			parentRoute: typeof DashboardTile_quotationRouteRoute
+		}
+		'/dashboard/curtains_quotation/history/$quotationId': {
+			id: '/dashboard/curtains_quotation/history/$quotationId'
+			path: '/history/$quotationId'
+			fullPath: '/dashboard/curtains_quotation/history/$quotationId'
+			preLoaderRoute: typeof DashboardCurtains_quotationHistoryQuotationIdRouteImport
+			parentRoute: typeof DashboardCurtains_quotationRouteRoute
+		}
+	}
 }
 
 interface DashboardCurtains_quotationRouteRouteChildren {
-  DashboardCurtains_quotationFormRoute: typeof DashboardCurtains_quotationFormRoute
-  DashboardCurtains_quotationIndexRoute: typeof DashboardCurtains_quotationIndexRoute
-  DashboardCurtains_quotationHistoryQuotationIdRoute: typeof DashboardCurtains_quotationHistoryQuotationIdRoute
-  DashboardCurtains_quotationHistoryIndexRoute: typeof DashboardCurtains_quotationHistoryIndexRoute
-  DashboardCurtains_quotationProductsIndexRoute: typeof DashboardCurtains_quotationProductsIndexRoute
+	DashboardCurtains_quotationFormRoute: typeof DashboardCurtains_quotationFormRoute
+	DashboardCurtains_quotationIndexRoute: typeof DashboardCurtains_quotationIndexRoute
+	DashboardCurtains_quotationHistoryQuotationIdRoute: typeof DashboardCurtains_quotationHistoryQuotationIdRoute
+	DashboardCurtains_quotationHistoryIndexRoute: typeof DashboardCurtains_quotationHistoryIndexRoute
+	DashboardCurtains_quotationProductsIndexRoute: typeof DashboardCurtains_quotationProductsIndexRoute
 }
 
-const DashboardCurtains_quotationRouteRouteChildren: DashboardCurtains_quotationRouteRouteChildren =
-  {
-    DashboardCurtains_quotationFormRoute: DashboardCurtains_quotationFormRoute,
-    DashboardCurtains_quotationIndexRoute:
-      DashboardCurtains_quotationIndexRoute,
-    DashboardCurtains_quotationHistoryQuotationIdRoute:
-      DashboardCurtains_quotationHistoryQuotationIdRoute,
-    DashboardCurtains_quotationHistoryIndexRoute:
-      DashboardCurtains_quotationHistoryIndexRoute,
-    DashboardCurtains_quotationProductsIndexRoute:
-      DashboardCurtains_quotationProductsIndexRoute,
-  }
+const DashboardCurtains_quotationRouteRouteChildren: DashboardCurtains_quotationRouteRouteChildren = {
+	DashboardCurtains_quotationFormRoute: DashboardCurtains_quotationFormRoute,
+	DashboardCurtains_quotationIndexRoute: DashboardCurtains_quotationIndexRoute,
+	DashboardCurtains_quotationHistoryQuotationIdRoute: DashboardCurtains_quotationHistoryQuotationIdRoute,
+	DashboardCurtains_quotationHistoryIndexRoute: DashboardCurtains_quotationHistoryIndexRoute,
+	DashboardCurtains_quotationProductsIndexRoute: DashboardCurtains_quotationProductsIndexRoute,
+}
 
-const DashboardCurtains_quotationRouteRouteWithChildren =
-  DashboardCurtains_quotationRouteRoute._addFileChildren(
-    DashboardCurtains_quotationRouteRouteChildren,
-  )
+const DashboardCurtains_quotationRouteRouteWithChildren = DashboardCurtains_quotationRouteRoute._addFileChildren(
+	DashboardCurtains_quotationRouteRouteChildren,
+)
 
 interface DashboardTile_quotationRouteRouteChildren {
-  DashboardTile_quotationFormRoute: typeof DashboardTile_quotationFormRoute
-  DashboardTile_quotationIndexRoute: typeof DashboardTile_quotationIndexRoute
-  DashboardTile_quotationHistoryQuotationIdRoute: typeof DashboardTile_quotationHistoryQuotationIdRoute
-  DashboardTile_quotationHistoryIndexRoute: typeof DashboardTile_quotationHistoryIndexRoute
-  DashboardTile_quotationProductsIndexRoute: typeof DashboardTile_quotationProductsIndexRoute
+	DashboardTile_quotationFormRoute: typeof DashboardTile_quotationFormRoute
+	DashboardTile_quotationIndexRoute: typeof DashboardTile_quotationIndexRoute
+	DashboardTile_quotationHistoryQuotationIdRoute: typeof DashboardTile_quotationHistoryQuotationIdRoute
+	DashboardTile_quotationHistoryIndexRoute: typeof DashboardTile_quotationHistoryIndexRoute
+	DashboardTile_quotationProductsIndexRoute: typeof DashboardTile_quotationProductsIndexRoute
 }
 
-const DashboardTile_quotationRouteRouteChildren: DashboardTile_quotationRouteRouteChildren =
-  {
-    DashboardTile_quotationFormRoute: DashboardTile_quotationFormRoute,
-    DashboardTile_quotationIndexRoute: DashboardTile_quotationIndexRoute,
-    DashboardTile_quotationHistoryQuotationIdRoute:
-      DashboardTile_quotationHistoryQuotationIdRoute,
-    DashboardTile_quotationHistoryIndexRoute:
-      DashboardTile_quotationHistoryIndexRoute,
-    DashboardTile_quotationProductsIndexRoute:
-      DashboardTile_quotationProductsIndexRoute,
-  }
+const DashboardTile_quotationRouteRouteChildren: DashboardTile_quotationRouteRouteChildren = {
+	DashboardTile_quotationFormRoute: DashboardTile_quotationFormRoute,
+	DashboardTile_quotationIndexRoute: DashboardTile_quotationIndexRoute,
+	DashboardTile_quotationHistoryQuotationIdRoute: DashboardTile_quotationHistoryQuotationIdRoute,
+	DashboardTile_quotationHistoryIndexRoute: DashboardTile_quotationHistoryIndexRoute,
+	DashboardTile_quotationProductsIndexRoute: DashboardTile_quotationProductsIndexRoute,
+}
 
-const DashboardTile_quotationRouteRouteWithChildren =
-  DashboardTile_quotationRouteRoute._addFileChildren(
-    DashboardTile_quotationRouteRouteChildren,
-  )
+const DashboardTile_quotationRouteRouteWithChildren = DashboardTile_quotationRouteRoute._addFileChildren(
+	DashboardTile_quotationRouteRouteChildren,
+)
 
 interface DashboardRouteRouteChildren {
-  DashboardCurtains_quotationRouteRoute: typeof DashboardCurtains_quotationRouteRouteWithChildren
-  DashboardTile_quotationRouteRoute: typeof DashboardTile_quotationRouteRouteWithChildren
-  DashboardIndexRoute: typeof DashboardIndexRoute
+	DashboardCurtains_quotationRouteRoute: typeof DashboardCurtains_quotationRouteRouteWithChildren
+	DashboardTile_quotationRouteRoute: typeof DashboardTile_quotationRouteRouteWithChildren
+	DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
-  DashboardCurtains_quotationRouteRoute:
-    DashboardCurtains_quotationRouteRouteWithChildren,
-  DashboardTile_quotationRouteRoute:
-    DashboardTile_quotationRouteRouteWithChildren,
-  DashboardIndexRoute: DashboardIndexRoute,
+	DashboardCurtains_quotationRouteRoute: DashboardCurtains_quotationRouteRouteWithChildren,
+	DashboardTile_quotationRouteRoute: DashboardTile_quotationRouteRouteWithChildren,
+	DashboardIndexRoute: DashboardIndexRoute,
 }
 
-const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
-  DashboardRouteRouteChildren,
-)
+const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(DashboardRouteRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  DashboardRouteRoute: DashboardRouteRouteWithChildren,
-  SignInRoute: SignInRoute,
-  SignUpRoute: SignUpRoute,
+	IndexRoute: IndexRoute,
+	DashboardRouteRoute: DashboardRouteRouteWithChildren,
+	SignInRoute: SignInRoute,
+	SignUpRoute: SignUpRoute,
 }
-export const routeTree = rootRouteImport
-  ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)._addFileTypes<FileRouteTypes>()

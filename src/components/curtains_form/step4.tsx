@@ -3,13 +3,7 @@ import type React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { Checkbox } from '@/components/ui/checkbox'
 import type { QuoteData, ProductDatabase } from './types'
@@ -27,11 +21,7 @@ interface Step4Props {
 	productDatabase: ProductDatabase
 }
 
-export function Step4PricingDiscounts({
-	quoteData,
-	setQuoteData,
-	productDatabase,
-}: Step4Props) {
+export function Step4PricingDiscounts({ quoteData, setQuoteData, productDatabase }: Step4Props) {
 	return (
 		<div className='space-y-6'>
 			<h3 className='text-lg font-semibold'>Pricing & Discounts</h3>
@@ -76,10 +66,7 @@ export function Step4PricingDiscounts({
 							</div>
 
 							<div className='space-y-2'>
-								<Label>
-									Markup Value{' '}
-									{quoteData.markupType === 'percentage' ? '(%)' : '($)'}
-								</Label>
+								<Label>Markup Value {quoteData.markupType === 'percentage' ? '(%)' : '($)'}</Label>
 								<Input
 									type='number'
 									step={quoteData.markupType === 'percentage' ? '0.1' : '0.01'}
@@ -131,17 +118,12 @@ export function Step4PricingDiscounts({
 						</div>
 
 						<div className='space-y-2'>
-							<Label>
-								Discount Value{' '}
-								{quoteData.discountType === 'percentage' ? '(%)' : '($)'}
-							</Label>
+							<Label>Discount Value {quoteData.discountType === 'percentage' ? '(%)' : '($)'}</Label>
 							<Input
 								type='number'
 								step='0.01'
 								min='0'
-								max={
-									quoteData.discountType === 'percentage' ? '100' : undefined
-								}
+								max={quoteData.discountType === 'percentage' ? '100' : undefined}
 								value={quoteData.discountValue}
 								onChange={e =>
 									setQuoteData(prev => ({
@@ -184,13 +166,7 @@ export function Step4PricingDiscounts({
 					<div className='space-y-2'>
 						<div className='flex justify-between'>
 							<span>Subtotal:</span> {/* Updated label */}
-							<span>
-								$
-								{calculateSubtotalBeforeAll(quoteData, productDatabase).toFixed(
-									2,
-								)}
-							</span>{' '}
-							{/* Updated function */}
+							<span>${calculateSubtotalBeforeAll(quoteData, productDatabase).toFixed(2)}</span> {/* Updated function */}
 						</div>
 						{quoteData.markupEnabled && (
 							<div className='flex justify-between text-green-600'>
@@ -204,9 +180,7 @@ export function Step4PricingDiscounts({
 						{quoteData.gstEnabled && (
 							<div className='flex justify-between text-muted-foreground'>
 								<span>Total GST ({quoteData.gstRate}%):</span>
-								<span>
-									${calculateTotalGST(quoteData, productDatabase).toFixed(2)}
-								</span>
+								<span>${calculateTotalGST(quoteData, productDatabase).toFixed(2)}</span>
 							</div>
 						)}
 						{quoteData.discountValue > 0 && (
@@ -215,17 +189,13 @@ export function Step4PricingDiscounts({
 									Discount ({quoteData.discountValue}
 									{quoteData.discountType === 'fixed' ? '$' : '%'}):
 								</span>
-								<span>
-									-${calculateDiscount(quoteData, productDatabase).toFixed(2)}
-								</span>
+								<span>-${calculateDiscount(quoteData, productDatabase).toFixed(2)}</span>
 							</div>
 						)}
 						<Separator />
 						<div className='flex justify-between text-xl font-bold'>
 							<span>Total:</span>
-							<span>
-								${calculateTotal(quoteData, productDatabase).toFixed(2)}
-							</span>
+							<span>${calculateTotal(quoteData, productDatabase).toFixed(2)}</span>
 						</div>
 					</div>
 				</CardContent>

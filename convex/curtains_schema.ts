@@ -38,11 +38,7 @@ export const curtainsSchema = {
 			id: v.string(),
 			name: v.string(),
 			description: v.string(),
-			unitType: v.union(
-				v.literal('each'),
-				v.literal('sqm'),
-				v.literal('linear'),
-			),
+			unitType: v.union(v.literal('each'), v.literal('sqm'), v.literal('linear')),
 			unitPrice: v.number(),
 			quantity: v.number(),
 			width: v.optional(v.number()),

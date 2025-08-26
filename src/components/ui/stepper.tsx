@@ -1,11 +1,4 @@
-import React, {
-	useState,
-	Children,
-	useRef,
-	useLayoutEffect,
-	type HTMLAttributes,
-	type ReactNode,
-} from 'react'
+import React, { useState, Children, useRef, useLayoutEffect, type HTMLAttributes, type ReactNode } from 'react'
 import { motion, AnimatePresence, type Variants } from 'framer-motion'
 
 interface StepperProps extends HTMLAttributes<HTMLDivElement> {
@@ -90,9 +83,7 @@ export default function Stepper({
 				className={`mx-auto w-full max-w-md rounded-4xl shadow-xl ${stepCircleContainerClassName}`}
 				style={{ border: '1px solid #222' }}
 			>
-				<div
-					className={`${stepContainerClassName} flex w-full items-center p-8`}
-				>
+				<div className={`${stepContainerClassName} flex w-full items-center p-8`}>
 					{stepsArray.map((_, index) => {
 						const stepNumber = index + 1
 						const isNotLastStep = index < totalSteps - 1
@@ -118,9 +109,7 @@ export default function Stepper({
 										}}
 									/>
 								)}
-								{isNotLastStep && (
-									<StepConnector isComplete={currentStep > stepNumber} />
-								)}
+								{isNotLastStep && <StepConnector isComplete={currentStep > stepNumber} />}
 							</React.Fragment>
 						)
 					})}
@@ -137,11 +126,7 @@ export default function Stepper({
 
 				{!isCompleted && (
 					<div className={`px-8 pb-8 ${footerClassName}`}>
-						<div
-							className={`mt-10 flex ${
-								currentStep !== 1 ? 'justify-between' : 'justify-end'
-							}`}
-						>
+						<div className={`mt-10 flex ${currentStep !== 1 ? 'justify-between' : 'justify-end'}`}>
 							{currentStep !== 1 && (
 								<button
 									onClick={handleBack}
@@ -196,11 +181,7 @@ function StepContentWrapper({
 		>
 			<AnimatePresence initial={false} mode='sync' custom={direction}>
 				{!isCompleted && (
-					<SlideTransition
-						key={currentStep}
-						direction={direction}
-						onHeightReady={h => setParentHeight(h)}
-					>
+					<SlideTransition key={currentStep} direction={direction} onHeightReady={h => setParentHeight(h)}>
 						{children}
 					</SlideTransition>
 				)}
@@ -215,11 +196,7 @@ interface SlideTransitionProps {
 	onHeightReady: (height: number) => void
 }
 
-function SlideTransition({
-	children,
-	direction,
-	onHeightReady,
-}: SlideTransitionProps) {
+function SlideTransition({ children, direction, onHeightReady }: SlideTransitionProps) {
 	const containerRef = useRef<HTMLDivElement | null>(null)
 
 	useLayoutEffect(() => {
@@ -274,18 +251,8 @@ interface StepIndicatorProps {
 	disableStepIndicators?: boolean
 }
 
-function StepIndicator({
-	step,
-	currentStep,
-	onClickStep,
-	disableStepIndicators = false,
-}: StepIndicatorProps) {
-	const status =
-		currentStep === step
-			? 'active'
-			: currentStep < step
-				? 'inactive'
-				: 'complete'
+function StepIndicator({ step, currentStep, onClickStep, disableStepIndicators = false }: StepIndicatorProps) {
+	const status = currentStep === step ? 'active' : currentStep < step ? 'inactive' : 'complete'
 
 	const handleClick = () => {
 		if (step !== currentStep && !disableStepIndicators) {
@@ -348,13 +315,7 @@ interface CheckIconProps extends React.SVGProps<SVGSVGElement> {}
 
 function CheckIcon(props: CheckIconProps) {
 	return (
-		<svg
-			{...props}
-			fill='none'
-			stroke='currentColor'
-			strokeWidth={2}
-			viewBox='0 0 24 24'
-		>
+		<svg {...props} fill='none' stroke='currentColor' strokeWidth={2} viewBox='0 0 24 24'>
 			<motion.path
 				initial={{ pathLength: 0 }}
 				animate={{ pathLength: 1 }}

@@ -7,15 +7,8 @@ interface PersistentStateOptions {
 	syncAcrossTabs?: boolean
 }
 
-export function usePersistentState<T>(
-	initialState: T,
-	options: PersistentStateOptions,
-) {
-	const {
-		key,
-		encryptionKey = 'persistent-state-key',
-		syncAcrossTabs = false,
-	} = options
+export function usePersistentState<T>(initialState: T, options: PersistentStateOptions) {
+	const { key, encryptionKey = 'persistent-state-key', syncAcrossTabs = false } = options
 
 	const [localState, setLocalState] = useState<T>(initialState)
 	const [isReady, setIsReady] = useState<boolean>(false)
@@ -67,10 +60,7 @@ export function usePersistentState<T>(
 	const setState = useCallback(
 		async (value: T | ((prevState: T) => T)) => {
 			try {
-				const newValue =
-					typeof value === 'function'
-						? (value as (prevState: T) => T)(localState)
-						: value
+				const newValue = typeof value === 'function' ? (value as (prevState: T) => T)(localState) : value
 
 				// Update local state immediately for better UX
 				setLocalState(newValue)

@@ -1,20 +1,8 @@
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '@/components/ui/card'
-import {
-	Table,
-	TableBody,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from '@/components/ui/table'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import type { Id } from 'convex/_generated/dataModel'
 import type { Category, Product } from './types'
 import type { CategoryFormValues } from './schemas'
@@ -32,28 +20,17 @@ interface CategoriesTableProps {
 	onAddCategory: (data: CategoryFormValues) => void
 }
 
-export function CategoriesTable({
-	categories,
-	products,
-	onAddCategory,
-}: CategoriesTableProps) {
+export function CategoriesTable({ categories, products, onAddCategory }: CategoriesTableProps) {
 	const isMobile = useIsMobile()
 	const [showAddSheet, setShowAddSheet] = useState(false)
-	const updateCategoryMutation = useMutation(
-		api.product_categoreis.updateCategory,
-	)
-	const deleteCategoryMutation = useMutation(
-		api.product_categoreis.deleteCategory,
-	)
+	const updateCategoryMutation = useMutation(api.product_categoreis.updateCategory)
+	const deleteCategoryMutation = useMutation(api.product_categoreis.deleteCategory)
 
 	const handleAdd = (data: CategoryFormValues) => {
 		onAddCategory(data)
 	}
 
-	const handleUpdate = async (
-		id: Id<'categories'>,
-		data: CategoryFormValues,
-	) => {
+	const handleUpdate = async (id: Id<'categories'>, data: CategoryFormValues) => {
 		const { user } = useAuth()
 		try {
 			await updateCategoryMutation({
@@ -93,10 +70,7 @@ export function CategoriesTable({
 							<CardTitle>Categories</CardTitle>
 							<CardDescription>Manage product categories</CardDescription>
 						</div>
-						<Button
-							onClick={() => setShowAddSheet(true)}
-							className='w-full sm:w-auto'
-						>
+						<Button onClick={() => setShowAddSheet(true)} className='w-full sm:w-auto'>
 							<Plus className='h-4 w-4 mr-2' />
 							Add Category
 						</Button>
@@ -144,11 +118,7 @@ export function CategoriesTable({
 				</CardContent>
 			</Card>
 
-			<CategoryFormSheet
-				open={showAddSheet}
-				onOpenChange={setShowAddSheet}
-				onSave={handleAdd}
-			/>
+			<CategoryFormSheet open={showAddSheet} onOpenChange={setShowAddSheet} onSave={handleAdd} />
 		</>
 	)
 }

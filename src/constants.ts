@@ -1,22 +1,6 @@
-export const fabricOptions = [
-	'Cotton',
-	'Silk',
-	'Linen',
-	'Polyester',
-	'Velvet',
-	'Blackout',
-	'Sheer',
-	'Semi-Sheer',
-]
+export const fabricOptions = ['Cotton', 'Silk', 'Linen', 'Polyester', 'Velvet', 'Blackout', 'Sheer', 'Semi-Sheer']
 
-export const shutterLocations = [
-	'Kitchen',
-	'Bathroom',
-	'Stairs',
-	'Balcony',
-	'Study Room',
-	'Dining Room',
-]
+export const shutterLocations = ['Kitchen', 'Bathroom', 'Stairs', 'Balcony', 'Study Room', 'Dining Room']
 
 export const basePrices = {
 	SWAVE: 150,

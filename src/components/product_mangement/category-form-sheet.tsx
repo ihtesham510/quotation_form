@@ -1,22 +1,8 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-	Sheet,
-	SheetContent,
-	SheetDescription,
-	SheetFooter,
-	SheetHeader,
-	SheetTitle,
-} from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
-import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { categorySchema, type CategoryFormValues } from './schemas'
@@ -29,12 +15,7 @@ interface CategoryFormSheetProps {
 	defaultValues?: Category
 }
 
-export function CategoryFormSheet({
-	open,
-	onOpenChange,
-	onSave,
-	defaultValues,
-}: CategoryFormSheetProps) {
+export function CategoryFormSheet({ open, onOpenChange, onSave, defaultValues }: CategoryFormSheetProps) {
 	const isEditing = !!defaultValues
 
 	const form = useForm<CategoryFormValues>({
@@ -62,22 +43,15 @@ export function CategoryFormSheet({
 		<Sheet open={open} onOpenChange={handleOpenChange}>
 			<SheetContent className='w-full sm:max-w-md flex flex-col h-full'>
 				<SheetHeader className='flex-shrink-0 px-6 pt-6'>
-					<SheetTitle>
-						{isEditing ? 'Edit Category' : 'Add Category'}
-					</SheetTitle>
+					<SheetTitle>{isEditing ? 'Edit Category' : 'Add Category'}</SheetTitle>
 					<SheetDescription>
-						{isEditing
-							? 'Update the category details below.'
-							: 'Create a new category for your products.'}
+						{isEditing ? 'Update the category details below.' : 'Create a new category for your products.'}
 					</SheetDescription>
 				</SheetHeader>
 
 				<div className='flex-1 flex flex-col min-h-0'>
 					<Form {...form}>
-						<form
-							onSubmit={form.handleSubmit(handleSave)}
-							className='flex flex-col h-full'
-						>
+						<form onSubmit={form.handleSubmit(handleSave)} className='flex flex-col h-full'>
 							<div className='flex-1 overflow-y-auto px-6 py-4'>
 								<div className='space-y-6'>
 									<FormField
@@ -87,10 +61,7 @@ export function CategoryFormSheet({
 											<FormItem>
 												<FormLabel>Title</FormLabel>
 												<FormControl>
-													<Input
-														placeholder='Enter category title'
-														{...field}
-													/>
+													<Input placeholder='Enter category title' {...field} />
 												</FormControl>
 												<FormMessage />
 											</FormItem>
@@ -117,11 +88,7 @@ export function CategoryFormSheet({
 							</div>
 
 							<SheetFooter className='flex-shrink-0 px-6 pb-6 pt-4 border-t bg-background'>
-								<Button
-									type='submit'
-									disabled={form.formState.isSubmitting}
-									className='w-full'
-								>
+								<Button type='submit' disabled={form.formState.isSubmitting} className='w-full'>
 									{isEditing ? 'Update Category' : 'Create Category'}
 								</Button>
 							</SheetFooter>

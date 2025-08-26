@@ -8,11 +8,7 @@ import {
 	ExpandableChatFooter,
 	ExpandableChatHeader,
 } from '@/components/ui/expandable-chat'
-import {
-	ChatBubble,
-	ChatBubbleAvatar,
-	ChatBubbleMessage,
-} from '@/components/ui/chat-bubble'
+import { ChatBubble, ChatBubbleAvatar, ChatBubbleMessage } from '@/components/ui/chat-bubble'
 import { ChatMessageList } from '@/components/ui/chat-message-list'
 import { ChatInput } from '@/components/ui/chat-input'
 import { Button } from '@/components/ui/button'
@@ -36,9 +32,7 @@ export function ChatBot() {
 		<ExpandableChat size='lg'>
 			<ExpandableChatHeader className='flex-col text-center justify-center'>
 				<h1 className='text-xl font-semibold'>Chat with our assistant ✨</h1>
-				<p className='text-sm text-muted-foreground'>
-					Try asking for pircing and quotes.
-				</p>
+				<p className='text-sm text-muted-foreground'>Try asking for pircing and quotes.</p>
 			</ExpandableChatHeader>
 			{threadId ? (
 				<ListMessages threadId={threadId} />
@@ -50,23 +44,9 @@ export function ChatBot() {
 
 			<ExpandableChatFooter>
 				<div className='flex p-3 pt-0 gap-4 justify-between'>
-					<ChatInput
-						value={message}
-						placeholder='Send Message'
-						onChange={e => setMessage(e.target.value)}
-					/>
-					<Button
-						type='submit'
-						size='sm'
-						disabled={loading}
-						className='ml-auto gap-1.5'
-						onClick={handleSendMessage}
-					>
-						{loading ? (
-							<LoaderIcon className='size-3.5 animate-spin' />
-						) : (
-							<SendIcon className='size-3.5' />
-						)}
+					<ChatInput value={message} placeholder='Send Message' onChange={e => setMessage(e.target.value)} />
+					<Button type='submit' size='sm' disabled={loading} className='ml-auto gap-1.5' onClick={handleSendMessage}>
+						{loading ? <LoaderIcon className='size-3.5 animate-spin' /> : <SendIcon className='size-3.5' />}
 					</Button>
 				</div>
 			</ExpandableChatFooter>
@@ -75,11 +55,7 @@ export function ChatBot() {
 }
 
 function ListMessages({ threadId }: { threadId: string }) {
-	const messages = useThreadMessages(
-		api.conversation.listThreadMessages,
-		{ threadId },
-		{ initialNumItems: 50 },
-	)
+	const messages = useThreadMessages(api.conversation.listThreadMessages, { threadId }, { initialNumItems: 50 })
 
 	const isLoading = messages.isLoading
 
@@ -88,11 +64,7 @@ function ListMessages({ threadId }: { threadId: string }) {
 			<ChatMessageList>
 				{messages.results.map(message => {
 					if (!message.message?.content) return null
-					if (
-						message.message?.role === 'system' ||
-						message.message?.role === 'tool'
-					)
-						return null
+					if (message.message?.role === 'system' || message.message?.role === 'tool') return null
 					const getContent = () => {
 						const content = message.message?.content
 						if (!content) return ''
@@ -104,10 +76,7 @@ function ListMessages({ threadId }: { threadId: string }) {
 					}
 
 					return (
-						<ChatBubble
-							key={message.id}
-							variant={message.message?.role === 'user' ? 'sent' : 'received'}
-						>
+						<ChatBubble key={message.id} variant={message.message?.role === 'user' ? 'sent' : 'received'}>
 							<ChatBubbleAvatar
 								className='h-8 w-8 shrink-0'
 								src={
@@ -117,9 +86,7 @@ function ListMessages({ threadId }: { threadId: string }) {
 								}
 								fallback={message.message?.role === 'user' ? 'US' : 'AI'}
 							/>
-							<ChatBubbleMessage
-								variant={message.message?.role ? 'sent' : 'received'}
-							>
+							<ChatBubbleMessage variant={message.message?.role ? 'sent' : 'received'}>
 								<MessageRenderer message={getContent() ?? ''} />
 							</ChatBubbleMessage>
 						</ChatBubble>
@@ -156,9 +123,7 @@ const MessageRenderer: React.FC<{ message: string }> = ({ message }) => {
 			}
 
 			// Check if line is a numbered list item (1. **Text**: Description)
-			const numberedMatch = trimmedLine.match(
-				/^(\d+)\.\s*\*\*(.*?)\*\*:\s*(.*)$/,
-			)
+			const numberedMatch = trimmedLine.match(/^(\d+)\.\s*\*\*(.*?)\*\*:\s*(.*)$/)
 			if (numberedMatch) {
 				const [, number, title, description] = numberedMatch
 				elements.push(

@@ -30,17 +30,13 @@ export const Route = createFileRoute('/dashboard/curtains_quotation/form')({
 function RouteComponent() {
 	const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false)
 	const [emailRecipient, setEmailRecipient] = useState('')
-	const [quoteDataToEmail, setQuoteDataToEmail] =
-		useState<SelfContainedQuoteData | null>(null)
+	const [quoteDataToEmail, setQuoteDataToEmail] = useState<SelfContainedQuoteData | null>(null)
 	const { user } = useAuth()
 	const sendEmailAction = useAction(api.node_functions.sendEmail)
 	const saveQuote = useMutation(api.quotation.addCurtainQuotation)
-	const productDatabase = useQuery(
-		api.product_categoreis.getProductAndCategories,
-		{
-			userId: user ? user._id : undefined,
-		},
-	)
+	const productDatabase = useQuery(api.product_categoreis.getProductAndCategories, {
+		userId: user ? user._id : undefined,
+	})
 	const handleEmail = (data: SelfContainedQuoteData) => {
 		setQuoteDataToEmail(data)
 		setEmailRecipient(data.customer.email)
@@ -75,9 +71,7 @@ function RouteComponent() {
 				<DialogContent className='sm:max-w-[425px]'>
 					<DialogHeader>
 						<DialogTitle>Email Quote</DialogTitle>
-						<DialogDescription>
-							Enter the recipient's email address to send the quote.
-						</DialogDescription>
+						<DialogDescription>Enter the recipient's email address to send the quote.</DialogDescription>
 					</DialogHeader>
 					<div className='grid gap-4 py-4'>
 						<div className='space-y-2'>
@@ -92,10 +86,7 @@ function RouteComponent() {
 						</div>
 					</div>
 					<DialogFooter>
-						<Button
-							variant='outline'
-							onClick={() => setIsEmailDialogOpen(false)}
-						>
+						<Button variant='outline' onClick={() => setIsEmailDialogOpen(false)}>
 							Cancel
 						</Button>
 						<Button onClick={sendEmail}>Send Email</Button>
@@ -106,9 +97,8 @@ function RouteComponent() {
 				<div>
 					<h1 className='title'>Curtains Form</h1>
 					<p className='description'>
-						Create your custom curtain quotation in just a few steps. Enter your
-						details, calculate the cost, and download your personalized quote as
-						a PDF instantly.
+						Create your custom curtain quotation in just a few steps. Enter your details, calculate the cost, and
+						download your personalized quote as a PDF instantly.
 					</p>
 				</div>
 

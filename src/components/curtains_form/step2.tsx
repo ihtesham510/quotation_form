@@ -4,20 +4,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import {
-	CommandSelect,
-	type CommandSelectOption,
-} from '@/components/ui/command-select'
+import { CommandSelect, type CommandSelectOption } from '@/components/ui/command-select'
 import { Plus, Trash2, Calculator, Edit, Save } from 'lucide-react'
 import type { QuoteData, QuoteProduct, ProductDatabase, Id } from './types'
 import { controlTypes } from './data'
@@ -38,24 +29,14 @@ const convertToMeters = (value: number, unit: MeasurementUnit): number => {
 	return value // Already in meters
 }
 
-const convertFromMeters = (
-	valueInMeters: number,
-	unit: MeasurementUnit,
-): number => {
+const convertFromMeters = (valueInMeters: number, unit: MeasurementUnit): number => {
 	if (unit === 'cm') return valueInMeters * 100
 	if (unit === 'mm') return valueInMeters * 1000
 	return valueInMeters // Already in meters
 }
 
-export function Step2ProductSelection({
-	quoteData,
-	setQuoteData,
-	errors,
-	productDatabase,
-}: Step2Props) {
-	const [productUnits, setProductUnits] = useState<
-		Record<string, MeasurementUnit>
-	>({})
+export function Step2ProductSelection({ quoteData, setQuoteData, errors, productDatabase }: Step2Props) {
+	const [productUnits, setProductUnits] = useState<Record<string, MeasurementUnit>>({})
 	const [editingProductId, setEditingProductId] = useState<string | null>(null)
 	const [tempProductName, setTempProductName] = useState<string>('')
 
@@ -83,9 +64,7 @@ export function Step2ProductSelection({
 	const updateProduct = (productId: string, updates: Partial<QuoteProduct>) => {
 		setQuoteData(prev => ({
 			...prev,
-			products: prev.products.map(product =>
-				product.id === productId ? { ...product, ...updates } : product,
-			),
+			products: prev.products.map(product => (product.id === productId ? { ...product, ...updates } : product)),
 		}))
 	}
 
@@ -128,10 +107,7 @@ export function Step2ProductSelection({
 		setTempProductName(e.target.value)
 	}
 
-	const handleKeyDown = (
-		e: React.KeyboardEvent<HTMLInputElement>,
-		productId: string,
-	) => {
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, productId: string) => {
 		if (e.key === 'Enter') {
 			e.preventDefault()
 			handleSave(productId)
@@ -141,17 +117,13 @@ export function Step2ProductSelection({
 		}
 	}
 
-	const categoryOptions: CommandSelectOption[] = productDatabase.categories.map(
-		category => ({
-			value: category._id,
-			label: category.name,
-			description: category.description,
-		}),
-	)
+	const categoryOptions: CommandSelectOption[] = productDatabase.categories.map(category => ({
+		value: category._id,
+		label: category.name,
+		description: category.description,
+	}))
 
-	const getProductOptions = (
-		categoryId: Id<'categories'>,
-	): CommandSelectOption[] => {
+	const getProductOptions = (categoryId: Id<'categories'>): CommandSelectOption[] => {
 		return productDatabase.products
 			.filter(product => product.categoryId === categoryId)
 			.map(product => ({
@@ -181,18 +153,10 @@ export function Step2ProductSelection({
 			)}
 
 			{quoteData.products.map((product, productIndex) => {
-				const productInfo = productDatabase.products.find(
-					p => p._id === product.productId,
-				)
+				const productInfo = productDatabase.products.find(p => p._id === product.productId)
 				const currentUnit = productUnits[product.id] || 'm'
 				const sqm = product.width * product.height
-				const baseTotal = calculateProductTotal(
-					product,
-					false,
-					0,
-					productDatabase,
-					quoteData,
-				)
+				const baseTotal = calculateProductTotal(product, false, 0, productDatabase, quoteData)
 				const gstAmount = calculateProductGST(
 					product,
 					quoteData.gstEnabled,
@@ -208,8 +172,7 @@ export function Step2ProductSelection({
 					quoteData,
 				)
 
-				const currentProductName =
-					product.label || productInfo?.name || `Product ${productIndex + 1}`
+				const currentProductName = product.label || productInfo?.name || `Product ${productIndex + 1}`
 
 				return (
 					<Card key={product.id} className='mb-4'>
@@ -230,30 +193,18 @@ export function Step2ProductSelection({
 										/>
 									</div>
 								) : (
-									<CardTitle className='text-base'>
-										{currentProductName}
-									</CardTitle>
+									<CardTitle className='text-base'>{currentProductName}</CardTitle>
 								)}
 								<div className='flex flex-col md:flex-row w-full md:w-max gap-2 mt-6 md:mt-0'>
 									{editingProductId === product.id ? (
 										<>
-											<Button
-												variant='outline'
-												size='sm'
-												onClick={() => handleSave(product.id)}
-											>
+											<Button variant='outline' size='sm' onClick={() => handleSave(product.id)}>
 												<Save className='w-4 h-4' />
 												Save
 											</Button>
 										</>
 									) : (
-										<Button
-											variant='outline'
-											size='sm'
-											onClick={() =>
-												handleEditClick(product.id, currentProductName)
-											}
-										>
+										<Button variant='outline' size='sm' onClick={() => handleEditClick(product.id, currentProductName)}>
 											<Edit className='w-4 h-4' />
 											Edit
 										</Button>
@@ -278,10 +229,7 @@ export function Step2ProductSelection({
 										options={categoryOptions}
 										value={productInfo?.categoryId || ''}
 										onValueChange={categoryId => {
-											const firstProductInCategory =
-												productDatabase.products.find(
-													p => p.categoryId === categoryId,
-												)
+											const firstProductInCategory = productDatabase.products.find(p => p.categoryId === categoryId)
 											if (firstProductInCategory) {
 												updateProduct(product.id, {
 													productId: firstProductInCategory._id,
@@ -297,10 +245,7 @@ export function Step2ProductSelection({
 								<div className='space-y-2'>
 									<Label>Product</Label>
 									<CommandSelect
-										options={getProductOptions(
-											productInfo?.categoryId ||
-												productDatabase.categories[0]._id,
-										)}
+										options={getProductOptions(productInfo?.categoryId || productDatabase.categories[0]._id)}
 										value={product.productId}
 										onValueChange={productId =>
 											updateProduct(product.id, {
@@ -339,22 +284,13 @@ export function Step2ProductSelection({
 											value={convertFromMeters(product.width, currentUnit)}
 											onChange={e =>
 												updateProduct(product.id, {
-													width: convertToMeters(
-														Number.parseFloat(e.target.value) || 0,
-														currentUnit,
-													),
+													width: convertToMeters(Number.parseFloat(e.target.value) || 0, currentUnit),
 												})
 											}
-											className={
-												errors[`product${productIndex}Width`]
-													? 'border-red-500'
-													: ''
-											}
+											className={errors[`product${productIndex}Width`] ? 'border-red-500' : ''}
 										/>
 										{errors[`product${productIndex}Width`] && (
-											<p className='text-red-500 text-sm'>
-												{errors[`product${productIndex}Width`]}
-											</p>
+											<p className='text-red-500 text-sm'>{errors[`product${productIndex}Width`]}</p>
 										)}
 									</div>
 
@@ -367,22 +303,13 @@ export function Step2ProductSelection({
 											value={convertFromMeters(product.height, currentUnit)}
 											onChange={e =>
 												updateProduct(product.id, {
-													height: convertToMeters(
-														Number.parseFloat(e.target.value) || 0,
-														currentUnit,
-													),
+													height: convertToMeters(Number.parseFloat(e.target.value) || 0, currentUnit),
 												})
 											}
-											className={
-												errors[`product${productIndex}Height`]
-													? 'border-red-500'
-													: ''
-											}
+											className={errors[`product${productIndex}Height`] ? 'border-red-500' : ''}
 										/>
 										{errors[`product${productIndex}Height`] && (
-											<p className='text-red-500 text-sm'>
-												{errors[`product${productIndex}Height`]}
-											</p>
+											<p className='text-red-500 text-sm'>{errors[`product${productIndex}Height`]}</p>
 										)}
 									</div>
 
@@ -390,9 +317,7 @@ export function Step2ProductSelection({
 										<Label>Unit</Label>
 										<Select
 											value={currentUnit}
-											onValueChange={(value: MeasurementUnit) =>
-												handleUnitChange(product.id, value)
-											}
+											onValueChange={(value: MeasurementUnit) => handleUnitChange(product.id, value)}
 										>
 											<SelectTrigger className='w-full'>
 												<SelectValue />
@@ -420,8 +345,7 @@ export function Step2ProductSelection({
 									<p className='text-sm text-primary flex gap-2 items-center'>
 										<strong>Per Unit Pricing :</strong>
 										<span className='text-primary/70'>
-											This product is priced per unit. Dimensions are not
-											required.
+											This product is priced per unit. Dimensions are not required.
 										</span>
 									</p>
 								</div>
@@ -430,21 +354,14 @@ export function Step2ProductSelection({
 							<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
 								<div className='space-y-2'>
 									<Label>Color/Finish</Label>
-									<Input
-										value={product.color}
-										onChange={e =>
-											updateProduct(product.id, { color: e.target.value })
-										}
-									/>
+									<Input value={product.color} onChange={e => updateProduct(product.id, { color: e.target.value })} />
 								</div>
 
 								<div className='space-y-2'>
 									<Label>Control Type</Label>
 									<Select
 										value={product.controlType}
-										onValueChange={value =>
-											updateProduct(product.id, { controlType: value })
-										}
+										onValueChange={value => updateProduct(product.id, { controlType: value })}
 									>
 										<SelectTrigger className='w-full'>
 											<SelectValue />
@@ -484,9 +401,7 @@ export function Step2ProductSelection({
 										})
 									}
 								/>
-								<Label htmlFor={`installation-${product.id}`}>
-									Requires Installation
-								</Label>
+								<Label htmlFor={`installation-${product.id}`}>Requires Installation</Label>
 							</div>
 
 							{productInfo?.specialConditions && (
@@ -499,26 +414,19 @@ export function Step2ProductSelection({
 
 							<div className='flex justify-between items-center pt-2'>
 								<div className='text-sm text-muted-foreground'>
-									{productInfo?.priceType === 'sqm' &&
-										productInfo.minimumQty > sqm && (
-											<span>Minimum {productInfo.minimumQty} sqm applies</span>
-										)}
-									{productInfo?.priceType === 'each' &&
-										productInfo.minimumQty > product.quantity && (
-											<span>
-												Minimum {productInfo.minimumQty} units required
-											</span>
-										)}
+									{productInfo?.priceType === 'sqm' && productInfo.minimumQty > sqm && (
+										<span>Minimum {productInfo.minimumQty} sqm applies</span>
+									)}
+									{productInfo?.priceType === 'each' && productInfo.minimumQty > product.quantity && (
+										<span>Minimum {productInfo.minimumQty} units required</span>
+									)}
 								</div>
 
 								<div className='text-right'>
-									<div className='text-lg font-semibold'>
-										${totalWithGST.toFixed(2)}
-									</div>
+									<div className='text-lg font-semibold'>${totalWithGST.toFixed(2)}</div>
 									{quoteData.gstEnabled && (
 										<div className='text-sm text-muted-foreground mb-2'>
-											Base: ${baseTotal.toFixed(2)} + GST: $
-											{gstAmount.toFixed(2)}
+											Base: ${baseTotal.toFixed(2)} + GST: ${gstAmount.toFixed(2)}
 										</div>
 									)}
 								</div>
@@ -529,9 +437,7 @@ export function Step2ProductSelection({
 			})}
 
 			{quoteData.products.length === 0 && (
-				<div className='text-center py-8 text-muted-foreground'>
-					No products added to this quote yet.
-				</div>
+				<div className='text-center py-8 text-muted-foreground'>No products added to this quote yet.</div>
 			)}
 		</div>
 	)

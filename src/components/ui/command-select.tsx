@@ -2,19 +2,8 @@ import * as React from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import {
-	Command,
-	CommandEmpty,
-	CommandGroup,
-	CommandInput,
-	CommandItem,
-	CommandList,
-} from '@/components/ui/command'
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '@/components/ui/popover'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ScrollArea } from './scroll-area'
 
 export interface CommandSelectOption {
@@ -50,12 +39,7 @@ export function CommandSelect({
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
-				<Button
-					variant='outline'
-					aria-expanded={open}
-					className='w-full justify-between p-4'
-					disabled={disabled}
-				>
+				<Button variant='outline' aria-expanded={open} className='w-full justify-between p-4' disabled={disabled}>
 					{selectedOption ? <span>{selectedOption.label}</span> : placeholder}
 					<ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
 				</Button>
@@ -77,18 +61,11 @@ export function CommandSelect({
 											setOpen(false)
 										}}
 									>
-										<Check
-											className={cn(
-												'mr-2 h-4 w-4',
-												value === option.value ? 'opacity-100' : 'opacity-0',
-											)}
-										/>
+										<Check className={cn('mr-2 h-4 w-4', value === option.value ? 'opacity-100' : 'opacity-0')} />
 										<div className='flex flex-col'>
 											<span>{option.label}</span>
 											{option.description && (
-												<span className='text-xs text-muted-foreground'>
-													{option.description}
-												</span>
+												<span className='text-xs text-muted-foreground'>{option.description}</span>
 											)}
 										</div>
 									</CommandItem>

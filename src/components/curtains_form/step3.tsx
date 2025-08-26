@@ -5,13 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Plus, Trash2, Calculator } from 'lucide-react'
@@ -32,19 +26,14 @@ const convertToMeters = (value: number, unit: MeasurementUnit): number => {
 	return value
 }
 
-const convertFromMeters = (
-	valueInMeters: number,
-	unit: MeasurementUnit,
-): number => {
+const convertFromMeters = (valueInMeters: number, unit: MeasurementUnit): number => {
 	if (unit === 'cm') return valueInMeters * 100
 	if (unit === 'mm') return valueInMeters * 1000
 	return valueInMeters
 }
 
 export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
-	const [addOnUnits, setAddOnUnits] = useState<Record<string, MeasurementUnit>>(
-		{},
-	)
+	const [addOnUnits, setAddOnUnits] = useState<Record<string, MeasurementUnit>>({})
 
 	const addAddOn = () => {
 		const newAddOn: AddOn = {
@@ -112,10 +101,7 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 		}))
 	}
 
-	const updateCustomService = (
-		serviceId: string,
-		updates: Partial<CustomService>,
-	) => {
+	const updateCustomService = (serviceId: string, updates: Partial<CustomService>) => {
 		setQuoteData(prev => ({
 			...prev,
 			customServices: prev.customServices.map(service =>
@@ -127,9 +113,7 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 	const removeCustomService = (serviceId: string) => {
 		setQuoteData(prev => ({
 			...prev,
-			customServices: prev.customServices.filter(
-				service => service.id !== serviceId,
-			),
+			customServices: prev.customServices.filter(service => service.id !== serviceId),
 		}))
 	}
 
@@ -138,14 +122,8 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 			<Card>
 				<CardHeader>
 					<div className='flex justify-between items-center'>
-						<CardTitle className='text-base'>
-							Custom Services & Charges
-						</CardTitle>
-						<Button
-							onClick={addCustomService}
-							size='sm'
-							className='flex items-center gap-2'
-						>
+						<CardTitle className='text-base'>Custom Services & Charges</CardTitle>
+						<Button onClick={addCustomService} size='sm' className='flex items-center gap-2'>
 							<Plus className='w-4 h-4' />
 							<p className='hidden md:inline-flex'>Add Service</p>
 						</Button>
@@ -171,9 +149,7 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 									<Label>Service Name *</Label>
 									<Input
 										value={service.name}
-										onChange={e =>
-											updateCustomService(service.id, { name: e.target.value })
-										}
+										onChange={e => updateCustomService(service.id, { name: e.target.value })}
 										placeholder='e.g., Express Delivery, Installation'
 									/>
 								</div>
@@ -208,9 +184,7 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 						</div>
 					))}
 					{quoteData.customServices.length === 0 && (
-						<div className='text-center py-8 text-muted-foreground'>
-							No custom services added.
-						</div>
+						<div className='text-center py-8 text-muted-foreground'>No custom services added.</div>
 					)}
 				</CardContent>
 			</Card>
@@ -253,8 +227,7 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 								placeholder='Enter GST rate (e.g., 10)'
 							/>
 							<p className='text-sm text-muted-foreground'>
-								GST will be calculated on the total amount after tax and
-								discount
+								GST will be calculated on the total amount after tax and discount
 							</p>
 						</div>
 					)}
@@ -265,11 +238,7 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 				<CardHeader>
 					<div className='flex justify-between items-center'>
 						<CardTitle className='text-base'>Additional Items</CardTitle>
-						<Button
-							onClick={addAddOn}
-							size='sm'
-							className='flex items-center gap-2'
-						>
+						<Button onClick={addAddOn} size='sm' className='flex items-center gap-2'>
 							<Plus className='w-4 h-4' />
 							<p className='hidden md:inline-flex'>Add Item</p>
 						</Button>
@@ -286,16 +255,8 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 								: addOn.unitType === 'linear'
 									? addOn.length || 0
 									: 1)
-						const gstAmount = calculateAddOnGST(
-							addOn,
-							quoteData.gstEnabled,
-							quoteData.gstRate,
-						)
-						const totalWithGST = calculateAddOnTotal(
-							addOn,
-							quoteData.gstEnabled,
-							quoteData.gstRate,
-						)
+						const gstAmount = calculateAddOnGST(addOn, quoteData.gstEnabled, quoteData.gstRate)
+						const totalWithGST = calculateAddOnTotal(addOn, quoteData.gstEnabled, quoteData.gstRate)
 						return (
 							<div key={addOn.id} className='border rounded-lg p-4 space-y-4'>
 								<div className='flex justify-between items-start'>
@@ -315,9 +276,7 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 										<Label>Item Name *</Label>
 										<Input
 											value={addOn.name}
-											onChange={e =>
-												updateAddOn(addOn.id, { name: e.target.value })
-											}
+											onChange={e => updateAddOn(addOn.id, { name: e.target.value })}
 											placeholder='Enter item name'
 										/>
 									</div>
@@ -338,11 +297,7 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 											<SelectContent>
 												{unitTypes.map(type => (
 													<SelectItem key={type} value={type}>
-														{type === 'each'
-															? 'Each'
-															: type === 'sqm'
-																? 'Square Meter'
-																: 'Linear Meter'}
+														{type === 'each' ? 'Each' : type === 'sqm' ? 'Square Meter' : 'Linear Meter'}
 													</SelectItem>
 												))}
 											</SelectContent>
@@ -361,10 +316,7 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 												value={convertFromMeters(addOn.width || 0, currentUnit)}
 												onChange={e =>
 													updateAddOn(addOn.id, {
-														width: convertToMeters(
-															Number.parseFloat(e.target.value) || 0,
-															currentUnit,
-														),
+														width: convertToMeters(Number.parseFloat(e.target.value) || 0, currentUnit),
 													})
 												}
 											/>
@@ -375,16 +327,10 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 												type='number'
 												step='0.01'
 												min='0'
-												value={convertFromMeters(
-													addOn.height || 0,
-													currentUnit,
-												)}
+												value={convertFromMeters(addOn.height || 0, currentUnit)}
 												onChange={e =>
 													updateAddOn(addOn.id, {
-														height: convertToMeters(
-															Number.parseFloat(e.target.value) || 0,
-															currentUnit,
-														),
+														height: convertToMeters(Number.parseFloat(e.target.value) || 0, currentUnit),
 													})
 												}
 											/>
@@ -393,9 +339,7 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 											<Label>Unit</Label>
 											<Select
 												value={currentUnit}
-												onValueChange={(value: MeasurementUnit) =>
-													handleAddOnUnitChange(addOn.id, value)
-												}
+												onValueChange={(value: MeasurementUnit) => handleAddOnUnitChange(addOn.id, value)}
 											>
 												<SelectTrigger>
 													<SelectValue />
@@ -411,10 +355,7 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 											<Label>Area</Label>
 											<div className='flex items-center h-10 px-3 border rounded-md bg-muted'>
 												<Calculator className='w-4 h-4 mr-2' />
-												{(addOn.width ?? 0 * (addOn.height ?? 0)).toFixed(
-													2,
-												)}{' '}
-												sqm
+												{(addOn.width ?? 0 * (addOn.height ?? 0)).toFixed(2)} sqm
 											</div>
 										</div>
 									</div>
@@ -428,16 +369,10 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 												type='number'
 												step='0.01'
 												min='0'
-												value={convertFromMeters(
-													addOn.length || 0,
-													currentUnit,
-												)}
+												value={convertFromMeters(addOn.length || 0, currentUnit)}
 												onChange={e =>
 													updateAddOn(addOn.id, {
-														length: convertToMeters(
-															Number.parseFloat(e.target.value) || 0,
-															currentUnit,
-														),
+														length: convertToMeters(Number.parseFloat(e.target.value) || 0, currentUnit),
 													})
 												}
 											/>
@@ -446,9 +381,7 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 											<Label>Unit</Label>
 											<Select
 												value={currentUnit}
-												onValueChange={(value: MeasurementUnit) =>
-													handleAddOnUnitChange(addOn.id, value)
-												}
+												onValueChange={(value: MeasurementUnit) => handleAddOnUnitChange(addOn.id, value)}
 											>
 												<SelectTrigger>
 													<SelectValue />
@@ -474,9 +407,7 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 									<Label>Description</Label>
 									<Textarea
 										value={addOn.description}
-										onChange={e =>
-											updateAddOn(addOn.id, { description: e.target.value })
-										}
+										onChange={e => updateAddOn(addOn.id, { description: e.target.value })}
 										placeholder='Optional description'
 									/>
 								</div>
@@ -528,9 +459,7 @@ export function Step3AddonsServices({ quoteData, setQuoteData }: Step3Props) {
 					})}
 
 					{quoteData.addOns.length === 0 && (
-						<div className='text-center py-8 text-muted-foreground'>
-							No additional items added.
-						</div>
+						<div className='text-center py-8 text-muted-foreground'>No additional items added.</div>
 					)}
 				</CardContent>
 			</Card>

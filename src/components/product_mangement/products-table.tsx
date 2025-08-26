@@ -1,20 +1,8 @@
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '@/components/ui/card'
-import {
-	Table,
-	TableBody,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from '@/components/ui/table'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import type { Id } from 'convex/_generated/dataModel'
 import type { Category, Product } from './types'
 import type { ProductFormValues } from './schemas'
@@ -30,18 +18,10 @@ interface ProductsTableProps {
 	onAddProduct: (data: ProductFormValues) => void
 }
 
-export function ProductsTable({
-	categories,
-	products,
-	onAddProduct,
-}: ProductsTableProps) {
+export function ProductsTable({ categories, products, onAddProduct }: ProductsTableProps) {
 	const [showAddSheet, setShowAddSheet] = useState(false)
-	const updateProductMutation = useMutation(
-		api.product_categoreis.updateProduct,
-	)
-	const deleteProductMutation = useMutation(
-		api.product_categoreis.deleteProduct,
-	)
+	const updateProductMutation = useMutation(api.product_categoreis.updateProduct)
+	const deleteProductMutation = useMutation(api.product_categoreis.deleteProduct)
 
 	const handleAdd = async (data: ProductFormValues) => {
 		onAddProduct(data)
@@ -84,10 +64,7 @@ export function ProductsTable({
 							<CardTitle>Products</CardTitle>
 							<CardDescription>Manage your product inventory</CardDescription>
 						</div>
-						<Button
-							onClick={() => setShowAddSheet(true)}
-							className='w-full sm:w-auto'
-						>
+						<Button onClick={() => setShowAddSheet(true)} className='w-full sm:w-auto'>
 							<Plus className='h-4 w-4 mr-2' />
 							Add Product
 						</Button>
@@ -139,12 +116,7 @@ export function ProductsTable({
 				</CardContent>
 			</Card>
 
-			<ProductFormSheet
-				open={showAddSheet}
-				onOpenChange={setShowAddSheet}
-				onSave={handleAdd}
-				categories={categories}
-			/>
+			<ProductFormSheet open={showAddSheet} onOpenChange={setShowAddSheet} onSave={handleAdd} categories={categories} />
 		</>
 	)
 }
