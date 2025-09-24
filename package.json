@@ -6,6 +6,7 @@
 		"dev": "run-p start db:dev",
 		"start": "vite --port 3000",
 		"build": "vite build && tsc",
+		"lint": "tsc",
 		"serve": "vite preview",
 		"format": "prettier",
 		"check": "prettier --write . && eslint --fix",

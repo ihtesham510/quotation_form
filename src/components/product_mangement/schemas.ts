@@ -8,7 +8,7 @@ export const categorySchema = z.object({
 export const productSchema = z.object({
 	categoryId: z.string().min(1, 'Category is required'),
 	name: z.string().min(1, 'Product name is required').max(200, 'Name must be less than 200 characters'),
-	priceType: z.enum(['sqm', 'each'], {
+	priceType: z.enum(['sqm', 'each', 'matrix'], {
 		required_error: 'Price type is required',
 	}),
 	basePrice: z.number().min(0.01, 'Price must be greater than 0'),

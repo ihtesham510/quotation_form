@@ -18,7 +18,7 @@ export const curtainsSchema = {
 			name: v.string(),
 			label: v.string(),
 			categoryName: v.string(),
-			priceType: v.union(v.literal('sqm'), v.literal('each')),
+			priceType: v.union(v.literal('sqm'), v.literal('each'), v.literal('matrix')),
 			basePrice: v.number(),
 			effectivePrice: v.number(),
 			width: v.number(),
@@ -77,11 +77,22 @@ export const curtainsSchema = {
 export const productSchema = {
 	categoryId: v.id('categories'),
 	name: v.string(),
-	priceType: v.union(v.literal('sqm'), v.literal('each')),
+	height: v.optional(v.number()),
+	width: v.optional(v.number()),
+	priceType: v.union(v.literal('sqm'), v.literal('each'), v.literal('matrix')),
 	basePrice: v.number(),
 	minimumQty: v.number(),
 	leadTime: v.string(),
 	specialConditions: v.optional(v.string()),
+	priceMatrix: v.optional(
+		v.array(
+			v.object({
+				height: v.number(),
+				width: v.number(),
+				price: v.number(),
+			}),
+		),
+	),
 }
 
 export const categorySchema = {
