@@ -28,6 +28,29 @@ export function TileMaterialManager({ data, onAdd, onUpdate, onImport, onExport,
 	const handleEdit = (item: Material | Style | Size | Finish, type: string) => {
 		setEditingItem({ ...item, type })
 	}
+
+	// Helper function to format size information
+	const formatSizeInfo = (size: Size) => {
+		const sizeData = size.size
+
+		switch (sizeData.type) {
+			case 'linear_meter':
+				return `Linear Meter - $${sizeData.pricing.toFixed(2)}`
+			case 'height_width':
+				const priceType = sizeData.price_type === 'fixed_price' ? 'Fixed' : 'Multiplier'
+				const priceValue =
+					sizeData.price_type === 'fixed_price' ? `$${sizeData.pricing.toFixed(2)}` : `${sizeData.pricing}x`
+				return `${sizeData.height}" × ${sizeData.width}" - ${priceType}: ${priceValue}`
+			case 'custom':
+				const customPriceType = sizeData.price_type === 'fixed_price' ? 'Fixed' : 'Multiplier'
+				const customPriceValue =
+					sizeData.price_type === 'fixed_price' ? `$${sizeData.pricing.toFixed(2)}` : `${sizeData.pricing}x`
+				return `Custom - ${customPriceType}: ${customPriceValue}`
+			default:
+				return 'Unknown size type'
+		}
+	}
+
 	const renderMaterials = () => (
 		<div className='space-y-4'>
 			<div className='flex justify-between items-center'>
@@ -61,7 +84,10 @@ export function TileMaterialManager({ data, onAdd, onUpdate, onImport, onExport,
 					sizes={data.sizes}
 					finishes={data.finish}
 					onUpdate={data => {
-						onUpdate?.({ data, type: 'material' })
+						console.log(data)
+						const { _creationTime, type, ...filteredData } = data as any
+						console.log(filteredData)
+						onUpdate?.({ data: filteredData, type: 'material' })
 						setEditingItem(null)
 					}}
 					onCancel={() => setEditingItem(null)}
@@ -252,7 +278,7 @@ export function TileMaterialManager({ data, onAdd, onUpdate, onImport, onExport,
 							<div className='flex justify-between items-center'>
 								<div>
 									<h4 className='font-medium'>{size.name}</h4>
-									<p className='text-sm text-muted-foreground'>Multiplier: {size.multiplier}x</p>
+									<p className='text-sm text-muted-foreground'>{formatSizeInfo(size)}</p>
 								</div>
 								<div className='flex gap-2'>
 									<Button variant='outline' size='sm' onClick={() => handleEdit(size, 'sizes')}>

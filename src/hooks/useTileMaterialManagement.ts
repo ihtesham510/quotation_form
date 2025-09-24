@@ -43,7 +43,7 @@ export function useTileMaterialManagement() {
 						const id = await addSize({
 							userId,
 							name: size.name,
-							multiplier: size.multiplier,
+							size: size.size,
 						})
 						sizesMap.set(size._id, id)
 					}),
@@ -53,7 +53,7 @@ export function useTileMaterialManagement() {
 						const id = await addSize({
 							userId,
 							name: size.name,
-							multiplier: size.multiplier,
+							size: size.size,
 						})
 						sizesMap.set(size._id, id)
 					}),

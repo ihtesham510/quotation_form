@@ -32,7 +32,7 @@ export async function generateTileQuotePDF(data: QuotationData): Promise<Blob> {
 		builder.drawInfoBox('No materials selected for this quote.', 'warning')
 	} else {
 		// Create materials table
-		const materialHeaders = ['Item', 'Material', 'Sq Ft', 'Unit Price', 'Total']
+		const materialHeaders = ['Item', 'Material', 'Unit Value', 'Unit Price', 'Total']
 		const materialRows: string[][] = []
 
 		for (const item of data.selections.materialItems) {
@@ -52,10 +52,41 @@ export async function generateTileQuotePDF(data: QuotationData): Promise<Blob> {
 					details.push(`${item.style.name}`)
 				}
 
-				// Apply size multiplier
+				// Apply size pricing based on new schema
 				if (item.size) {
-					effectivePrice *= item.size.multiplier
-					details.push(`${item.size.name}`)
+					const sizeData = item.size.size
+					let sizePricing = 0
+
+					switch (sizeData.type) {
+						case 'linear_meter':
+							sizePricing = sizeData.pricing
+							details.push(`${item.size.name} - Linear Meter`)
+							break
+						case 'height_width':
+							if (sizeData.price_type === 'fixed_price') {
+								sizePricing = sizeData.pricing
+							} else if (sizeData.price_type === 'multiplier') {
+								effectivePrice *= sizeData.pricing
+							}
+							details.push(`${item.size.name} - ${sizeData.height}"×${sizeData.width}"`)
+							break
+						case 'custom':
+							if (sizeData.price_type === 'fixed_price') {
+								sizePricing = sizeData.pricing
+							} else if (sizeData.price_type === 'multiplier') {
+								effectivePrice *= sizeData.pricing
+							}
+							details.push(`${item.size.name} - Custom`)
+							break
+					}
+
+					// Add fixed pricing if applicable
+					if (
+						sizeData.type === 'linear_meter' ||
+						(sizeData.type !== 'custom' && sizeData.price_type === 'fixed_price')
+					) {
+						effectivePrice += sizePricing
+					}
 				}
 
 				// Apply finish premium
@@ -65,14 +96,14 @@ export async function generateTileQuotePDF(data: QuotationData): Promise<Blob> {
 				}
 
 				unitPrice = effectivePrice
-				itemTotal = effectivePrice * item.squareFootage
+				itemTotal = effectivePrice * item.unit_value
 			}
 
 			// Add main row to table
 			materialRows.push([
 				item.label,
 				item.material?.name || 'N/A',
-				item.squareFootage.toString(),
+				item.unit_value.toString(),
 				`$${unitPrice.toFixed(2)}`,
 				`$${itemTotal.toFixed(2)}`,
 			])
@@ -82,7 +113,7 @@ export async function generateTileQuotePDF(data: QuotationData): Promise<Blob> {
 				materialRows.push([
 					'', // Empty item column
 					`- ${details.join(' • ')}`, // Details in material column
-					'', // Empty sq ft
+					'', // Empty unit value
 					basePrice > 0 ? `Base: $${basePrice.toFixed(2)}` : '', // Base price info
 					'', // Empty total
 				])
@@ -90,7 +121,7 @@ export async function generateTileQuotePDF(data: QuotationData): Promise<Blob> {
 		}
 
 		// Draw materials table with custom column widths
-		const materialColumnWidths = [120, 160, 60, 80, 80]
+		const materialColumnWidths = [120, 160, 80, 80, 80]
 		builder.drawTable(materialHeaders, materialRows, materialColumnWidths)
 	}
 

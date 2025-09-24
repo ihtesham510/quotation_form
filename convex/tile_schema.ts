@@ -18,7 +18,24 @@ export const tile_styles_schema = {
 export const tile_sizes_schema = {
 	name: v.string(),
 	userId: v.id('user'),
-	multiplier: v.number(),
+	size: v.union(
+		v.object({
+			type: v.literal('linear_meter'),
+			pricing: v.number(),
+		}),
+		v.object({
+			type: v.literal('height_width'),
+			height: v.number(),
+			width: v.number(),
+			price_type: v.union(v.literal('fixed_price'), v.literal('multiplier')),
+			pricing: v.number(),
+		}),
+		v.object({
+			type: v.literal('custom'),
+			price_type: v.union(v.literal('fixed_price'), v.literal('multiplier')),
+			pricing: v.number(),
+		}),
+	),
 }
 
 export const tile_finishes_schema = {
@@ -57,7 +74,7 @@ const materialItem = {
 	style: v.optional(v.object(tile_styles_schema)),
 	size: v.optional(v.object(tile_sizes_schema)),
 	finish: v.optional(v.object(tile_finishes_schema)),
-	squareFootage: v.number(),
+	unit_value: v.number(),
 }
 
 const selections = {

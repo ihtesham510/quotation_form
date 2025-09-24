@@ -84,9 +84,9 @@ export function validateMaterialSelections(selections: Selections): ValidationRe
 			errors[`materialItem_${index}_finish`] = 'Please select a finish'
 		}
 
-		if (!item.squareFootage || item.squareFootage <= 0) {
+		if (!item.unit_value || item.unit_value <= 0) {
 			errors[`materialItem_${index}_squareFootage`] = 'Square footage must be greater than 0'
-		} else if (item.squareFootage > 10000) {
+		} else if (item.unit_value > 10000) {
 			errors[`materialItem_${index}_squareFootage`] = 'Square footage seems unusually large. Please verify.'
 		}
 	})

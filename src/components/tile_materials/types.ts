@@ -137,7 +137,24 @@ const SizeSchema = z
 	.object({
 		_id: z.string(),
 		name: z.string(),
-		multiplier: z.number(),
+		size: z.union([
+			z.object({
+				type: z.literal('linear_meter'),
+				pricing: z.number(),
+			}),
+			z.object({
+				type: z.literal('height_width'),
+				height: z.number(),
+				width: z.number(),
+				price_type: z.union([z.literal('fixed_price'), z.literal('multiplier')]),
+				pricing: z.number(),
+			}),
+			z.object({
+				type: z.literal('custom'),
+				price_type: z.union([z.literal('fixed_price'), z.literal('multiplier')]),
+				pricing: z.number(),
+			}),
+		]),
 	})
 	.passthrough()
 

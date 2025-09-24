@@ -43,7 +43,7 @@ export interface MaterialItem {
 	style?: Style
 	size?: Size
 	finish?: Finish
-	squareFootage: number
+	unit_value: number
 }
 
 export interface Selections {

@@ -316,7 +316,7 @@ export const TileQuotationEmail = (props: {
 										</Column>
 									</Row>
 									<Text className='text-[14px] text-gray-700 m-0'>
-										<strong>Square Footage:</strong> {item.squareFootage} sq ft
+										<strong>Square Footage:</strong> {item.unit_value} sq ft
 									</Text>
 								</div>
 							))}

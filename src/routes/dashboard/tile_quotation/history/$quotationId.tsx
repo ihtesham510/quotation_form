@@ -85,6 +85,7 @@ function RouteComponent() {
 		/>
 	)
 }
+
 function RenderQuotation({
 	quotation,
 	onSendEmail,
@@ -106,6 +107,40 @@ function RenderQuotation({
 	const handleSendEmail = () => {
 		onSendEmail(emailData.to)
 		setEmailDialogOpen(false)
+	}
+
+	// Helper function to format size information for display
+	const formatSizeDisplay = (item: MaterialItem) => {
+		if (!item.size) return 'N/A'
+
+		const sizeData = item.size.size
+		switch (sizeData.type) {
+			case 'linear_meter':
+				return `${item.size.name} (Linear Meter)`
+			case 'height_width':
+				return `${item.size.name} (${sizeData.height}" × ${sizeData.width}")`
+			case 'custom':
+				return `${item.size.name} (Custom)`
+			default:
+				return item.size.name
+		}
+	}
+
+	// Helper function to get appropriate unit display
+	const getUnitDisplay = (item: MaterialItem) => {
+		if (!item.size) return 'units'
+
+		const sizeData = item.size.size
+		switch (sizeData.type) {
+			case 'linear_meter':
+				return 'linear meters'
+			case 'height_width':
+				return 'sq ft'
+			case 'custom':
+				return 'units'
+			default:
+				return 'units'
+		}
 	}
 
 	return (
@@ -221,23 +256,25 @@ function RenderQuotation({
 									<div key={item.id} className='border rounded-lg p-4'>
 										<div className='flex justify-between items-start mb-2'>
 											<h4 className='font-semibold'>{item.label}</h4>
-											<Badge variant='outline'>{item.squareFootage} sq ft</Badge>
+											<Badge variant='outline'>
+												{item.unit_value} {getUnitDisplay(item)}
+											</Badge>
 										</div>
 										<div className='grid md:grid-cols-2 gap-4 text-sm'>
 											<div>
 												<p>
-													<span className='font-medium'>Material:</span> {item.material?.name}
+													<span className='font-medium'>Material:</span> {item.material?.name || 'N/A'}
 												</p>
 												<p>
-													<span className='font-medium'>Style:</span> {item.style?.name}
+													<span className='font-medium'>Style:</span> {item.style?.name || 'N/A'}
 												</p>
 											</div>
 											<div>
 												<p>
-													<span className='font-medium'>Size:</span> {item.size?.name}
+													<span className='font-medium'>Size:</span> {formatSizeDisplay(item)}
 												</p>
 												<p>
-													<span className='font-medium'>Finish:</span> {item.finish?.name}
+													<span className='font-medium'>Finish:</span> {item.finish?.name || 'N/A'}
 												</p>
 											</div>
 										</div>
@@ -262,6 +299,7 @@ function RenderQuotation({
 												<div key={item.id} className='flex justify-between items-center text-sm'>
 													<span>
 														{item.name} ({item.quantity} {item.unit})
+														{item.measurement && ` - ${item.measurement} ${item.unit}`}
 													</span>
 													<span>${(item.price * item.quantity).toFixed(2)}</span>
 												</div>
@@ -297,6 +335,12 @@ function RenderQuotation({
 									<span>Material Cost</span>
 									<span>${quotation.pricing.materialCost.toFixed(2)}</span>
 								</div>
+								{quotation.pricing.markupAmount > 0 && (
+									<div className='flex justify-between'>
+										<span>Markup</span>
+										<span>${quotation.pricing.markupAmount.toFixed(2)}</span>
+									</div>
+								)}
 								{quotation.pricing.customItemsCost > 0 && (
 									<div className='flex justify-between'>
 										<span>Custom Items</span>
@@ -314,17 +358,19 @@ function RenderQuotation({
 									<span>Subtotal</span>
 									<span>${quotation.pricing.subtotal.toFixed(2)}</span>
 								</div>
-								{quotation.pricingOptions.discount.enabled && (
+								{quotation.pricingOptions.discount.enabled && quotation.pricing.discountAmount > 0 && (
 									<div className='flex justify-between text-green-600'>
 										<span>Discount ({quotation.pricingOptions.discount.value}%)</span>
 										<span>-${quotation.pricing.discountAmount.toFixed(2)}</span>
 									</div>
 								)}
-								<div className='flex justify-between'>
-									<span>After Discount</span>
-									<span>${quotation.pricing.afterDiscount.toFixed(2)}</span>
-								</div>
-								{quotation.pricingOptions.gst.enabled && (
+								{quotation.pricingOptions.discount.enabled && (
+									<div className='flex justify-between'>
+										<span>After Discount</span>
+										<span>${quotation.pricing.afterDiscount.toFixed(2)}</span>
+									</div>
+								)}
+								{quotation.pricingOptions.gst.enabled && quotation.pricing.gstAmount > 0 && (
 									<div className='flex justify-between'>
 										<span>GST ({quotation.pricingOptions.gst.percentage}%)</span>
 										<span>${quotation.pricing.gstAmount.toFixed(2)}</span>

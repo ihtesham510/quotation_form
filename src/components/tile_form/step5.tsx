@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { PricingSummary } from './pricing-summary'
-import { formatCurrency } from './calculations'
+import { calculateSingleMaterialCostWithGstAndMarkup, formatCurrency } from './calculations'
 import type { CalculationResult, Selections, AddOns, PricingOptions, CustomerInfo } from './types'
 
 interface Step5Props {
@@ -29,32 +29,6 @@ export function Step5({
 	onGeneratePDF,
 	onStepJump,
 }: Step5Props) {
-	const calculateIndividualItemCost = (item: any) => {
-		if (!item.material || !item.squareFootage) return 0
-
-		// Calculate base cost with multipliers and premium
-		const basePrice = item.material.basePrice || 0
-		const styleMultiplier = item.style?.multiplier || 1
-		const sizeMultiplier = item.size?.multiplier || 1
-		const finishPremium = item.finish?.premium || 0
-
-		const baseCost = (basePrice * styleMultiplier * sizeMultiplier + finishPremium) * item.squareFootage
-
-		// Apply markup if enabled
-		let costWithMarkup = baseCost
-		if (addOns.markup && addOns.markup > 0) {
-			costWithMarkup = baseCost * (1 + addOns.markup / 100)
-		}
-
-		// Apply GST if enabled
-		let finalCost = costWithMarkup
-		if (pricingOptions.gst.enabled && pricingOptions.gst.percentage > 0) {
-			finalCost = costWithMarkup * (1 + pricingOptions.gst.percentage / 100)
-		}
-
-		return finalCost
-	}
-
 	return (
 		<div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
 			<div className='lg:col-span-2 space-y-6'>
@@ -101,7 +75,7 @@ export function Step5({
 										<h4 className='font-medium'>{item.label}</h4>
 										<div className='text-right'>
 											<div className='font-semibold text-lg text-blue-600'>
-												{formatCurrency(calculateIndividualItemCost(item))}
+												{formatCurrency(calculateSingleMaterialCostWithGstAndMarkup(item))}
 											</div>
 											<div className='text-xs text-gray-500'>Total Cost</div>
 										</div>
@@ -115,14 +89,20 @@ export function Step5({
 											<strong>Style:</strong> {item.style?.name} ({item.style?.multiplier}x multiplier)
 										</div>
 										<div>
-											<strong>Size:</strong> {item.size?.name} ({item.size?.multiplier}x multiplier)
+											<strong>Size:</strong> {item.size?.name}
+											<div className='flex gap-1'>
+												({item.size?.size.type === 'linear_meter' && 'Linear Meter'}{' '}
+												{item.size?.size.type === 'height_width' &&
+													`${item.size?.size.height} x ${item.size?.size.height} ${item.size.size.price_type === 'fixed_price' ? '@' : 'x'}  ${item.size?.size.pricing}`}
+												{item.size?.size.type === 'linear_meter' && `@ ${item.size?.size.pricing}$`})
+											</div>
 										</div>
 										<div>
 											<strong>Finish:</strong> {item.finish?.name} (+$
 											{item.finish?.premium}/sq ft)
 										</div>
 										<div>
-											<strong>Square Footage:</strong> {item.squareFootage} sq ft
+											<strong>Square Footage:</strong> {item.unit_value} sq ft
 										</div>
 									</div>
 								</div>
@@ -131,7 +111,7 @@ export function Step5({
 							<div className='text-gray-500'>No materials selected</div>
 						)}
 						<div className='pt-2 border-t'>
-							<strong>Total Material Cost:</strong> {formatCurrency(pricing.materialCost)}
+							<strong>Total Material Cost:</strong> {formatCurrency(pricing.materialCost)} + GST
 						</div>
 					</CardContent>
 				</Card>
