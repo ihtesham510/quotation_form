@@ -221,11 +221,16 @@ export function Step2ProductSelection({ quoteData, setQuoteData, errors, product
 	const getProductOptions = (categoryId: Id<'categories'>): CommandSelectOption[] => {
 		return productDatabase.products
 			.filter(product => product.categoryId === categoryId)
-			.map(product => ({
-				value: product._id,
-				label: product.name,
-				description: `$${product.basePrice}/${product.priceType}`,
-			}))
+			.map(product => {
+				return {
+					value: product._id,
+					label: product.name,
+					description:
+						product.priceType === 'matrix'
+							? `${product.priceMatrix?.length} sizes`
+							: `$${product.basePrice}/${product.priceType}`,
+				}
+			})
 	}
 
 	return (

@@ -191,7 +191,9 @@ function QuotationDetails({
 												<TableCell>
 													{p.width}m × {p.height}m
 												</TableCell>
-												<TableCell className='uppercase'>{p.priceType}</TableCell>
+												<TableCell>
+													{p.priceType === 'matrix' ? <p>Custom Sizing</p> : <p className='uppercase'>{p.priceType}</p>}
+												</TableCell>
 												<TableCell>{p.quantity}</TableCell>
 												<TableCell className='text-right'>{formatCurrency(p.effectivePrice)}</TableCell>
 												<TableCell className='text-right'>{formatCurrency(p.total)}</TableCell>

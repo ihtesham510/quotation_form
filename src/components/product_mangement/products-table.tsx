@@ -96,7 +96,7 @@ export function ProductsTable({ categories, products, onAddProduct }: ProductsTa
 										Per SQM: {pricingStats.sqm}
 									</Badge>
 									<Badge variant='secondary' className='text-xs'>
-										Matrix: {pricingStats.matrix}
+										Custom Sizes: {pricingStats.matrix}
 									</Badge>
 									{pricingStats.matrixWithoutEntries > 0 && (
 										<Badge variant='destructive' className='text-xs'>
@@ -148,7 +148,7 @@ export function ProductsTable({ categories, products, onAddProduct }: ProductsTa
 								<SelectItem value='all'>All Price Types</SelectItem>
 								<SelectItem value='each'>Per Unit</SelectItem>
 								<SelectItem value='sqm'>Per SQM</SelectItem>
-								<SelectItem value='matrix'>Matrix Pricing</SelectItem>
+								<SelectItem value='matrix'>Custom Sizes</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>

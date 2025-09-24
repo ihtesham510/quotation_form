@@ -40,7 +40,7 @@ function PriceDisplay({ product }: { product: Product }) {
 
 		return (
 			<div className='space-y-1'>
-				<div className='text-sm font-medium'>Matrix ({matrixCount} sizes)</div>
+				<div className='text-sm font-medium'>Sizes ({matrixCount} sizes)</div>
 				<div className='text-xs text-muted-foreground'>{priceRange}</div>
 			</div>
 		)
@@ -63,7 +63,7 @@ function MatrixPricingDialog({ product }: { product: Product }) {
 			<DialogTrigger asChild>
 				<Button variant='outline' size='sm'>
 					<Eye className='h-4 w-4 mr-1' />
-					View Matrix
+					View Sizes
 				</Button>
 			</DialogTrigger>
 			<DialogContent className='max-w-2xl'>

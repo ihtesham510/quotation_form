@@ -244,7 +244,7 @@ export function ProductFormSheet({ open, onOpenChange, onSave, categories, defau
 															<SelectContent>
 																<SelectItem value='each'>Per Each</SelectItem>
 																<SelectItem value='sqm'>Per SQM</SelectItem>
-																<SelectItem value='matrix'>Matrix Pricing</SelectItem>
+																<SelectItem value='matrix'>Custom Sizings</SelectItem>
 															</SelectContent>
 														</Select>
 														<FormMessage />

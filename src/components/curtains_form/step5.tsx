@@ -216,7 +216,7 @@ export function Step5QuotePreview({ quoteData, onSaveQuote, onGeneratePDF, onEma
 					) : (
 						quoteData.products
 							.filter(product => isProductPricingValid(product, productDatabase))
-							.map((product, _) => {
+							.map(product => {
 								const productInfo = productDatabase.products.find(p => p._id === product.productId)
 								const sqm = product.width * product.height
 								const baseTotal = calculateProductTotalAfterMarkup(product, quoteData, productDatabase)
@@ -273,7 +273,7 @@ export function Step5QuotePreview({ quoteData, onSaveQuote, onGeneratePDF, onEma
 												)}
 												{productInfo?.priceType === 'matrix' && (
 													<p>
-														Matrix Size: {product.width}m × {product.height}m (${originalPrice.toFixed(2)})
+														Size: {product.width}m × {product.height}m (${originalPrice.toFixed(2)})
 													</p>
 												)}
 												{productInfo?.priceType === 'each' && <p>Unit Price: ${originalPrice.toFixed(2)} each</p>}
