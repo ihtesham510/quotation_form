@@ -15,6 +15,8 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import type { Id } from 'convex/_generated/dataModel'
+import { toast } from 'sonner'
+import { useEffect } from 'react'
 
 interface ProductFormSheetProps {
 	open: boolean
@@ -33,7 +35,7 @@ export function ProductFormSheet({ open, onOpenChange, onSave, categories, defau
 			categoryId: defaultValues?.categoryId || ('' as Id<'categories'>),
 			name: defaultValues?.name || '',
 			priceType: defaultValues?.priceType || 'each',
-			basePrice: defaultValues?.basePrice || 0,
+			basePrice: defaultValues?.basePrice || 0.01,
 			minimumQty: defaultValues?.minimumQty || 1,
 			leadTime: defaultValues?.leadTime || '',
 			specialConditions: defaultValues?.specialConditions || '',
@@ -48,20 +50,74 @@ export function ProductFormSheet({ open, onOpenChange, onSave, categories, defau
 
 	const watchedPriceType = form.watch('priceType')
 
-	const handleSave = async (data: ProductFormValues) => {
-		// Clean up priceMatrix if not using matrix pricing
-		if (data.priceType !== 'matrix') {
-			data.priceMatrix = []
+	const validatePriceMatrix = (data: ProductFormValues) => {
+		if (data.priceType !== 'matrix') return true
+
+		const { priceMatrix } = data
+		if (!priceMatrix || priceMatrix.length === 0) {
+			form.setError('priceMatrix', {
+				type: 'manual',
+				message: 'At least one price matrix entry is required for matrix pricing',
+			})
+			return false
 		}
-		console.log('submitting')
-		onSave(data)
-		form.reset()
-		onOpenChange(false)
+		const duplicates = new Set()
+		for (let i = 0; i < priceMatrix.length; i++) {
+			const entry = priceMatrix[i]
+			const key = `${entry.width}-${entry.height}`
+
+			if (duplicates.has(key)) {
+				form.setError(`priceMatrix.${i}`, {
+					type: 'manual',
+					message: 'Duplicate dimensions detected',
+				})
+				return false
+			}
+			duplicates.add(key)
+			if (entry.width <= 0 || entry.height <= 0 || entry.price <= 0) {
+				form.setError(`priceMatrix.${i}`, {
+					type: 'manual',
+					message: 'Width, height, and price must be greater than 0',
+				})
+				return false
+			}
+		}
+
+		return true
+	}
+
+	const handleSave = async (data: ProductFormValues) => {
+		try {
+			console.log('Form data before validation:', data)
+
+			form.clearErrors()
+			if (data.priceType !== 'matrix') {
+				data.priceMatrix = []
+			} else {
+				if (!validatePriceMatrix(data)) {
+					console.log('Price matrix validation failed')
+					return
+				}
+			}
+
+			console.log('Form data after cleanup:', data)
+			console.log('Submitting form...')
+
+			onSave(data)
+			form.reset()
+			onOpenChange(false)
+
+			console.log('Form submitted successfully')
+		} catch (error) {
+			console.error('Form submission error:', error)
+			toast.error('Failed to save product. Please try again.')
+		}
 	}
 
 	const handleOpenChange = (newOpen: boolean) => {
 		if (!newOpen) {
 			form.reset()
+			form.clearErrors()
 		}
 		onOpenChange(newOpen)
 	}
@@ -72,19 +128,16 @@ export function ProductFormSheet({ open, onOpenChange, onSave, categories, defau
 
 	const removeMatrixEntry = (index: number) => {
 		remove(index)
+		form.clearErrors(`priceMatrix.${index}`)
 	}
 
-	const validateMatrixEntry = (index: number) => {
-		const entry = form.getValues(`priceMatrix.${index}`)
-		if (!entry) return true
-
-		// Check for duplicates
-		const allEntries = form.getValues('priceMatrix')
-		const duplicates =
-			allEntries?.filter((item, i) => i !== index && item.width === entry.width && item.height === entry.height) ?? []
-
-		return duplicates.length === 0
-	}
+	useEffect(() => {
+		if (watchedPriceType !== 'matrix' && fields.length > 0) {
+			for (let i = fields.length - 1; i >= 0; i--) {
+				remove(i)
+			}
+		}
+	}, [watchedPriceType, fields.length, remove])
 
 	return (
 		<Sheet open={open} onOpenChange={handleOpenChange}>
@@ -210,6 +263,7 @@ export function ProductFormSheet({ open, onOpenChange, onSave, categories, defau
 																<Input
 																	type='number'
 																	step='0.01'
+																	min='0'
 																	placeholder='0.00'
 																	{...field}
 																	onChange={e => field.onChange(Number.parseFloat(e.target.value) || 0)}
@@ -250,6 +304,12 @@ export function ProductFormSheet({ open, onOpenChange, onSave, categories, defau
 												</Button>
 											</div>
 
+											{form.formState.errors.priceMatrix && (
+												<Alert variant='destructive'>
+													<AlertDescription>{form.formState.errors.priceMatrix.message}</AlertDescription>
+												</Alert>
+											)}
+
 											{fields.length === 0 && (
 												<Alert>
 													<AlertDescription>
@@ -272,6 +332,7 @@ export function ProductFormSheet({ open, onOpenChange, onSave, categories, defau
 																			<Input
 																				type='number'
 																				step='0.01'
+																				min='0'
 																				placeholder='0.00'
 																				{...field}
 																				onChange={e => field.onChange(Number.parseFloat(e.target.value) || 0)}
@@ -291,6 +352,7 @@ export function ProductFormSheet({ open, onOpenChange, onSave, categories, defau
 																			<Input
 																				type='number'
 																				step='0.01'
+																				min='0'
 																				placeholder='0.00'
 																				{...field}
 																				onChange={e => field.onChange(Number.parseFloat(e.target.value) || 0)}
@@ -310,6 +372,7 @@ export function ProductFormSheet({ open, onOpenChange, onSave, categories, defau
 																			<Input
 																				type='number'
 																				step='0.01'
+																				min='0'
 																				placeholder='0.00'
 																				{...field}
 																				onChange={e => field.onChange(Number.parseFloat(e.target.value) || 0)}
@@ -331,9 +394,9 @@ export function ProductFormSheet({ open, onOpenChange, onSave, categories, defau
 																</Button>
 															</div>
 														</div>
-														{!validateMatrixEntry(index) && (
+														{form.formState.errors.priceMatrix?.[index] && (
 															<p className='text-red-500 text-xs mt-2'>
-																Duplicate dimensions detected. Each width/height combination must be unique.
+																{form.formState.errors.priceMatrix[index]?.message}
 															</p>
 														)}
 													</Card>
@@ -353,6 +416,7 @@ export function ProductFormSheet({ open, onOpenChange, onSave, categories, defau
 													<FormControl>
 														<Input
 															type='number'
+															min='1'
 															placeholder='1'
 															{...field}
 															onChange={e => field.onChange(Number.parseInt(e.target.value) || 1)}
@@ -399,7 +463,13 @@ export function ProductFormSheet({ open, onOpenChange, onSave, categories, defau
 
 							<SheetFooter className='flex-shrink-0 px-6 pb-6 pt-4 border-t bg-background'>
 								<Button type='submit' disabled={form.formState.isSubmitting} className='w-full'>
-									{isEditing ? 'Update Product' : 'Create Product'}
+									{form.formState.isSubmitting
+										? isEditing
+											? 'Updating...'
+											: 'Creating...'
+										: isEditing
+											? 'Update Product'
+											: 'Create Product'}
 								</Button>
 							</SheetFooter>
 						</form>

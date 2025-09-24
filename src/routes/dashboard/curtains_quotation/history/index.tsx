@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { formatDate, formatCurrency } from '@/lib/utils'
 import { Eye, Download, FileText } from 'lucide-react'
-import { useQuery } from 'convex/react'
+import { useQuery } from 'convex-helpers/react/cache'
 import { api } from 'convex/_generated/api'
 import type { DataModel, Id } from 'convex/_generated/dataModel'
 import { useAuth } from '@/context/auth'

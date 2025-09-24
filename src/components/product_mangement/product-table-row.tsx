@@ -1,11 +1,20 @@
 'use client'
 
 import { useState } from 'react'
-import { Pencil, Trash2 } from 'lucide-react'
+import { Pencil, Trash2, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { TableCell, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from '@/components/ui/dialog'
+import { Table, TableBody, TableHead, TableHeader, TableRow as MatrixTableRow } from '@/components/ui/table'
 import type { Id } from 'convex/_generated/dataModel'
 import type { Product, Category } from './types'
 import type { ProductFormValues } from './schemas'
@@ -19,6 +28,74 @@ interface ProductTableRowProps {
 	onUpdate: (id: Id<'products'>, data: ProductFormValues) => void
 	onDelete: (id: Id<'products'>) => void
 	isMobile?: boolean
+}
+
+function PriceDisplay({ product }: { product: Product }) {
+	if (product.priceType === 'matrix') {
+		const matrixCount = product.priceMatrix?.length || 0
+		const priceRange =
+			product.priceMatrix && product.priceMatrix.length > 0
+				? `$${Math.min(...product.priceMatrix.map(m => m.price)).toFixed(2)} - $${Math.max(...product.priceMatrix.map(m => m.price)).toFixed(2)}`
+				: 'No pricing'
+
+		return (
+			<div className='space-y-1'>
+				<div className='text-sm font-medium'>Matrix ({matrixCount} sizes)</div>
+				<div className='text-xs text-muted-foreground'>{priceRange}</div>
+			</div>
+		)
+	}
+
+	return (
+		<div>
+			${product.basePrice.toFixed(2)} / {product.priceType}
+		</div>
+	)
+}
+
+function MatrixPricingDialog({ product }: { product: Product }) {
+	if (product.priceType !== 'matrix' || !product.priceMatrix || product.priceMatrix.length === 0) {
+		return null
+	}
+
+	return (
+		<Dialog>
+			<DialogTrigger asChild>
+				<Button variant='outline' size='sm'>
+					<Eye className='h-4 w-4 mr-1' />
+					View Matrix
+				</Button>
+			</DialogTrigger>
+			<DialogContent className='max-w-2xl'>
+				<DialogHeader>
+					<DialogTitle>Price Matrix - {product.name}</DialogTitle>
+					<DialogDescription>All available sizes and their corresponding prices</DialogDescription>
+				</DialogHeader>
+				<div className='max-h-96 overflow-y-auto'>
+					<Table>
+						<TableHeader>
+							<MatrixTableRow>
+								<TableHead>Width (m)</TableHead>
+								<TableHead>Height (m)</TableHead>
+								<TableHead>Area (m²)</TableHead>
+								<TableHead className='text-right'>Price</TableHead>
+							</MatrixTableRow>
+						</TableHeader>
+						<TableBody>
+							{product.priceMatrix.map((matrix, index) => (
+								<MatrixTableRow key={index}>
+									<TableCell>{matrix.width}</TableCell>
+									<TableCell>{matrix.height}</TableCell>
+									<TableCell>{(matrix.width * matrix.height).toFixed(2)}</TableCell>
+									<TableCell className='text-right font-medium'>${matrix.price.toFixed(2)}</TableCell>
+								</MatrixTableRow>
+							))}
+						</TableBody>
+					</Table>
+				</div>
+			</DialogContent>
+		</Dialog>
+	)
 }
 
 export function ProductTableRow({
@@ -65,9 +142,9 @@ export function ProductTableRow({
 						<div className='grid grid-cols-2 gap-4 text-sm'>
 							<div>
 								<span className='text-muted-foreground'>Price:</span>
-								<p className='font-medium'>
-									${product.basePrice.toFixed(2)} / {product.priceType}
-								</p>
+								<div className='font-medium'>
+									<PriceDisplay product={product} />
+								</div>
 							</div>
 							<div>
 								<span className='text-muted-foreground'>Min Qty:</span>
@@ -77,13 +154,24 @@ export function ProductTableRow({
 								<span className='text-muted-foreground'>Lead Time:</span>
 								<p className='font-medium'>{product.leadTime}</p>
 							</div>
-							{product.specialConditions && (
-								<div className='col-span-2'>
-									<span className='text-muted-foreground'>Special Conditions:</span>
-									<p className='text-sm mt-1'>{product.specialConditions}</p>
-								</div>
-							)}
+							<div>
+								<span className='text-muted-foreground'>Price Type:</span>
+								<p className='font-medium capitalize'>{product.priceType}</p>
+							</div>
 						</div>
+
+						{product.priceType === 'matrix' && (
+							<div className='mt-4 pt-3 border-t'>
+								<MatrixPricingDialog product={product} />
+							</div>
+						)}
+
+						{product.specialConditions && (
+							<div className='mt-4 pt-3 border-t'>
+								<span className='text-muted-foreground text-sm'>Special Conditions:</span>
+								<p className='text-sm mt-1'>{product.specialConditions}</p>
+							</div>
+						)}
 					</CardContent>
 				</Card>
 
@@ -109,17 +197,25 @@ export function ProductTableRow({
 	return (
 		<>
 			<TableRow>
-				<TableCell className='font-medium'>{product.name}</TableCell>
+				<TableCell className='font-medium'>
+					<div>
+						<div>{product.name}</div>
+						{product.priceType === 'matrix' && product.priceMatrix && product.priceMatrix.length > 0 && (
+							<div className='text-xs text-muted-foreground mt-1'>{product.priceMatrix.length} matrix entries</div>
+						)}
+					</div>
+				</TableCell>
 				<TableCell>
 					<Badge variant='outline'>{getCategoryName(product.categoryId)}</Badge>
 				</TableCell>
 				<TableCell>
-					${product.basePrice.toFixed(2)} / {product.priceType}
+					<PriceDisplay product={product} />
 				</TableCell>
 				<TableCell>{product.minimumQty}</TableCell>
 				<TableCell>{product.leadTime}</TableCell>
 				<TableCell className='text-right'>
 					<div className='flex items-center justify-end gap-2'>
+						{product.priceType === 'matrix' && <MatrixPricingDialog product={product} />}
 						<Button variant='ghost' size='sm' onClick={() => setShowEditSheet(true)}>
 							<Pencil className='h-4 w-4' />
 						</Button>

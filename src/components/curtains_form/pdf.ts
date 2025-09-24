@@ -9,8 +9,9 @@ export async function generateQuotePDF(data: SelfContainedQuoteData): Promise<Bl
 	await builder.loadFonts()
 
 	// Enhanced Title with colored header box
-	builder.drawTitle('BLINDS QUOTATION')
+	builder.drawTitle('CURTAINS & BLINDS QUOTATION')
 	builder.drawKeyValueBox('Quote Date', data.quoteDate)
+	builder.drawKeyValueBox('Quote ID', `#${data.id.slice(-8)}`)
 
 	// Customer Information Section with structured key-value boxes
 	builder.drawHeading('Customer Information')
@@ -27,65 +28,98 @@ export async function generateQuotePDF(data: SelfContainedQuoteData): Promise<Bl
 		builder.drawKeyValueBox('Project Address', data.customer.projectAddress)
 	}
 
+	// Payment Terms
+	if (data.paymentTerms) {
+		builder.drawKeyValueBox('Payment Terms', data.paymentTerms)
+	}
+
 	// Product Breakdown Section with enhanced table layout
 	builder.drawHeading('Product Breakdown')
 
 	if (data.products.length === 0) {
-		builder.drawInfoBox('No products added to this quote.', 'warning')
+		builder.drawInfoBox('No products with valid pricing in this quote.', 'warning')
 	} else {
-		// Create products table
-		const productHeaders = ['Product', 'Dimensions', 'Qty', 'Unit Price', 'Total']
+		// Create products table with enhanced matrix support
+		const productHeaders = ['Product', 'Specifications', 'Qty', 'Unit Price', 'Total']
 		const productRows: string[][] = []
 
 		for (const product of data.products) {
 			const sqm = product.width * product.height
 
-			// Main product row
-			let dimensions = ''
+			// Main product row with price type indication
+			let specifications = ''
+			let unitPriceDisplay = ''
+
 			if (product.priceType === 'sqm') {
-				dimensions = `${product.width}m × ${product.height}m\n(${sqm.toFixed(2)} sqm)`
+				specifications = `${product.width}m × ${product.height}m\n(${sqm.toFixed(2)} sqm)\nPer SQM`
+				unitPriceDisplay = `$${product.effectivePrice.toFixed(2)}/sqm`
+			} else if (product.priceType === 'matrix') {
+				specifications = `${product.width}m × ${product.height}m\nMatrix Pricing\n(${sqm.toFixed(2)} sqm)`
+				unitPriceDisplay = `$${product.effectivePrice.toFixed(2)}`
 			} else {
-				dimensions = 'Per Unit'
+				specifications = `Per Unit\n(Each)`
+				unitPriceDisplay = `$${product.effectivePrice.toFixed(2)}/each`
 			}
 
 			productRows.push([
-				product.name,
-				dimensions,
+				product.label || product.name,
+				specifications,
 				product.quantity.toString(),
-				`$${product.effectivePrice.toFixed(2)}${product.priceType === 'sqm' ? '/sqm' : '/each'}`,
+				unitPriceDisplay,
 				`$${product.total.toFixed(2)}`,
 			])
 
-			// Product details row
+			// Product details row with enhanced information
 			let details = []
+
+			// Always show the actual product name if different from label
 			if (product.label && product.label !== product.name) {
-				details.push(`Label: ${product.label}`)
+				details.push(`Product: ${product.name}`)
 			}
-			if (product.color !== 'White') {
+
+			// Category information
+			if (product.categoryName && product.categoryName !== 'Unknown Category') {
+				details.push(`Category: ${product.categoryName}`)
+			}
+
+			// Product features
+			if (product.color && product.color !== 'White') {
 				details.push(`Color: ${product.color}`)
 			}
-			if (product.controlType !== 'Cord') {
+			if (product.controlType && product.controlType !== 'Cord') {
 				details.push(`Control: ${product.controlType}`)
 			}
-			if (product.specialFeatures) {
-				details.push(`Features: ${product.specialFeatures}`)
+			if (product.installation) {
+				details.push(`Installation: Included`)
 			}
 
 			if (details.length > 0) {
 				productRows.push([
 					'', // Empty product column
-					`${details.join(' • ')}`, // Details span dimensions column
+					`${details.join(' • ')}`, // Details span specifications column
 					'', // Empty qty
 					'', // Empty unit price
 					'', // Empty total
 				])
 			}
 
-			// Pricing breakdown row if applicable
-			if (product.effectivePrice !== product.basePrice) {
+			// Special features in separate row
+			if (product.specialFeatures) {
 				productRows.push([
 					'', // Empty product column
-					`Original: $${product.basePrice.toFixed(2)} - Marked Up: $${product.effectivePrice.toFixed(1)}`,
+					`Special Features: ${product.specialFeatures}`,
+					'', // Empty qty
+					'', // Empty unit price
+					'', // Empty total
+				])
+			}
+
+			// Pricing breakdown row for markup
+			if (product.effectivePrice !== product.basePrice) {
+				const markupAmount = product.effectivePrice - product.basePrice
+				productRows.push([
+					'', // Empty product column
+					`Base Price: $${product.basePrice.toFixed(2)} + Markup: $${markupAmount.toFixed(2)}`,
 					'', // Empty qty
 					'', // Empty unit price
 					'', // Empty total
@@ -96,16 +130,21 @@ export async function generateQuotePDF(data: SelfContainedQuoteData): Promise<Bl
 			if (data.pricing.gstEnabled && product.gstAmount > 0) {
 				productRows.push([
 					'', // Empty product column
-					`Base: $${(product.total - product.gstAmount).toFixed(2)} + GST: $${product.gstAmount.toFixed(2)}`,
+					`Subtotal: $${(product.total - product.gstAmount).toFixed(2)} + GST (${data.pricing.gstRate}%): $${product.gstAmount.toFixed(2)}`,
 					'', // Empty qty
 					'', // Empty unit price
 					'', // Empty total
 				])
 			}
+
+			// Add spacing between products
+			if (data.products.indexOf(product) < data.products.length - 1) {
+				productRows.push(['', '', '', '', ''])
+			}
 		}
 
-		// Draw products table with custom column widths
-		const productColumnWidths = [140, 140, 50, 80, 80]
+		// Draw products table with custom column widths optimized for matrix info
+		const productColumnWidths = [120, 160, 40, 80, 80]
 		builder.drawTable(productHeaders, productRows, productColumnWidths)
 	}
 
@@ -118,23 +157,25 @@ export async function generateQuotePDF(data: SelfContainedQuoteData): Promise<Bl
 		// Add-ons Table
 		if (data.addOns.length > 0) {
 			builder.drawSubheading('Additional Items')
-			const addOnHeaders = ['Item', 'Description', 'Quantity', 'Unit Price', 'Total']
+			const addOnHeaders = ['Item', 'Specifications', 'Quantity', 'Unit Price', 'Total']
 			const addOnRows: string[][] = []
 
 			for (const addOn of data.addOns) {
-				let description = `${addOn.unitType}`
+				let specifications = `Unit Type: ${addOn.unitType.toUpperCase()}`
 
 				if (addOn.unitType === 'sqm' && addOn.width && addOn.height) {
-					description += ` (${addOn.width.toFixed(2)}m × ${addOn.height.toFixed(2)}m)`
+					const addOnSqm = addOn.width * addOn.height
+					specifications += `\n${addOn.width.toFixed(2)}m × ${addOn.height.toFixed(2)}m`
+					specifications += `\n(${addOnSqm.toFixed(2)} sqm)`
 				} else if (addOn.unitType === 'linear' && addOn.length) {
-					description += ` (${addOn.length.toFixed(2)}m)`
+					specifications += `\nLength: ${addOn.length.toFixed(2)}m`
 				}
 
 				addOnRows.push([
 					addOn.name,
-					description,
+					specifications,
 					addOn.quantity.toString(),
-					`$${addOn.unitPrice.toFixed(2)}`,
+					`$${addOn.unitPrice.toFixed(2)}/${addOn.unitType}`,
 					`$${addOn.total.toFixed(2)}`,
 				])
 
@@ -142,7 +183,7 @@ export async function generateQuotePDF(data: SelfContainedQuoteData): Promise<Bl
 				if (addOn.description) {
 					addOnRows.push([
 						'', // Empty item
-						`${addOn.description}`, // Description
+						`Description: ${addOn.description}`, // Description
 						'', // Empty quantity
 						'', // Empty unit price
 						'', // Empty total
@@ -153,7 +194,7 @@ export async function generateQuotePDF(data: SelfContainedQuoteData): Promise<Bl
 				if (data.pricing.gstEnabled && addOn.gstAmount > 0) {
 					addOnRows.push([
 						'', // Empty item
-						`Base: $${(addOn.total - addOn.gstAmount).toFixed(2)} + GST: $${addOn.gstAmount.toFixed(2)}`,
+						`Subtotal: $${(addOn.total - addOn.gstAmount).toFixed(2)} + GST: $${addOn.gstAmount.toFixed(2)}`,
 						'', // Empty quantity
 						'', // Empty unit price
 						'', // Empty total
@@ -161,7 +202,7 @@ export async function generateQuotePDF(data: SelfContainedQuoteData): Promise<Bl
 				}
 			}
 
-			const addOnColumnWidths = [100, 150, 60, 80, 80]
+			const addOnColumnWidths = [100, 160, 50, 80, 80]
 			builder.drawTable(addOnHeaders, addOnRows, addOnColumnWidths)
 		}
 
@@ -178,7 +219,7 @@ export async function generateQuotePDF(data: SelfContainedQuoteData): Promise<Bl
 				if (data.pricing.gstEnabled && service.gstAmount > 0) {
 					serviceRows.push([
 						'', // Empty service
-						`Base: $${(service.total - service.gstAmount).toFixed(2)} + GST: $${service.gstAmount.toFixed(2)}`,
+						`Subtotal: $${(service.total - service.gstAmount).toFixed(2)} + GST: $${service.gstAmount.toFixed(2)}`,
 						'', // Empty total
 					])
 				}
@@ -192,21 +233,41 @@ export async function generateQuotePDF(data: SelfContainedQuoteData): Promise<Bl
 	// Enhanced Pricing Summary Section
 	builder.drawHeading('Pricing Summary')
 
-	// Subtotal in accent color
+	// Show detailed breakdown
 	builder.drawKeyValueBox(
-		'Subtotal',
-		`$${(data.pricing.subtotalBeforeMarkupAndDiscount + data.pricing.totalMarkup).toFixed(2)}`,
+		'Subtotal (Before Markup & Discount)',
+		`$${data.pricing.subtotalBeforeMarkupAndDiscount.toFixed(2)}`,
+	)
+
+	// Markup section
+	if (data.pricing.totalMarkup > 0) {
+		builder.drawKeyValueBox(
+			`Markup Applied`,
+			`+$${data.pricing.totalMarkup.toFixed(2)}`,
+			[0.95, 0.9, 1.0], // Light purple for markup
+		)
+	}
+
+	// Subtotal after markup
+	const subtotalAfterMarkup = data.pricing.subtotalBeforeMarkupAndDiscount + data.pricing.totalMarkup
+	builder.drawKeyValueBox(
+		'Subtotal (After Markup)',
+		`$${subtotalAfterMarkup.toFixed(2)}`,
 		[0.9, 0.95, 1.0], // Light blue accent
 	)
 
 	// GST section
 	if (data.pricing.gstEnabled && data.pricing.totalGST > 0) {
-		builder.drawKeyValueBox(`Total GST (${data.pricing.gstRate}%)`, `$${data.pricing.totalGST.toFixed(2)}`)
+		builder.drawKeyValueBox(
+			`GST (${data.pricing.gstRate}%)`,
+			`+$${data.pricing.totalGST.toFixed(2)}`,
+			[0.95, 0.95, 0.9], // Light yellow for tax
+		)
 	}
 
 	// Discount section
 	if (data.pricing.discountAmount > 0) {
-		let discountLabel = ''
+		let discountLabel = 'Discount'
 		if (data.pricing.discountType === 'percentage') {
 			discountLabel = `Discount (${data.pricing.discountValue}%)`
 		} else {
@@ -220,23 +281,46 @@ export async function generateQuotePDF(data: SelfContainedQuoteData): Promise<Bl
 		builder.drawKeyValueBox(
 			discountLabel,
 			`-$${data.pricing.discountAmount.toFixed(2)}`,
-			[1.0, 0.95, 0.7], // Warning yellow for discount
+			[1.0, 0.9, 0.9], // Light red for discount
 		)
 	}
 
 	// Final total in success color box (prominent)
 	builder.drawKeyValueBox(
-		'TOTAL',
+		'GRAND TOTAL',
 		`$${data.pricing.grandTotal.toFixed(2)}`,
 		[0.8, 0.95, 0.8], // Success green
 	)
 
+	// Quote summary stats
+	const productCount = data.products.length
+	const addOnCount = data.addOns.length
+	const serviceCount = data.customServices.length
+	const totalItems = productCount + addOnCount + serviceCount
+
+	if (totalItems > 0) {
+		builder.drawInfoBox(
+			`Quote Summary: ${productCount} product${productCount !== 1 ? 's' : ''}, ${addOnCount} add-on${addOnCount !== 1 ? 's' : ''}, ${serviceCount} custom service${serviceCount !== 1 ? 's' : ''}`,
+			'info',
+		)
+	}
+
 	// Professional footer with success message
-	builder.drawInfoBox('Thank you for your business!', 'success')
+	builder.drawInfoBox('Thank you for choosing our curtains and blinds services!', 'success')
+
+	// Important notes
+	if (data.pricing.gstEnabled) {
+		builder.drawInfoBox('All prices are inclusive of GST where applicable.', 'info')
+	}
 
 	// Generation timestamp
 	const timestamp = `Generated on: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}`
 	builder.drawSmallText(timestamp)
+
+	// Quote validity
+	const validityDate = new Date()
+	validityDate.setDate(validityDate.getDate() + 30) // 30 days validity
+	builder.drawSmallText(`Quote valid until: ${validityDate.toLocaleDateString()}`)
 
 	const pdfBytes = await doc.save()
 	// @ts-ignore

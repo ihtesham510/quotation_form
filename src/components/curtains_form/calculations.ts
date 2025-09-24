@@ -1,49 +1,75 @@
 import type { QuoteProduct, AddOn, CustomService, ProductDatabase, QuoteData, Product } from './types'
 
 /**
- * Finds the best matching price from the price matrix based on product dimensions.
- * Returns the price from the matrix entry that best matches the product's width and height.
- * If no exact match is found, returns the basePrice as fallback.
+ * Finds the exact matching price from the price matrix based on product dimensions.
+ * Returns the price from the matrix entry that exactly matches the product's width and height.
+ * Returns 0 if no exact match is found, as matrix pricing requires exact dimensional matches.
  */
 const findMatrixPrice = (product: QuoteProduct, productInfo: Product): number => {
 	if (!productInfo.priceMatrix || productInfo.priceMatrix.length === 0) {
-		return productInfo.basePrice || 0
+		return 0 // No pricing available without matrix
 	}
 
 	const exactMatch = productInfo.priceMatrix.find(
 		(matrix: any) => matrix.width === product.width && matrix.height === product.height,
 	)
-	if (exactMatch) {
-		return exactMatch.price
-	}
 
-	const productArea = product.width * product.height
-	let closestMatch = productInfo.priceMatrix[0]
-	let smallestDifference = Math.abs(closestMatch.width * closestMatch.height - productArea)
+	// Matrix pricing requires exact matches - no fallbacks
+	return exactMatch ? exactMatch.price : 0
+}
 
-	for (const matrix of productInfo.priceMatrix) {
-		const matrixArea = matrix.width * matrix.height
-		const difference = Math.abs(matrixArea - productArea)
-		if (difference < smallestDifference) {
-			smallestDifference = difference
-			closestMatch = matrix
+/**
+ * Checks if a product has valid pricing available based on its type and dimensions.
+ * For matrix products, validates that exact dimensions exist in the price matrix.
+ */
+export const isProductPricingValid = (product: QuoteProduct, productDatabase: ProductDatabase): boolean => {
+	const productInfo = productDatabase.products.find(p => p._id === product.productId)
+	if (!productInfo) return false
+
+	if (productInfo.priceType === 'matrix') {
+		// Matrix pricing requires exact dimensional match
+		if (!productInfo.priceMatrix || productInfo.priceMatrix.length === 0) {
+			return false
 		}
+
+		const exactMatch = productInfo.priceMatrix.find(
+			(matrix: any) => matrix.width === product.width && matrix.height === product.height,
+		)
+		return !!exactMatch
 	}
 
-	return closestMatch.price
+	// Non-matrix products are valid if they have a base price
+	return (productInfo.basePrice || 0) > 0
+}
+
+/**
+ * Gets available dimensions for a matrix product.
+ * Returns empty array for non-matrix products.
+ */
+export const getAvailableMatrixDimensions = (
+	productInfo: Product,
+): Array<{ width: number; height: number; price: number }> => {
+	if (productInfo.priceType !== 'matrix' || !productInfo.priceMatrix) {
+		return []
+	}
+	return productInfo.priceMatrix.map(matrix => ({
+		width: matrix.width,
+		height: matrix.height,
+		price: matrix.price,
+	}))
 }
 
 /**
  * Calculates the original base price of a product before any markup or GST.
  * If a custom price is set on the product, it is used; otherwise, the product's base price from the database is used.
- * For matrix pricing, it finds the appropriate price from the price matrix.
- * Returns 0 if the product is not found.
+ * For matrix pricing, it finds the exact price from the price matrix.
+ * Returns 0 if the product is not found or if matrix dimensions are invalid.
  */
 export const calculateProductOriginalBasePrice = (product: QuoteProduct, productDatabase: ProductDatabase): number => {
 	const productInfo = productDatabase.products.find(p => p._id === product.productId)
 	if (!productInfo) return 0
 
-	if (product.customPrice) {
+	if (product.customPrice && product.customPrice > 0) {
 		return product.customPrice
 	}
 
@@ -56,6 +82,7 @@ export const calculateProductOriginalBasePrice = (product: QuoteProduct, product
 
 /**
  * Calculates the total base price of a product before markup or GST.
+ * For invalid matrix dimensions, returns 0 to prevent incorrect calculations.
  * If the product is priced by area (sqm), it uses the greater of the actual area or the minimum quantity.
  * If the product uses matrix pricing, it uses the matrix price directly with quantity.
  */
@@ -63,18 +90,28 @@ export const calculateProductBaseTotal = (product: QuoteProduct, productDatabase
 	const productInfo = productDatabase.products.find(p => p._id === product.productId)
 	if (!productInfo) return 0
 
+	// Check if product pricing is valid (especially important for matrix products)
+	if (!isProductPricingValid(product, productDatabase)) {
+		return 0
+	}
+
 	const originalPrice = calculateProductOriginalBasePrice(product, productDatabase)
+	if (originalPrice <= 0) return 0
 
 	let baseTotal = 0
 	if (productInfo.priceType === 'sqm') {
 		const sqm = product.width * product.height
-		const minSqm = productInfo.minimumQty
+		const minSqm = productInfo.minimumQty || 0
 		const billableSqm = Math.max(sqm, minSqm)
 		baseTotal = billableSqm * originalPrice * product.quantity
 	} else if (productInfo.priceType === 'matrix') {
+		// Matrix pricing uses the exact price from the matrix
 		baseTotal = originalPrice * product.quantity
 	} else {
-		baseTotal = originalPrice * product.quantity
+		// Per-each pricing
+		const minQty = productInfo.minimumQty || 0
+		const billableQty = Math.max(product.quantity, minQty)
+		baseTotal = originalPrice * billableQty
 	}
 	return baseTotal
 }
@@ -106,12 +143,17 @@ export const calculateCustomServiceBaseTotal = (service: CustomService): number 
 /**
  * Calculates the subtotal of all items before applying any markup, GST, or discounts.
  * Includes products, add-ons, and custom services.
+ * Only includes products with valid pricing.
  */
 export const calculateSubtotalBeforeAll = (quoteData: QuoteData, productDatabase: ProductDatabase): number => {
-	const productsTotal = quoteData.products.reduce(
-		(total, product) => total + calculateProductBaseTotal(product, productDatabase),
-		0,
-	)
+	const productsTotal = quoteData.products.reduce((total, product) => {
+		// Only include products with valid pricing
+		if (isProductPricingValid(product, productDatabase)) {
+			return total + calculateProductBaseTotal(product, productDatabase)
+		}
+		return total
+	}, 0)
+
 	const addOnsTotal = quoteData.addOns.reduce((total, addOn) => total + calculateAddOnBaseTotal(addOn), 0)
 	const customServicesTotal = quoteData.customServices.reduce(
 		(total, service) => total + calculateCustomServiceBaseTotal(service),
@@ -124,16 +166,21 @@ export const calculateSubtotalBeforeAll = (quoteData: QuoteData, productDatabase
 /**
  * Calculates the effective price of a product after applying markup.
  * Supports percentage or fixed value markup.
+ * Returns 0 for products with invalid pricing.
  */
 export const calculateProductEffectiveBasePrice = (
 	product: QuoteProduct,
 	quoteData: QuoteData,
 	productDatabase: ProductDatabase,
 ): number => {
+	if (!isProductPricingValid(product, productDatabase)) {
+		return 0
+	}
+
 	const originalPrice = calculateProductOriginalBasePrice(product, productDatabase)
 	let effectivePrice = originalPrice
 
-	if (quoteData.markupEnabled) {
+	if (quoteData.markupEnabled && originalPrice > 0) {
 		if (quoteData.markupType === 'percentage') {
 			effectivePrice = originalPrice * (1 + quoteData.markupValue / 100)
 		} else {
@@ -146,6 +193,7 @@ export const calculateProductEffectiveBasePrice = (
 /**
  * Calculates the total cost of a product after applying markup but before GST.
  * Handles area-based, matrix-based, and quantity-based pricing.
+ * Returns 0 for products with invalid pricing.
  */
 export const calculateProductTotalAfterMarkup = (
 	product: QuoteProduct,
@@ -153,26 +201,30 @@ export const calculateProductTotalAfterMarkup = (
 	productDatabase: ProductDatabase,
 ): number => {
 	const productInfo = productDatabase.products.find(p => p._id === product.productId)
-	if (!productInfo) return 0
+	if (!productInfo || !isProductPricingValid(product, productDatabase)) return 0
 
 	const effectivePrice = calculateProductEffectiveBasePrice(product, quoteData, productDatabase)
+	if (effectivePrice <= 0) return 0
 
 	let total = 0
 	if (productInfo.priceType === 'sqm') {
 		const sqm = product.width * product.height
-		const minSqm = productInfo.minimumQty
+		const minSqm = productInfo.minimumQty || 0
 		const billableSqm = Math.max(sqm, minSqm)
 		total = billableSqm * effectivePrice * product.quantity
 	} else if (productInfo.priceType === 'matrix') {
 		total = effectivePrice * product.quantity
 	} else {
-		total = effectivePrice * product.quantity
+		const minQty = productInfo.minimumQty || 0
+		const billableQty = Math.max(product.quantity, minQty)
+		total = effectivePrice * billableQty
 	}
 	return total
 }
 
 /**
  * Calculates the final total price for a product after applying markup and GST.
+ * Returns 0 for products with invalid pricing.
  */
 export const calculateProductTotal = (
 	product: QuoteProduct,
@@ -181,8 +233,12 @@ export const calculateProductTotal = (
 	productDatabase: ProductDatabase,
 	quoteData: QuoteData,
 ): number => {
+	if (!isProductPricingValid(product, productDatabase)) {
+		return 0
+	}
+
 	let total = calculateProductTotalAfterMarkup(product, quoteData, productDatabase)
-	if (gstEnabled) {
+	if (gstEnabled && total > 0) {
 		total = total * (1 + gstRate / 100)
 	}
 	return total
@@ -190,6 +246,7 @@ export const calculateProductTotal = (
 
 /**
  * Calculates the GST amount for a product based on its total price after markup.
+ * Returns 0 for products with invalid pricing.
  */
 export const calculateProductGST = (
 	product: QuoteProduct,
@@ -198,7 +255,7 @@ export const calculateProductGST = (
 	productDatabase: ProductDatabase,
 	quoteData: QuoteData,
 ): number => {
-	if (!gstEnabled) return 0
+	if (!gstEnabled || !isProductPricingValid(product, productDatabase)) return 0
 	const baseValue = calculateProductTotalAfterMarkup(product, quoteData, productDatabase)
 	return baseValue * (gstRate / 100)
 }
@@ -246,12 +303,17 @@ export const calculateCustomServiceGST = (service: CustomService, gstEnabled = f
 /**
  * Calculates the total markup added to all products in the quote.
  * This is the total extra amount charged due to markup (either percentage or fixed).
+ * Only includes products with valid pricing.
  */
 export const calculateTotalMarkup = (quoteData: QuoteData, productDatabase: ProductDatabase): number => {
 	if (!quoteData.markupEnabled) return 0
 
 	let totalMarkup = 0
 	quoteData.products.forEach(product => {
+		if (!isProductPricingValid(product, productDatabase)) {
+			return // Skip products with invalid pricing
+		}
+
 		const originalBasePrice = calculateProductOriginalBasePrice(product, productDatabase)
 		const effectivePrice = calculateProductEffectiveBasePrice(product, quoteData, productDatabase)
 
@@ -262,13 +324,15 @@ export const calculateTotalMarkup = (quoteData: QuoteData, productDatabase: Prod
 
 		if (productInfo.priceType === 'sqm') {
 			const sqm = product.width * product.height
-			const minSqm = productInfo.minimumQty
+			const minSqm = productInfo.minimumQty || 0
 			const billableSqm = Math.max(sqm, minSqm)
 			totalMarkup += priceDifferencePerUnit * billableSqm * product.quantity
 		} else if (productInfo.priceType === 'matrix') {
 			totalMarkup += priceDifferencePerUnit * product.quantity
 		} else {
-			totalMarkup += priceDifferencePerUnit * product.quantity
+			const minQty = productInfo.minimumQty || 0
+			const billableQty = Math.max(product.quantity, minQty)
+			totalMarkup += priceDifferencePerUnit * billableQty
 		}
 	})
 	return totalMarkup
@@ -276,12 +340,16 @@ export const calculateTotalMarkup = (quoteData: QuoteData, productDatabase: Prod
 
 /**
  * Calculates the subtotal of all items after applying markup but before GST and discount.
+ * Only includes products with valid pricing.
  */
 export const calculateSubtotalAfterMarkup = (quoteData: QuoteData, productDatabase: ProductDatabase): number => {
-	const productsTotal = quoteData.products.reduce(
-		(total, product) => total + calculateProductTotalAfterMarkup(product, quoteData, productDatabase),
-		0,
-	)
+	const productsTotal = quoteData.products.reduce((total, product) => {
+		if (isProductPricingValid(product, productDatabase)) {
+			return total + calculateProductTotalAfterMarkup(product, quoteData, productDatabase)
+		}
+		return total
+	}, 0)
+
 	const addOnsTotal = quoteData.addOns.reduce((total, addOn) => total + calculateAddOnBaseTotal(addOn), 0)
 	const customServicesTotal = quoteData.customServices.reduce(
 		(total, service) => total + calculateCustomServiceBaseTotal(service),
@@ -293,14 +361,18 @@ export const calculateSubtotalAfterMarkup = (quoteData: QuoteData, productDataba
 
 /**
  * Calculates the total GST for all products, add-ons, and services.
+ * Only includes products with valid pricing.
  */
 export const calculateTotalGST = (quoteData: QuoteData, productDatabase: ProductDatabase): number => {
 	if (!quoteData.gstEnabled) return 0
 
-	const productsGST = quoteData.products.reduce(
-		(total, product) => total + calculateProductGST(product, true, quoteData.gstRate, productDatabase, quoteData),
-		0,
-	)
+	const productsGST = quoteData.products.reduce((total, product) => {
+		if (isProductPricingValid(product, productDatabase)) {
+			return total + calculateProductGST(product, true, quoteData.gstRate, productDatabase, quoteData)
+		}
+		return total
+	}, 0)
+
 	const addOnsGST = quoteData.addOns.reduce(
 		(total, addOn) => total + calculateAddOnGST(addOn, true, quoteData.gstRate),
 		0,
@@ -335,6 +407,53 @@ export const calculateTotal = (quoteData: QuoteData, productDatabase: ProductDat
 		calculateSubtotalAfterMarkup(quoteData, productDatabase) + calculateTotalGST(quoteData, productDatabase)
 	const discount = calculateDiscount(quoteData, productDatabase)
 	return subtotalWithMarkupAndGST - discount
+}
+
+/**
+ * Gets a summary of products with invalid pricing for display purposes.
+ */
+export const getInvalidPricingProducts = (
+	quoteData: QuoteData,
+	productDatabase: ProductDatabase,
+): Array<{
+	id: string
+	name: string
+	reason: string
+}> => {
+	return quoteData.products
+		.filter(product => !isProductPricingValid(product, productDatabase))
+		.map(product => {
+			const productInfo = productDatabase.products.find(p => p._id === product.productId)
+			if (!productInfo) {
+				return {
+					id: product.id,
+					name: product.label || 'Unknown Product',
+					reason: 'Product not found in database',
+				}
+			}
+
+			if (productInfo.priceType === 'matrix') {
+				if (!productInfo.priceMatrix || productInfo.priceMatrix.length === 0) {
+					return {
+						id: product.id,
+						name: productInfo.name,
+						reason: 'No pricing matrix configured',
+					}
+				} else {
+					return {
+						id: product.id,
+						name: productInfo.name,
+						reason: `No pricing available for dimensions ${product.width}m × ${product.height}m`,
+					}
+				}
+			}
+
+			return {
+				id: product.id,
+				name: productInfo.name,
+				reason: 'No base price configured',
+			}
+		})
 }
 
 export const calculateTax = (quoteData: QuoteData): number => {

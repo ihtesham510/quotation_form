@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CommandSelect, type CommandSelectOption } from '@/components/ui/command-select'
-import { Plus, Trash2, Calculator, Edit, Save, AlertTriangle } from 'lucide-react'
+import { Plus, Trash2, Calculator, Edit, Save, AlertTriangle, CheckCircle } from 'lucide-react'
 import type { QuoteData, QuoteProduct, ProductDatabase, Id } from './types'
 import { controlTypes } from './data'
 import { calculateProductTotal, calculateProductGST } from './calculations'
@@ -39,14 +39,25 @@ export function Step2ProductSelection({ quoteData, setQuoteData, errors, product
 	const [productUnits, setProductUnits] = useState<Record<string, MeasurementUnit>>({})
 	const [editingProductId, setEditingProductId] = useState<string | null>(null)
 	const [tempProductName, setTempProductName] = useState<string>('')
-	const [matrixDimensionErrors, setMatrixDimensionErrors] = useState<Record<string, string>>({})
+	const [matrixValidation, setMatrixValidation] = useState<Record<string, { isValid: boolean; message: string }>>({})
+
+	const getDefaultMatrixDimensions = (productInfo: any) => {
+		if (productInfo?.priceType === 'matrix' && productInfo.priceMatrix && productInfo.priceMatrix.length > 0) {
+			const firstMatrix = productInfo.priceMatrix[0]
+			return { width: firstMatrix.width, height: firstMatrix.height }
+		}
+		return { width: 0, height: 0 }
+	}
 
 	const addProduct = () => {
+		const firstProduct = productDatabase.products[0]
+		const defaultDimensions = getDefaultMatrixDimensions(firstProduct)
+
 		const newProduct: QuoteProduct = {
 			id: Date.now().toString(),
-			productId: productDatabase.products[0]._id,
-			width: 1,
-			height: 1,
+			productId: firstProduct._id,
+			width: defaultDimensions.width || 1,
+			height: defaultDimensions.height || 1,
 			quantity: 1,
 			color: 'White',
 			controlType: 'Cord',
@@ -60,42 +71,72 @@ export function Step2ProductSelection({ quoteData, setQuoteData, errors, product
 			products: [...prev.products, newProduct],
 		}))
 		setProductUnits(prev => ({ ...prev, [newProduct.id]: 'm' }))
+
+		// Validate matrix dimensions for the new product
+		if (firstProduct.priceType === 'matrix') {
+			validateMatrixDimensions(newProduct.id, defaultDimensions.width || 0, defaultDimensions.height || 0, firstProduct)
+		}
 	}
 
-	const checkMatrixDimensions = (productId: string, width: number, height: number): boolean => {
-		const product = quoteData.products.find(p => p.id === productId)
-		if (!product) return true
+	const validateMatrixDimensions = (productId: string, width: number, height: number, productInfo: any): boolean => {
+		if (!productInfo || productInfo.priceType !== 'matrix') {
+			// Clear validation for non-matrix products
+			setMatrixValidation(prev => {
+				const newValidation = { ...prev }
+				delete newValidation[productId]
+				return newValidation
+			})
+			return true
+		}
 
-		const productInfo = productDatabase.products.find(p => p._id === product.productId)
-		if (!productInfo || productInfo.priceType !== 'matrix' || !productInfo.priceMatrix) return true
-
-		const exactMatch = productInfo.priceMatrix.find((matrix: any) => matrix.width === width && matrix.height === height)
-
-		if (!exactMatch) {
-			setMatrixDimensionErrors(prev => ({
+		// If no price matrix exists, show error
+		if (!productInfo.priceMatrix || productInfo.priceMatrix.length === 0) {
+			setMatrixValidation(prev => ({
 				...prev,
-				[productId]: `No pricing available for dimensions ${width}m × ${height}m. Available sizes: ${productInfo.priceMatrix?.map((m: any) => `${m.width}m×${m.height}m`).join(', ')}`,
+				[productId]: {
+					isValid: false,
+					message: 'No pricing matrix available for this product',
+				},
 			}))
 			return false
 		}
 
-		// Clear error if dimensions are valid
-		setMatrixDimensionErrors(prev => {
-			const newErrors = { ...prev }
-			delete newErrors[productId]
-			return newErrors
-		})
-		return true
+		// Check if exact dimensions exist in matrix
+		const exactMatch = productInfo.priceMatrix.find((matrix: any) => matrix.width === width && matrix.height === height)
+
+		if (exactMatch) {
+			setMatrixValidation(prev => ({
+				...prev,
+				[productId]: {
+					isValid: true,
+					message: `Price available: $${exactMatch.price.toFixed(2)}`,
+				},
+			}))
+			return true
+		} else {
+			const availableSizes = productInfo.priceMatrix
+				.map((m: any) => `${m.width}m×${m.height}m ($${m.price})`)
+				.join(', ')
+
+			setMatrixValidation(prev => ({
+				...prev,
+				[productId]: {
+					isValid: false,
+					message: `No pricing available for ${width}m × ${height}m. Available sizes: ${availableSizes}`,
+				},
+			}))
+			return false
+		}
 	}
 
 	const updateProduct = (productId: string, updates: Partial<QuoteProduct>) => {
-		// If width or height is being updated for matrix products, validate dimensions
-		if (updates.width !== undefined || updates.height !== undefined) {
-			const currentProduct = quoteData.products.find(p => p.id === productId)
-			if (currentProduct) {
-				const newWidth = updates.width ?? currentProduct.width
-				const newHeight = updates.height ?? currentProduct.height
-				checkMatrixDimensions(productId, newWidth, newHeight)
+		// Handle product change - reset dimensions to matrix defaults
+		if (updates.productId) {
+			const newProductInfo = productDatabase.products.find(p => p._id === updates.productId)
+			if (newProductInfo?.priceType === 'matrix') {
+				const defaultDimensions = getDefaultMatrixDimensions(newProductInfo)
+				updates.width = defaultDimensions.width || 0
+				updates.height = defaultDimensions.height || 0
 			}
 		}
 
@@ -103,6 +144,18 @@ export function Step2ProductSelection({ quoteData, setQuoteData, errors, product
 			...prev,
 			products: prev.products.map(product => (product.id === productId ? { ...product, ...updates } : product)),
 		}))
+
+		// Validate matrix dimensions after update
+		const currentProduct = quoteData.products.find(p => p.id === productId)
+		if (currentProduct) {
+			const productInfo = productDatabase.products.find(p => p._id === (updates.productId || currentProduct.productId))
+			const newWidth = updates.width ?? currentProduct.width
+			const newHeight = updates.height ?? currentProduct.height
+
+			if (productInfo) {
+				validateMatrixDimensions(productId, newWidth, newHeight, productInfo)
+			}
+		}
 	}
 
 	const removeProduct = (productId: string) => {
@@ -115,10 +168,10 @@ export function Step2ProductSelection({ quoteData, setQuoteData, errors, product
 			delete newUnits[productId]
 			return newUnits
 		})
-		setMatrixDimensionErrors(prev => {
-			const newErrors = { ...prev }
-			delete newErrors[productId]
-			return newErrors
+		setMatrixValidation(prev => {
+			const newValidation = { ...prev }
+			delete newValidation[productId]
+			return newValidation
 		})
 	}
 
@@ -212,10 +265,10 @@ export function Step2ProductSelection({ quoteData, setQuoteData, errors, product
 				)
 
 				const currentProductName = product.label || productInfo?.name || `Product ${productIndex + 1}`
-				const hasMatrixError = matrixDimensionErrors[product.id]
+				const matrixStatus = matrixValidation[product.id]
 
 				return (
-					<Card key={product.id} className={`mb-4 ${hasMatrixError ? 'border-red-500' : ''}`}>
+					<Card key={product.id} className={`mb-4 ${matrixStatus && !matrixStatus.isValid ? 'border-red-500' : ''}`}>
 						<CardHeader>
 							<div className='flex justify-between items-start'>
 								<div className='flex-1'>
@@ -285,12 +338,6 @@ export function Step2ProductSelection({ quoteData, setQuoteData, errors, product
 										onValueChange={productId => {
 											updateProduct(product.id, {
 												productId: productId as Id<'products'>,
-											})
-											// Clear matrix errors when product changes
-											setMatrixDimensionErrors(prev => {
-												const newErrors = { ...prev }
-												delete newErrors[product.id]
-												return newErrors
 											})
 										}}
 										placeholder='Select product...'
@@ -382,21 +429,15 @@ export function Step2ProductSelection({ quoteData, setQuoteData, errors, product
 										)}
 									</div>
 
-									{/* Matrix Dimension Error */}
-									{hasMatrixError && (
-										<Alert variant='destructive'>
-											<AlertTriangle className='h-4 w-4' />
-											<AlertDescription>{hasMatrixError}</AlertDescription>
-										</Alert>
-									)}
-
-									{/* Matrix Available Sizes Info */}
-									{productInfo?.priceType === 'matrix' && productInfo.priceMatrix && !hasMatrixError && (
-										<Alert>
-											<AlertDescription>
-												<strong>Available sizes:</strong>{' '}
-												{productInfo.priceMatrix.map((m: any) => `${m.width}m×${m.height}m`).join(', ')}
-											</AlertDescription>
+									{/* Matrix Pricing Validation */}
+									{productInfo?.priceType === 'matrix' && matrixStatus && (
+										<Alert variant={matrixStatus.isValid ? 'default' : 'destructive'}>
+											{matrixStatus.isValid ? (
+												<CheckCircle className='h-4 w-4' />
+											) : (
+												<AlertTriangle className='h-4 w-4' />
+											)}
+											<AlertDescription>{matrixStatus.message}</AlertDescription>
 										</Alert>
 									)}
 								</div>
@@ -476,6 +517,9 @@ export function Step2ProductSelection({ quoteData, setQuoteData, errors, product
 									)}
 									{productInfo?.priceType === 'each' && productInfo.minimumQty > product.quantity && (
 										<span>Minimum {productInfo.minimumQty} units required</span>
+									)}
+									{productInfo?.priceType === 'matrix' && matrixStatus && !matrixStatus.isValid && (
+										<span className='text-red-500'>Invalid dimensions - no pricing available</span>
 									)}
 								</div>
 
