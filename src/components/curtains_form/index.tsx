@@ -53,7 +53,6 @@ export function BlindQuotationForm({ productDatabase, onSaveQuote, onGeneratePDF
 		{ number: 5, title: 'Quote Preview', icon: Eye },
 	]
 
-	// Validation functions
 	const validateStep = (step: number): boolean => {
 		const newErrors: Record<string, string> = {}
 
@@ -63,7 +62,7 @@ export function BlindQuotationForm({ productDatabase, onSaveQuote, onGeneratePDF
 				if (!quoteData.customer.email) newErrors.customerEmail = 'Email is required'
 				if (!quoteData.customer.phone) newErrors.customerPhone = 'Phone is required'
 				break
-			case 2: // Product Selection step
+			case 2:
 				if (quoteData.products.length === 0) newErrors.products = 'At least one product is required'
 				quoteData.products.forEach((product, productIndex) => {
 					const productInfo = productDatabase.products.find(p => p._id === product.productId)
@@ -83,7 +82,6 @@ export function BlindQuotationForm({ productDatabase, onSaveQuote, onGeneratePDF
 		return Object.keys(newErrors).length === 0
 	}
 
-	// Navigation functions
 	const nextStep = () => {
 		if (validateStep(currentStep)) {
 			setCurrentStep(prev => Math.min(prev + 1, 5))

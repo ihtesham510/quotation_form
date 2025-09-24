@@ -1,18 +1,63 @@
-import type { QuoteProduct, AddOn, CustomService, ProductDatabase, QuoteData } from './types'
+import type { QuoteProduct, AddOn, CustomService, ProductDatabase, QuoteData, Product } from './types'
+
+/**
+ * Finds the best matching price from the price matrix based on product dimensions.
+ * Returns the price from the matrix entry that best matches the product's width and height.
+ * If no exact match is found, returns the basePrice as fallback.
+ */
+const findMatrixPrice = (product: QuoteProduct, productInfo: Product): number => {
+	if (!productInfo.priceMatrix || productInfo.priceMatrix.length === 0) {
+		return productInfo.basePrice || 0
+	}
+
+	const exactMatch = productInfo.priceMatrix.find(
+		(matrix: any) => matrix.width === product.width && matrix.height === product.height,
+	)
+	if (exactMatch) {
+		return exactMatch.price
+	}
+
+	const productArea = product.width * product.height
+	let closestMatch = productInfo.priceMatrix[0]
+	let smallestDifference = Math.abs(closestMatch.width * closestMatch.height - productArea)
+
+	for (const matrix of productInfo.priceMatrix) {
+		const matrixArea = matrix.width * matrix.height
+		const difference = Math.abs(matrixArea - productArea)
+		if (difference < smallestDifference) {
+			smallestDifference = difference
+			closestMatch = matrix
+		}
+	}
+
+	return closestMatch.price
+}
 
 /**
  * Calculates the original base price of a product before any markup or GST.
  * If a custom price is set on the product, it is used; otherwise, the product's base price from the database is used.
+ * For matrix pricing, it finds the appropriate price from the price matrix.
  * Returns 0 if the product is not found.
  */
 export const calculateProductOriginalBasePrice = (product: QuoteProduct, productDatabase: ProductDatabase): number => {
 	const productInfo = productDatabase.products.find(p => p._id === product.productId)
-	return product.customPrice || productInfo?.basePrice || 0
+	if (!productInfo) return 0
+
+	if (product.customPrice) {
+		return product.customPrice
+	}
+
+	if (productInfo.priceType === 'matrix') {
+		return findMatrixPrice(product, productInfo)
+	}
+
+	return productInfo.basePrice || 0
 }
 
 /**
  * Calculates the total base price of a product before markup or GST.
  * If the product is priced by area (sqm), it uses the greater of the actual area or the minimum quantity.
+ * If the product uses matrix pricing, it uses the matrix price directly with quantity.
  */
 export const calculateProductBaseTotal = (product: QuoteProduct, productDatabase: ProductDatabase): number => {
 	const productInfo = productDatabase.products.find(p => p._id === product.productId)
@@ -20,12 +65,14 @@ export const calculateProductBaseTotal = (product: QuoteProduct, productDatabase
 
 	const originalPrice = calculateProductOriginalBasePrice(product, productDatabase)
 
-	const sqm = product.width * product.height
 	let baseTotal = 0
 	if (productInfo.priceType === 'sqm') {
+		const sqm = product.width * product.height
 		const minSqm = productInfo.minimumQty
 		const billableSqm = Math.max(sqm, minSqm)
 		baseTotal = billableSqm * originalPrice * product.quantity
+	} else if (productInfo.priceType === 'matrix') {
+		baseTotal = originalPrice * product.quantity
 	} else {
 		baseTotal = originalPrice * product.quantity
 	}
@@ -43,7 +90,6 @@ export const calculateAddOnBaseTotal = (addOn: AddOn): number => {
 	} else if (addOn.unitType === 'linear') {
 		baseTotal = addOn.unitPrice * addOn.quantity * (addOn.length || 0)
 	} else {
-		// "each"
 		baseTotal = addOn.unitPrice * addOn.quantity
 	}
 	return baseTotal
@@ -91,7 +137,6 @@ export const calculateProductEffectiveBasePrice = (
 		if (quoteData.markupType === 'percentage') {
 			effectivePrice = originalPrice * (1 + quoteData.markupValue / 100)
 		} else {
-			// fixed
 			effectivePrice = originalPrice + quoteData.markupValue
 		}
 	}
@@ -100,7 +145,7 @@ export const calculateProductEffectiveBasePrice = (
 
 /**
  * Calculates the total cost of a product after applying markup but before GST.
- * Handles area-based and quantity-based pricing.
+ * Handles area-based, matrix-based, and quantity-based pricing.
  */
 export const calculateProductTotalAfterMarkup = (
 	product: QuoteProduct,
@@ -112,12 +157,14 @@ export const calculateProductTotalAfterMarkup = (
 
 	const effectivePrice = calculateProductEffectiveBasePrice(product, quoteData, productDatabase)
 
-	const sqm = product.width * product.height
 	let total = 0
 	if (productInfo.priceType === 'sqm') {
+		const sqm = product.width * product.height
 		const minSqm = productInfo.minimumQty
 		const billableSqm = Math.max(sqm, minSqm)
 		total = billableSqm * effectivePrice * product.quantity
+	} else if (productInfo.priceType === 'matrix') {
+		total = effectivePrice * product.quantity
 	} else {
 		total = effectivePrice * product.quantity
 	}
@@ -218,6 +265,8 @@ export const calculateTotalMarkup = (quoteData: QuoteData, productDatabase: Prod
 			const minSqm = productInfo.minimumQty
 			const billableSqm = Math.max(sqm, minSqm)
 			totalMarkup += priceDifferencePerUnit * billableSqm * product.quantity
+		} else if (productInfo.priceType === 'matrix') {
+			totalMarkup += priceDifferencePerUnit * product.quantity
 		} else {
 			totalMarkup += priceDifferencePerUnit * product.quantity
 		}
@@ -233,12 +282,9 @@ export const calculateSubtotalAfterMarkup = (quoteData: QuoteData, productDataba
 		(total, product) => total + calculateProductTotalAfterMarkup(product, quoteData, productDatabase),
 		0,
 	)
-	const addOnsTotal = quoteData.addOns.reduce(
-		(total, addOn) => total + calculateAddOnBaseTotal(addOn), // Add-ons don't have markup
-		0,
-	)
+	const addOnsTotal = quoteData.addOns.reduce((total, addOn) => total + calculateAddOnBaseTotal(addOn), 0)
 	const customServicesTotal = quoteData.customServices.reduce(
-		(total, service) => total + calculateCustomServiceBaseTotal(service), // Custom services don't have markup
+		(total, service) => total + calculateCustomServiceBaseTotal(service),
 		0,
 	)
 
@@ -272,7 +318,6 @@ export const calculateTotalGST = (quoteData: QuoteData, productDatabase: Product
  * Supports percentage-based and fixed-value discounts.
  */
 export const calculateDiscount = (quoteData: QuoteData, productDatabase: ProductDatabase): number => {
-	// Discount is applied to the subtotal that includes markup and GST
 	const subtotalWithMarkupAndGST =
 		calculateSubtotalAfterMarkup(quoteData, productDatabase) + calculateTotalGST(quoteData, productDatabase)
 	if (quoteData.discountType === 'percentage') {

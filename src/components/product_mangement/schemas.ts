@@ -15,6 +15,15 @@ export const productSchema = z.object({
 	minimumQty: z.number().int().min(1, 'Minimum quantity must be at least 1'),
 	leadTime: z.string().min(1, 'Lead time is required').max(100, 'Lead time must be less than 100 characters'),
 	specialConditions: z.string().max(1000, 'Special conditions must be less than 1000 characters').optional(),
+	priceMatrix: z.optional(
+		z.array(
+			z.object({
+				height: z.number(),
+				width: z.number(),
+				price: z.number(),
+			}),
+		),
+	),
 })
 
 export type CategoryFormValues = z.infer<typeof categorySchema>

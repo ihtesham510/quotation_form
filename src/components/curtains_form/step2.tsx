@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CommandSelect, type CommandSelectOption } from '@/components/ui/command-select'
-import { Plus, Trash2, Calculator, Edit, Save } from 'lucide-react'
+import { Plus, Trash2, Calculator, Edit, Save, AlertTriangle } from 'lucide-react'
 import type { QuoteData, QuoteProduct, ProductDatabase, Id } from './types'
 import { controlTypes } from './data'
 import { calculateProductTotal, calculateProductGST } from './calculations'
@@ -39,6 +39,7 @@ export function Step2ProductSelection({ quoteData, setQuoteData, errors, product
 	const [productUnits, setProductUnits] = useState<Record<string, MeasurementUnit>>({})
 	const [editingProductId, setEditingProductId] = useState<string | null>(null)
 	const [tempProductName, setTempProductName] = useState<string>('')
+	const [matrixDimensionErrors, setMatrixDimensionErrors] = useState<Record<string, string>>({})
 
 	const addProduct = () => {
 		const newProduct: QuoteProduct = {
@@ -61,7 +62,43 @@ export function Step2ProductSelection({ quoteData, setQuoteData, errors, product
 		setProductUnits(prev => ({ ...prev, [newProduct.id]: 'm' }))
 	}
 
+	const checkMatrixDimensions = (productId: string, width: number, height: number): boolean => {
+		const product = quoteData.products.find(p => p.id === productId)
+		if (!product) return true
+
+		const productInfo = productDatabase.products.find(p => p._id === product.productId)
+		if (!productInfo || productInfo.priceType !== 'matrix' || !productInfo.priceMatrix) return true
+
+		const exactMatch = productInfo.priceMatrix.find((matrix: any) => matrix.width === width && matrix.height === height)
+
+		if (!exactMatch) {
+			setMatrixDimensionErrors(prev => ({
+				...prev,
+				[productId]: `No pricing available for dimensions ${width}m × ${height}m. Available sizes: ${productInfo.priceMatrix?.map((m: any) => `${m.width}m×${m.height}m`).join(', ')}`,
+			}))
+			return false
+		}
+
+		// Clear error if dimensions are valid
+		setMatrixDimensionErrors(prev => {
+			const newErrors = { ...prev }
+			delete newErrors[productId]
+			return newErrors
+		})
+		return true
+	}
+
 	const updateProduct = (productId: string, updates: Partial<QuoteProduct>) => {
+		// If width or height is being updated for matrix products, validate dimensions
+		if (updates.width !== undefined || updates.height !== undefined) {
+			const currentProduct = quoteData.products.find(p => p.id === productId)
+			if (currentProduct) {
+				const newWidth = updates.width ?? currentProduct.width
+				const newHeight = updates.height ?? currentProduct.height
+				checkMatrixDimensions(productId, newWidth, newHeight)
+			}
+		}
+
 		setQuoteData(prev => ({
 			...prev,
 			products: prev.products.map(product => (product.id === productId ? { ...product, ...updates } : product)),
@@ -77,6 +114,11 @@ export function Step2ProductSelection({ quoteData, setQuoteData, errors, product
 			const newUnits = { ...prev }
 			delete newUnits[productId]
 			return newUnits
+		})
+		setMatrixDimensionErrors(prev => {
+			const newErrors = { ...prev }
+			delete newErrors[productId]
+			return newErrors
 		})
 	}
 
@@ -137,13 +179,10 @@ export function Step2ProductSelection({ quoteData, setQuoteData, errors, product
 		<div className='space-y-6'>
 			<div className='flex justify-between items-center'>
 				<h3 className='text-lg font-semibold'>Product Selection</h3>
-
-				<div className='flex justify-end mb-4'>
-					<Button onClick={addProduct} className='flex items-center gap-2'>
-						<Plus className='w-4 h-4' />
-						<p className='hidden md:inline-flex'>Add Product</p>
-					</Button>
-				</div>
+				<Button onClick={addProduct} className='flex items-center gap-2'>
+					<Plus className='w-4 h-4' />
+					Add Product
+				</Button>
 			</div>
 
 			{errors.products && (
@@ -173,56 +212,52 @@ export function Step2ProductSelection({ quoteData, setQuoteData, errors, product
 				)
 
 				const currentProductName = product.label || productInfo?.name || `Product ${productIndex + 1}`
+				const hasMatrixError = matrixDimensionErrors[product.id]
 
 				return (
-					<Card key={product.id} className='mb-4'>
+					<Card key={product.id} className={`mb-4 ${hasMatrixError ? 'border-red-500' : ''}`}>
 						<CardHeader>
-							<div className='flex flex-col md:flex-row justify-between w-full md:w-auto items-center'>
-								{editingProductId === product.id ? (
-									<div className='flex items-center gap-2 w-full md:w-auto'>
-										<Input
-											value={tempProductName}
-											onChange={handleNameInputChange}
-											onKeyDown={e => handleKeyDown(e, product.id)}
-											autoFocus
-											onBlur={() => {
-												handleSave(product.id)
-											}}
-											className='text-base font-bold'
-											placeholder='Enter product name...'
-										/>
-									</div>
-								) : (
-									<CardTitle className='text-base'>{currentProductName}</CardTitle>
-								)}
-								<div className='flex flex-col md:flex-row w-full md:w-max gap-2 mt-6 md:mt-0'>
+							<div className='flex justify-between items-start'>
+								<div className='flex-1'>
 									{editingProductId === product.id ? (
-										<>
-											<Button variant='outline' size='sm' onClick={() => handleSave(product.id)}>
+										<div className='flex items-center gap-2'>
+											<Input
+												value={tempProductName}
+												onChange={handleNameInputChange}
+												onKeyDown={e => handleKeyDown(e, product.id)}
+												autoFocus
+												onBlur={() => handleSave(product.id)}
+												className='text-base font-bold max-w-md'
+												placeholder='Enter product name...'
+											/>
+											<Button variant='ghost' size='sm' onClick={() => handleSave(product.id)}>
 												<Save className='w-4 h-4' />
-												Save
 											</Button>
-										</>
+										</div>
 									) : (
-										<Button variant='outline' size='sm' onClick={() => handleEditClick(product.id, currentProductName)}>
+										<CardTitle className='text-base'>{currentProductName}</CardTitle>
+									)}
+								</div>
+								<div className='flex gap-2'>
+									{editingProductId !== product.id && (
+										<Button variant='ghost' size='sm' onClick={() => handleEditClick(product.id, currentProductName)}>
 											<Edit className='w-4 h-4' />
-											Edit
 										</Button>
 									)}
 									<Button
-										variant='outline'
+										variant='ghost'
 										size='sm'
 										onClick={() => removeProduct(product.id)}
 										className='text-red-600 hover:text-red-700'
 									>
 										<Trash2 className='w-4 h-4' />
-										Delete
 									</Button>
 								</div>
 							</div>
 						</CardHeader>
-						<CardContent className='space-y-4'>
-							<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+						<CardContent className='space-y-6'>
+							{/* Product Selection Row */}
+							<div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
 								<div className='space-y-2'>
 									<Label>Category</Label>
 									<CommandSelect
@@ -247,11 +282,17 @@ export function Step2ProductSelection({ quoteData, setQuoteData, errors, product
 									<CommandSelect
 										options={getProductOptions(productInfo?.categoryId || productDatabase.categories[0]._id)}
 										value={product.productId}
-										onValueChange={productId =>
+										onValueChange={productId => {
 											updateProduct(product.id, {
 												productId: productId as Id<'products'>,
 											})
-										}
+											// Clear matrix errors when product changes
+											setMatrixDimensionErrors(prev => {
+												const newErrors = { ...prev }
+												delete newErrors[product.id]
+												return newErrors
+											})
+										}}
 										placeholder='Select product...'
 										searchPlaceholder='Search products...'
 										emptyMessage='No product found.'
@@ -273,84 +314,104 @@ export function Step2ProductSelection({ quoteData, setQuoteData, errors, product
 								</div>
 							</div>
 
-							{productInfo?.priceType === 'sqm' && (
-								<div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
-									<div className='space-y-2'>
-										<Label>Width ({currentUnit}) *</Label>
-										<Input
-											type='number'
-											step='0.01'
-											min='0.001'
-											value={convertFromMeters(product.width, currentUnit)}
-											onChange={e =>
-												updateProduct(product.id, {
-													width: convertToMeters(Number.parseFloat(e.target.value) || 0, currentUnit),
-												})
-											}
-											className={errors[`product${productIndex}Width`] ? 'border-red-500' : ''}
-										/>
-										{errors[`product${productIndex}Width`] && (
-											<p className='text-red-500 text-sm'>{errors[`product${productIndex}Width`]}</p>
-										)}
-									</div>
-
-									<div className='space-y-2'>
-										<Label>Height ({currentUnit}) *</Label>
-										<Input
-											type='number'
-											step='0.01'
-											min='0.01'
-											value={convertFromMeters(product.height, currentUnit)}
-											onChange={e =>
-												updateProduct(product.id, {
-													height: convertToMeters(Number.parseFloat(e.target.value) || 0, currentUnit),
-												})
-											}
-											className={errors[`product${productIndex}Height`] ? 'border-red-500' : ''}
-										/>
-										{errors[`product${productIndex}Height`] && (
-											<p className='text-red-500 text-sm'>{errors[`product${productIndex}Height`]}</p>
-										)}
-									</div>
-
-									<div className='space-y-2'>
-										<Label>Unit</Label>
-										<Select
-											value={currentUnit}
-											onValueChange={(value: MeasurementUnit) => handleUnitChange(product.id, value)}
-										>
-											<SelectTrigger className='w-full'>
-												<SelectValue />
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value='m'>Meters (m)</SelectItem>
-												<SelectItem value='cm'>Centimeters (cm)</SelectItem>
-												<SelectItem value='mm'>Millimeters (mm)</SelectItem>
-											</SelectContent>
-										</Select>
-									</div>
-
-									<div className='space-y-2'>
-										<Label>Area</Label>
-										<div className='flex items-center h-10 px-3 border rounded-md bg-muted'>
-											<Calculator className='w-4 h-4 mr-2' />
-											{sqm.toFixed(2)} sqm
+							{/* Dimensions Section */}
+							{(productInfo?.priceType === 'sqm' || productInfo?.priceType === 'matrix') && (
+								<div className='space-y-4'>
+									<div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
+										<div className='space-y-2'>
+											<Label>Width ({currentUnit}) *</Label>
+											<Input
+												type='number'
+												step='0.01'
+												min='0.001'
+												value={convertFromMeters(product.width, currentUnit)}
+												onChange={e => {
+													const newWidth = convertToMeters(Number.parseFloat(e.target.value) || 0, currentUnit)
+													updateProduct(product.id, { width: newWidth })
+												}}
+												className={errors[`product${productIndex}Width`] ? 'border-red-500' : ''}
+											/>
+											{errors[`product${productIndex}Width`] && (
+												<p className='text-red-500 text-sm'>{errors[`product${productIndex}Width`]}</p>
+											)}
 										</div>
+
+										<div className='space-y-2'>
+											<Label>Height ({currentUnit}) *</Label>
+											<Input
+												type='number'
+												step='0.01'
+												min='0.01'
+												value={convertFromMeters(product.height, currentUnit)}
+												onChange={e => {
+													const newHeight = convertToMeters(Number.parseFloat(e.target.value) || 0, currentUnit)
+													updateProduct(product.id, { height: newHeight })
+												}}
+												className={errors[`product${productIndex}Height`] ? 'border-red-500' : ''}
+											/>
+											{errors[`product${productIndex}Height`] && (
+												<p className='text-red-500 text-sm'>{errors[`product${productIndex}Height`]}</p>
+											)}
+										</div>
+
+										<div className='space-y-2'>
+											<Label>Unit</Label>
+											<Select
+												value={currentUnit}
+												onValueChange={(value: MeasurementUnit) => handleUnitChange(product.id, value)}
+											>
+												<SelectTrigger>
+													<SelectValue />
+												</SelectTrigger>
+												<SelectContent>
+													<SelectItem value='m'>Meters (m)</SelectItem>
+													<SelectItem value='cm'>Centimeters (cm)</SelectItem>
+													<SelectItem value='mm'>Millimeters (mm)</SelectItem>
+												</SelectContent>
+											</Select>
+										</div>
+
+										{productInfo?.priceType === 'sqm' && (
+											<div className='space-y-2'>
+												<Label>Area</Label>
+												<div className='flex items-center h-10 px-3 border rounded-md bg-muted'>
+													<Calculator className='w-4 h-4 mr-2' />
+													{sqm.toFixed(2)} sqm
+												</div>
+											</div>
+										)}
 									</div>
+
+									{/* Matrix Dimension Error */}
+									{hasMatrixError && (
+										<Alert variant='destructive'>
+											<AlertTriangle className='h-4 w-4' />
+											<AlertDescription>{hasMatrixError}</AlertDescription>
+										</Alert>
+									)}
+
+									{/* Matrix Available Sizes Info */}
+									{productInfo?.priceType === 'matrix' && productInfo.priceMatrix && !hasMatrixError && (
+										<Alert>
+											<AlertDescription>
+												<strong>Available sizes:</strong>{' '}
+												{productInfo.priceMatrix.map((m: any) => `${m.width}m×${m.height}m`).join(', ')}
+											</AlertDescription>
+										</Alert>
+									)}
 								</div>
 							)}
 
+							{/* Per Unit Pricing Info */}
 							{productInfo?.priceType === 'each' && (
-								<div className='bg-primary/10 border border-primary rounded-lg p-3'>
-									<p className='text-sm text-primary flex gap-2 items-center'>
-										<strong>Per Unit Pricing :</strong>
-										<span className='text-primary/70'>
-											This product is priced per unit. Dimensions are not required.
-										</span>
-									</p>
-								</div>
+								<Alert>
+									<AlertDescription>
+										<strong>Per Unit Pricing:</strong> This product is priced per unit. Dimensions are not required.
+									</AlertDescription>
+								</Alert>
 							)}
 
+							{/* Product Details */}
 							<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
 								<div className='space-y-2'>
 									<Label>Color/Finish</Label>
@@ -363,7 +424,7 @@ export function Step2ProductSelection({ quoteData, setQuoteData, errors, product
 										value={product.controlType}
 										onValueChange={value => updateProduct(product.id, { controlType: value })}
 									>
-										<SelectTrigger className='w-full'>
+										<SelectTrigger>
 											<SelectValue />
 										</SelectTrigger>
 										<SelectContent>
@@ -377,33 +438,28 @@ export function Step2ProductSelection({ quoteData, setQuoteData, errors, product
 								</div>
 							</div>
 
+							{/* Notes */}
 							<div className='space-y-2'>
 								<Label htmlFor={`notes-${product.id}`}>Notes</Label>
 								<Textarea
 									id={`notes-${product.id}`}
 									value={product.specialFeatures}
-									onChange={e =>
-										updateProduct(product.id, {
-											specialFeatures: e.target.value,
-										})
-									}
+									onChange={e => updateProduct(product.id, { specialFeatures: e.target.value })}
 									placeholder='Any special requirements or notes...'
 								/>
 							</div>
 
+							{/* Installation Checkbox */}
 							<div className='flex items-center space-x-2'>
 								<Checkbox
 									id={`installation-${product.id}`}
 									checked={product.installation}
-									onCheckedChange={checked =>
-										updateProduct(product.id, {
-											installation: checked as boolean,
-										})
-									}
+									onCheckedChange={checked => updateProduct(product.id, { installation: checked as boolean })}
 								/>
 								<Label htmlFor={`installation-${product.id}`}>Requires Installation</Label>
 							</div>
 
+							{/* Special Conditions */}
 							{productInfo?.specialConditions && (
 								<Alert>
 									<AlertDescription>
@@ -412,7 +468,8 @@ export function Step2ProductSelection({ quoteData, setQuoteData, errors, product
 								</Alert>
 							)}
 
-							<div className='flex justify-between items-center pt-2'>
+							{/* Pricing Summary */}
+							<div className='flex justify-between items-center pt-4 border-t'>
 								<div className='text-sm text-muted-foreground'>
 									{productInfo?.priceType === 'sqm' && productInfo.minimumQty > sqm && (
 										<span>Minimum {productInfo.minimumQty} sqm applies</span>
@@ -425,7 +482,7 @@ export function Step2ProductSelection({ quoteData, setQuoteData, errors, product
 								<div className='text-right'>
 									<div className='text-lg font-semibold'>${totalWithGST.toFixed(2)}</div>
 									{quoteData.gstEnabled && (
-										<div className='text-sm text-muted-foreground mb-2'>
+										<div className='text-sm text-muted-foreground'>
 											Base: ${baseTotal.toFixed(2)} + GST: ${gstAmount.toFixed(2)}
 										</div>
 									)}
@@ -437,7 +494,13 @@ export function Step2ProductSelection({ quoteData, setQuoteData, errors, product
 			})}
 
 			{quoteData.products.length === 0 && (
-				<div className='text-center py-8 text-muted-foreground'>No products added to this quote yet.</div>
+				<div className='text-center py-8 text-muted-foreground'>
+					<p>No products added to this quote yet.</p>
+					<Button onClick={addProduct} variant='outline' className='mt-4'>
+						<Plus className='w-4 h-4 mr-2' />
+						Add Your First Product
+					</Button>
+				</div>
 			)}
 		</div>
 	)
