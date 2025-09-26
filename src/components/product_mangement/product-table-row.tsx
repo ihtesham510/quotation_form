@@ -48,7 +48,7 @@ function PriceDisplay({ product }: { product: Product }) {
 
 	return (
 		<div>
-			${product.basePrice.toFixed(2)} / {product.priceType}
+			${product.basePrice.toFixed(2)} / {product.priceType === 'linear_meter' ? 'm' : product.priceType}
 		</div>
 	)
 }

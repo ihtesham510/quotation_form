@@ -65,12 +65,11 @@ export function ProductsTable({ categories, products, onAddProduct }: ProductsTa
 		const matchesPriceType = selectedPriceType === 'all' || product.priceType === selectedPriceType
 		return matchesSearch && matchesCategory && matchesPriceType
 	})
-
-	// Statistics for different pricing types
 	const pricingStats = {
 		total: products.length,
 		each: products.filter(p => p.priceType === 'each').length,
 		sqm: products.filter(p => p.priceType === 'sqm').length,
+		linear_meter: products.filter(p => p.priceType === 'linear_meter').length, // ADD THIS LINE
 		matrix: products.filter(p => p.priceType === 'matrix').length,
 		matrixWithEntries: products.filter(p => p.priceType === 'matrix' && p.priceMatrix && p.priceMatrix.length > 0)
 			.length,
@@ -78,7 +77,6 @@ export function ProductsTable({ categories, products, onAddProduct }: ProductsTa
 			p => p.priceType === 'matrix' && (!p.priceMatrix || p.priceMatrix.length === 0),
 		).length,
 	}
-
 	return (
 		<>
 			<Card>
@@ -96,13 +94,11 @@ export function ProductsTable({ categories, products, onAddProduct }: ProductsTa
 										Per SQM: {pricingStats.sqm}
 									</Badge>
 									<Badge variant='secondary' className='text-xs'>
+										Per Linear Meter: {pricingStats.linear_meter}
+									</Badge>
+									<Badge variant='secondary' className='text-xs'>
 										Custom Sizes: {pricingStats.matrix}
 									</Badge>
-									{pricingStats.matrixWithoutEntries > 0 && (
-										<Badge variant='destructive' className='text-xs'>
-											Matrix Missing: {pricingStats.matrixWithoutEntries}
-										</Badge>
-									)}
 								</div>
 							</CardDescription>
 						</div>
@@ -148,6 +144,7 @@ export function ProductsTable({ categories, products, onAddProduct }: ProductsTa
 								<SelectItem value='all'>All Price Types</SelectItem>
 								<SelectItem value='each'>Per Unit</SelectItem>
 								<SelectItem value='sqm'>Per SQM</SelectItem>
+								<SelectItem value='linear_meter'>Per Linear Meter</SelectItem>
 								<SelectItem value='matrix'>Custom Sizes</SelectItem>
 							</SelectContent>
 						</Select>
