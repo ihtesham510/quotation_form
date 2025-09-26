@@ -448,6 +448,63 @@ export function Step2ProductSelection({ quoteData, setQuoteData, errors, product
 								</div>
 							)}
 
+							{/* Linear Meter Dimensions Section */}
+							{productInfo?.priceType === 'linear_meter' && (
+								<div className='space-y-4'>
+									<div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+										<div className='space-y-2'>
+											<Label>Linear Meters ({currentUnit}) *</Label>
+											<Input
+												type='number'
+												step='0.01'
+												min='0.001'
+												value={convertFromMeters(product.width, currentUnit)}
+												onChange={e => {
+													const newWidth = convertToMeters(Number.parseFloat(e.target.value) || 0, currentUnit)
+													updateProduct(product.id, { width: newWidth })
+												}}
+												className={errors[`product${productIndex}Width`] ? 'border-red-500' : ''}
+											/>
+											{errors[`product${productIndex}Width`] && (
+												<p className='text-red-500 text-sm'>{errors[`product${productIndex}Width`]}</p>
+											)}
+										</div>
+
+										<div className='space-y-2'>
+											<Label>Unit</Label>
+											<Select
+												value={currentUnit}
+												onValueChange={(value: MeasurementUnit) => handleUnitChange(product.id, value)}
+											>
+												<SelectTrigger>
+													<SelectValue />
+												</SelectTrigger>
+												<SelectContent>
+													<SelectItem value='m'>Meters (m)</SelectItem>
+													<SelectItem value='cm'>Centimeters (cm)</SelectItem>
+													<SelectItem value='mm'>Millimeters (mm)</SelectItem>
+												</SelectContent>
+											</Select>
+										</div>
+
+										<div className='space-y-2'>
+											<Label>Total Length</Label>
+											<div className='flex items-center h-10 px-3 border rounded-md bg-muted'>
+												<Calculator className='w-4 h-4 mr-2' />
+												{convertFromMeters(product.width, currentUnit).toFixed(2)} {currentUnit}
+											</div>
+										</div>
+									</div>
+
+									<Alert>
+										<AlertDescription>
+											<strong>Linear Meter Pricing:</strong> This product is priced per linear meter. Enter the total
+											length required.
+										</AlertDescription>
+									</Alert>
+								</div>
+							)}
+
 							{/* Per Unit Pricing Info */}
 							{productInfo?.priceType === 'each' && (
 								<Alert>
@@ -522,6 +579,9 @@ export function Step2ProductSelection({ quoteData, setQuoteData, errors, product
 									)}
 									{productInfo?.priceType === 'each' && productInfo.minimumQty > product.quantity && (
 										<span>Minimum {productInfo.minimumQty} units required</span>
+									)}
+									{productInfo?.priceType === 'linear_meter' && productInfo.minimumQty > product.width && (
+										<span>Minimum {productInfo.minimumQty} linear meters applies</span>
 									)}
 									{productInfo?.priceType === 'matrix' && matrixStatus && !matrixStatus.isValid && (
 										<span className='text-red-500'>Invalid dimensions - no pricing available</span>

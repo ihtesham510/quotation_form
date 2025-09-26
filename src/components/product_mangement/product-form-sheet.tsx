@@ -244,6 +244,7 @@ export function ProductFormSheet({ open, onOpenChange, onSave, categories, defau
 															<SelectContent>
 																<SelectItem value='each'>Per Each</SelectItem>
 																<SelectItem value='sqm'>Per SQM</SelectItem>
+																<SelectItem value='linear_meter'>Per Linear Meter</SelectItem>
 																<SelectItem value='matrix'>Custom Sizings</SelectItem>
 															</SelectContent>
 														</Select>
@@ -282,6 +283,8 @@ export function ProductFormSheet({ open, onOpenChange, onSave, categories, defau
 											<AlertDescription>
 												{watchedPriceType === 'each' && 'Product will be priced per unit. No dimensions required.'}
 												{watchedPriceType === 'sqm' && 'Product will be priced per square meter. Dimensions required.'}
+												{watchedPriceType === 'linear_meter' &&
+													'Product will be priced per linear meter. Linear measurement required.'}
 												{watchedPriceType === 'matrix' &&
 													'Product will use dimension-specific pricing. Configure the price matrix below.'}
 											</AlertDescription>
@@ -412,14 +415,20 @@ export function ProductFormSheet({ open, onOpenChange, onSave, categories, defau
 											name='minimumQty'
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Minimum Quantity</FormLabel>
+													<FormLabel>
+														Minimum Quantity
+														{watchedPriceType === 'sqm' && ' (sqm)'}
+														{watchedPriceType === 'linear_meter' && ' (meters)'}
+														{watchedPriceType === 'each' && ' (units)'}
+													</FormLabel>
 													<FormControl>
 														<Input
 															type='number'
 															min='1'
+															step={watchedPriceType === 'each' ? '1' : '0.01'}
 															placeholder='1'
 															{...field}
-															onChange={e => field.onChange(Number.parseInt(e.target.value) || 1)}
+															onChange={e => field.onChange(Number.parseFloat(e.target.value) || 1)}
 														/>
 													</FormControl>
 													<FormMessage />

@@ -271,6 +271,11 @@ export function Step5QuotePreview({ quoteData, onSaveQuote, onGeneratePDF, onEma
 														Dimensions: {product.width}m × {product.height}m ({sqm.toFixed(2)} sqm)
 													</p>
 												)}
+												{productInfo?.priceType === 'linear_meter' && (
+													<p>
+														Linear Meters: {product.width}m (${originalPrice.toFixed(2)}/m)
+													</p>
+												)}
 												{productInfo?.priceType === 'matrix' && (
 													<p>
 														Size: {product.width}m × {product.height}m (${originalPrice.toFixed(2)})

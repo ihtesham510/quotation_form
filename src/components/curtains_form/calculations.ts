@@ -85,6 +85,7 @@ export const calculateProductOriginalBasePrice = (product: QuoteProduct, product
  * For invalid matrix dimensions, returns 0 to prevent incorrect calculations.
  * If the product is priced by area (sqm), it uses the greater of the actual area or the minimum quantity.
  * If the product uses matrix pricing, it uses the matrix price directly with quantity.
+ * If the product uses linear_meter pricing, it uses width as the linear measurement.
  */
 export const calculateProductBaseTotal = (product: QuoteProduct, productDatabase: ProductDatabase): number => {
 	const productInfo = productDatabase.products.find(p => p._id === product.productId)
@@ -107,6 +108,11 @@ export const calculateProductBaseTotal = (product: QuoteProduct, productDatabase
 	} else if (productInfo.priceType === 'matrix') {
 		// Matrix pricing uses the exact price from the matrix
 		baseTotal = originalPrice * product.quantity
+	} else if (productInfo.priceType === 'linear_meter') {
+		const linearMeters = product.width
+		const minLinearMeters = productInfo.minimumQty || 0
+		const billableLinearMeters = Math.max(linearMeters, minLinearMeters)
+		baseTotal = billableLinearMeters * originalPrice * product.quantity
 	} else {
 		// Per-each pricing
 		const minQty = productInfo.minimumQty || 0
@@ -192,7 +198,7 @@ export const calculateProductEffectiveBasePrice = (
 
 /**
  * Calculates the total cost of a product after applying markup but before GST.
- * Handles area-based, matrix-based, and quantity-based pricing.
+ * Handles area-based, matrix-based, linear_meter-based, and quantity-based pricing.
  * Returns 0 for products with invalid pricing.
  */
 export const calculateProductTotalAfterMarkup = (
@@ -214,6 +220,11 @@ export const calculateProductTotalAfterMarkup = (
 		total = billableSqm * effectivePrice * product.quantity
 	} else if (productInfo.priceType === 'matrix') {
 		total = effectivePrice * product.quantity
+	} else if (productInfo.priceType === 'linear_meter') {
+		const linearMeters = product.width
+		const minLinearMeters = productInfo.minimumQty || 0
+		const billableLinearMeters = Math.max(linearMeters, minLinearMeters)
+		total = billableLinearMeters * effectivePrice * product.quantity
 	} else {
 		const minQty = productInfo.minimumQty || 0
 		const billableQty = Math.max(product.quantity, minQty)
@@ -329,6 +340,11 @@ export const calculateTotalMarkup = (quoteData: QuoteData, productDatabase: Prod
 			totalMarkup += priceDifferencePerUnit * billableSqm * product.quantity
 		} else if (productInfo.priceType === 'matrix') {
 			totalMarkup += priceDifferencePerUnit * product.quantity
+		} else if (productInfo.priceType === 'linear_meter') {
+			const linearMeters = product.width
+			const minLinearMeters = productInfo.minimumQty || 0
+			const billableLinearMeters = Math.max(linearMeters, minLinearMeters)
+			totalMarkup += priceDifferencePerUnit * billableLinearMeters * product.quantity
 		} else {
 			const minQty = productInfo.minimumQty || 0
 			const billableQty = Math.max(product.quantity, minQty)

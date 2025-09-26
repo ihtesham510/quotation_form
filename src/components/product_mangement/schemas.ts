@@ -9,7 +9,7 @@ export const productSchema = z
 	.object({
 		categoryId: z.string().min(1, 'Category is required'),
 		name: z.string().min(1, 'Product name is required').max(200, 'Name must be less than 200 characters'),
-		priceType: z.enum(['sqm', 'each', 'matrix'], {
+		priceType: z.enum(['sqm', 'each', 'matrix', 'linear_meter'], {
 			required_error: 'Price type is required',
 		}),
 		basePrice: z.number(),
@@ -30,7 +30,7 @@ export const productSchema = z
 		if (data.priceType !== 'matrix' && data.basePrice === 0) {
 			ctx.addIssue({
 				code: z.ZodIssueCode.custom,
-				message: 'Base Price must be under greater than 0',
+				message: 'Base Price must be greater than Zero',
 				path: ['basePrice'],
 			})
 		}

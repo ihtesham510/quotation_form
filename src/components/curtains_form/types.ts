@@ -99,7 +99,7 @@ export interface SelfContainedQuoteData {
 		name: string
 		label: string
 		categoryName: string
-		priceType: 'sqm' | 'each' | 'matrix'
+		priceType: 'sqm' | 'each' | 'matrix' | 'linear_meter'
 		basePrice: number
 		effectivePrice: number
 		width: number
