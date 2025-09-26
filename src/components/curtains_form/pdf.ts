@@ -49,18 +49,19 @@ export async function generateQuotePDF(data: SelfContainedQuoteData): Promise<Bl
 			// Main product row with price type indication
 			let specifications = ''
 			let unitPriceDisplay = ''
-
 			if (product.priceType === 'sqm') {
 				specifications = `${product.width}m × ${product.height}m\n(${sqm.toFixed(2)} sqm)\nPer SQM`
 				unitPriceDisplay = `$${product.effectivePrice.toFixed(2)}/sqm`
 			} else if (product.priceType === 'matrix') {
 				specifications = `${product.width}m × ${product.height}m\nMatrix Pricing\n(${sqm.toFixed(2)} sqm)`
 				unitPriceDisplay = `$${product.effectivePrice.toFixed(2)}`
+			} else if (product.priceType === 'linear_meter') {
+				specifications = `Linear: ${product.width}m\nPer Linear Meter`
+				unitPriceDisplay = `$${product.effectivePrice.toFixed(2)}/m`
 			} else {
 				specifications = `Per Unit\n(Each)`
 				unitPriceDisplay = `$${product.effectivePrice.toFixed(2)}/each`
 			}
-
 			productRows.push([
 				product.label || product.name,
 				specifications,
