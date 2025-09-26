@@ -233,25 +233,10 @@ export async function generateQuotePDF(data: SelfContainedQuoteData): Promise<Bl
 	// Enhanced Pricing Summary Section
 	builder.drawHeading('Pricing Summary')
 
-	// Show detailed breakdown
-	builder.drawKeyValueBox(
-		'Subtotal (Before Markup & Discount)',
-		`$${data.pricing.subtotalBeforeMarkupAndDiscount.toFixed(2)}`,
-	)
-
-	// Markup section
-	if (data.pricing.totalMarkup > 0) {
-		builder.drawKeyValueBox(
-			`Markup Applied`,
-			`+$${data.pricing.totalMarkup.toFixed(2)}`,
-			[0.95, 0.9, 1.0], // Light purple for markup
-		)
-	}
-
-	// Subtotal after markup
 	const subtotalAfterMarkup = data.pricing.subtotalBeforeMarkupAndDiscount + data.pricing.totalMarkup
+
 	builder.drawKeyValueBox(
-		'Subtotal (After Markup)',
+		'Subtotal',
 		`$${subtotalAfterMarkup.toFixed(2)}`,
 		[0.9, 0.95, 1.0], // Light blue accent
 	)
