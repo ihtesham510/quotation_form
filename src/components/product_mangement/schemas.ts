@@ -27,7 +27,7 @@ export const productSchema = z
 		),
 	})
 	.superRefine((data, ctx) => {
-		if (data.priceType !== 'matrix') {
+		if (data.priceType !== 'matrix' && data.basePrice === 0) {
 			ctx.addIssue({
 				code: z.ZodIssueCode.custom,
 				message: 'Base Price must be under greater than 0',
